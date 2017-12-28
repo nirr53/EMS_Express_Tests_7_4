@@ -40,9 +40,9 @@ import java.util.concurrent.TimeUnit;
 public class GlobalFuncs {
 	
 	  /**
-	  *  webUrl  	  - default url for the used funcs
-	  *  username  	  - default username for the used funcs
-	  *  password 	  - default password for the used funcs
+	  *  webUrl  	  - default url for the used functions
+	  *  username  	  - default username for the used functions
+	  *  password 	  - default password for the used functions
 	  *  StringBuffer - default string for errors buffering
 	  */
 	  GlobalVars 		   testVars;
@@ -138,7 +138,7 @@ public class GlobalFuncs {
 	  }
 	  
 	  /**
-	  *  Press the Network Toplogy Button
+	  *  Press the Network Topology Button
 	  *  @param driver - given driver
 	  */
 	  public void pressNetworkTopologyButton(WebDriver driver) {
@@ -192,7 +192,7 @@ public class GlobalFuncs {
 	  /**
 	  *  read file method
 	  *  @param  path    - given path for file to read
-	  *  @return content - string of readed file
+	  *  @return content - string of the readed file
 	  */
 	  String readFile(String path) {
 		  
@@ -759,7 +759,7 @@ public class GlobalFuncs {
 	  }
 	  
 	  /**
-	  *  Upload file with given path with confirm messagebox
+	  *  Upload file with given path with confirm message-box
 	  *  @param driver  		   - given driver
 	  *  @param path    		   - path for a file for upload
 	  *  @param uploadFieldXpath   - xpath for upload field
@@ -1195,8 +1195,8 @@ public class GlobalFuncs {
 						    myClick(driver, By.xpath("//*[@id='CAP Profile']")									, 7000);				
 							verifyStrByXpath(driver, "//*[@id='modalTitleId']"								   , "CAP Profile");
 
-							// Check that defauult configuration (three first checkboxes are checked) is set
-							myDebugPrinting("Check that defauult configuration (three first checkboxes are checked) is set", testVars.logerVars.MINOR);
+							// Check that default configuration (three first check-boxes are checked) is set
+							myDebugPrinting("Check that default configuration (three first check-boxes are checked) is set", testVars.logerVars.MINOR);
 							myAssertTrue("Checkbox is not checked at default !!", driver.findElement(By.xpath("//*[@id='voip_common_area_is_cap_device']")).getAttribute("checked") 			   != null);
 							myAssertTrue("Checkbox is not checked at default !!", driver.findElement(By.xpath("//*[@id='lync_corporate_directory_enabled']")).getAttribute("checked")			   != null);
 							myAssertTrue("Checkbox is not checked at default !!", driver.findElement(By.xpath("//*[@id='lync_userSetting_prevent_user_sign_out']")).getAttribute("checked")        != null);
@@ -1208,8 +1208,8 @@ public class GlobalFuncs {
 							myAssertTrue("Checkbox is checked at default !!", driver.findElement(By.xpath("//*[@id='system_pin_lock_enabled']")).getAttribute("checked")			  			   == null);
 							myAssertTrue("Checkbox is checked at default !!", driver.findElement(By.xpath("//*[@id='system_enable_key_configuration']")).getAttribute("checked") 	  			   == null);
 
-							// Check all avalible checkboxes
-							myDebugPrinting("Check all avalible checkboxes", testVars.logerVars.MINOR);
+							// Check all available check-boxes
+							myDebugPrinting("Check all available check-boxes", testVars.logerVars.MINOR);
 						    myClick(driver, By.xpath("//*[@id='lync_calendar_enabled']")			   , 2000);				
 						    myClick(driver, By.xpath("//*[@id='lync_VoiceMail_enabled']")			   , 2000);				
 						    myClick(driver, By.xpath("//*[@id='lync_BToE_enable']")					   , 2000);				
@@ -1433,7 +1433,6 @@ public class GlobalFuncs {
 				default:
 					myFail("Action is not recognized !!");	
 					break;
-			
 		  }  
 	  }
 	  
@@ -1490,8 +1489,8 @@ public class GlobalFuncs {
 			myAssertTrue("Latest header was not detected !! ("  + txt + ")", txt.contains("Latest EMS IPP configuration templates"));
 			myAssertTrue("Confirm header was not detected !! (" + txt + ")", txt.contains("I agree: Terms and Conditions"));
 			
-			// Click on Confirm and Select-all checkboxes
-			myDebugPrinting("Click on Confirm and Select-all checkboxes", testVars.logerVars.MINOR);	
+			// Click on Confirm and Select-all check-boxes
+			myDebugPrinting("Click on Confirm and Select-all check-boxes", testVars.logerVars.MINOR);	
 			myClick(driver, By.xpath("//*[@id='applicationHost']/div/div[1]/div[2]/div/div[7]/div[2]/div/div[1]/label/div"),  7000);		
 			myClick(driver, By.xpath("//*[@id='applicationHost']/div/div[1]/div[2]/div/div[5]/div/div[1]/label/div[1]"), 7000);		
 			String shareFilesFile = testVars.getShareFilesName();
@@ -2110,7 +2109,7 @@ public class GlobalFuncs {
 	  }
 	  
 	  /**
-	  *  Send a string to a given elemnent using given parameters
+	  *  Send a string to a given element using given parameters
 	  *  @param driver  - given driver
 	  *  @param byType  - given By element (By xpath, name or id)
 	  *  @param currUsr - given string to send
@@ -2119,6 +2118,7 @@ public class GlobalFuncs {
 	  public void mySendKeys(WebDriver driver, By byType, String currUsr, int timeOut) {
 		  
 		  driver.findElement(byType).clear();
+		  myWait(1000);
 		  driver.findElement(byType).sendKeys(currUsr);
 		  myWait(timeOut);
 	  }
@@ -2229,11 +2229,11 @@ public class GlobalFuncs {
 	  }  
 	  
 	  /**
-	  *  Create a user using en extarnal exe script on given element by given xpath and waits a given timeout
-	  *  @param crUserBatName - given extarnal script full path
+	  *  Create a user using an external exe script on given element by given xpath and waits a given timeout
+	  *  @param crUserBatName - given external script full path
 	  *  @param ip  		  - IP for target the script  			(I.e. 10.21.8.32)
 	  *  @param	port		  - port for target the script 			(I.e. 8081)
-	  *  @param mac 	  	  - MAC address of registerd device		(I.e. 00908fdf411a)
+	  *  @param mac 	  	  - MAC address of registered device		(I.e. 00908fdf411a)
 	  *  @param	alertName	  - alert name							(I.e. IPPHONE CONFERENCE SPEAKER CONNECTION FAILURE)
 	  *  @param alertDesc	  - alert description					(I.e. dateTest)
 	  *  @param alertDate	  - alert date							(I.e. 2017-07-217T12:24:18)
