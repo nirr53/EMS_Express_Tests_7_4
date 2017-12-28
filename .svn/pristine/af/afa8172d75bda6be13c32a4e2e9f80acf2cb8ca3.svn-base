@@ -1,0 +1,166 @@
+package EMS_Tests;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the Full search feature.
+* ----------------
+* Tests:
+*  	 - Login the system via an Administrator user.
+*    1. Create a user via a POST query and enter the Manage users menu.
+*    2. Search the user by its MAC address without check the full-search checkbox.
+*    3. Search the user by its MAC address with check the full-search checkbox.
+*    4. Delete the users.
+*  
+* Results:
+*    1. A regular search should not find the user according to its MAC address.
+*    2. A full-search should find the user according to its MAC address.
+*  
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test77__full_search {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test77__full_search(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Full_search() throws Exception {
+	  
+	  String successPath      = System.getProperty("user.dir") + "\\" + "success.txt";
+	  String usersPrefix      = "fullSearch";
+	  String Id = testFuncs.getId();
+	  String srcUserName      = usersPrefix + Id;
+	  File file               = new File(successPath);
+	  Map<String, String> map = new HashMap<String, String>();
+	  map.put("usersNumber",  "1");
+	  map.put("usersPrefix",  usersPrefix);
+	  map.put("srcUsername",  srcUserName + "_");
+	  map.put("startIdx"   ,  String.valueOf(1));
+	  Log.startTestCase(this.getClass().getName());
+	  testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+		  
+	  // Step 1 - Create a user via a POST query and enter the Manage users menu
+	  testFuncs.myDebugPrinting("Step 1 - Create a user via a POST query and enter the Manage users menu");
+	  file.delete();
+	  String path = System.getProperty("user.dir") + "\\" + testVars.getCrUserBatName();	
+	  String[] cmd = {path, testVars.getIp(), testVars.getPort()  , "1",
+			          srcUserName , testVars.getDomain(), "registered",
+	    		      "430HD", "TelAviv", "myLocation" };
+	  Process p = Runtime.getRuntime().exec(cmd);
+	  p.waitFor();
+	  testFuncs.waitForPostUsersCreate(successPath, 1 * 70);
+	  driver.switchTo().defaultContent();
+	  testFuncs.enterMenu(driver, "Manage_users", "Manage Users");
+	  driver.switchTo().frame(1);
+	  testFuncs.myWait(2000);
+	  String userMacAddr = testFuncs.readFile("mac_1.txt");
+	  testFuncs.myDebugPrinting("userMacAddr - " + userMacAddr, testVars.logerVars.MINOR);
+	  
+	  // Step 2 - Search the user by its MAC address without check the full-search checkbox
+	  testFuncs.myDebugPrinting(" Step 2 - Search the user by its MAC address without check the full-search checkbox");
+	  driver.findElement(By.xpath("//*[@id='searchtext']")).clear();
+	  driver.findElement(By.xpath("//*[@id='searchtext']")).sendKeys(userMacAddr);
+	  driver.findElement(By.xpath("//*[@id='searchusersform']/table/tbody/tr/td[7]/a")).click();
+	  testFuncs.myWait(10000);
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[2]/td/font", "No users found");
+	  
+	  // Step 3 - Search the user by its MAC address with check the full-search checkbox
+	  testFuncs.myDebugPrinting("Step 3 - Search the user by its MAC address with check the full-search checkbox");
+	  driver.findElement(By.xpath("//*[@id='searchtext']")).clear();
+	  driver.findElement(By.xpath("//*[@id='searchtext']")).sendKeys(userMacAddr);
+	  testFuncs.myWait(2000);
+	  driver.findElement(By.xpath("//*[@id='searchusersform']/table/tbody/tr/td[5]/a/img")).click();
+	  testFuncs.myWait(2000);
+	  driver.findElement(By.xpath("//*[@id='fullSearch']")).click();
+	  testFuncs.myWait(2000);
+	  driver.findElement(By.xpath("//*[@id='searchusersform']/table/tbody/tr/td[7]/a")).click();
+	  testFuncs.myWait(10000);
+	  String bodyText = driver.findElement(By.tagName("body")).getText();
+	  if (!bodyText.contains(srcUserName)) {
+		  
+		  testFuncs.myFail("User was not found via Full search !!" + bodyText);
+	  }
+	  
+	  // Step 4 - Delete the users
+	  testFuncs.myDebugPrinting("Step 4 - Delete the users");
+	  driver.switchTo().defaultContent();
+	  testFuncs.enterMenu(driver, "Manage_Multiple_Users_open", "Manage Multiple Users");
+	  driver.switchTo().frame(1);
+	  testFuncs.selectMultipleUsers(driver, usersPrefix, "1");
+	  map.put("action"	        ,  "Delete Users");
+	  map.put("srcUsername"     ,  "Finished");
+	  map.put("skipVerifyDelete",  "true");
+	  testFuncs.setMultipleUsersAction(driver, map); 
+	  bodyText = driver.findElement(By.tagName("body")).getText();
+	  if (!bodyText.contains(srcUserName + " Finished")) {
+		  
+		  testFuncs.myFail("User was not found via Full search !!" + bodyText);
+	  }
+  }
+  
+ @After
+ public void tearDown() throws Exception {
+	  
+    //driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

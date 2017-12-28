@@ -1,0 +1,164 @@
+package EMS_Tests;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.Select;
+
+/**
+* ----------------
+* This test tests the URL mechanism of the DHCP- Zero touch
+* ----------------
+* Tests:
+* 	 - Login the EMS environment.
+* 	 - Enter the system settings menu & the DHCP Option configuration menu.
+* 	 1. Check DHCP option 160 URLs.
+* 	 2. Select a region with all the templates and use the tester.
+* 	 3. Select a region without any template and use the tester..
+* 
+* Results:
+* 	 1. URLs should be changed respectively by the selected region.
+* 	 2. In all of phone models a configuration should be received as an answer.
+* 	 3. In none of the phone models a configuration should be received as an answer.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test68__DHCP_Option_configuration_urls {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test68__DHCP_Option_configuration_urls(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void DHCP_configuration_urls() throws Exception {
+	  
+	String regWithAllTemp    = "TelAviv";
+	String regWithoutAnyTemp = "NoTemplate";
+	Log.startTestCase(this.getClass().getName());
+	  
+    // Enter System settings and DHCP option configuration menu
+	testFuncs.myDebugPrinting("Enter System settings and DHCP option configuration menu");
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "System_settings", "System Settings");
+  	testFuncs.myWait(1000);
+    driver.switchTo().frame(1);
+    driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[25]/td/a[2]")).click();
+    testFuncs.myWait(2000);	
+    testFuncs.verifyStrByXpath(driver, "//*[@id='title']"										   		  , "DHCP Option Template");
+    testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[1]/td"		  , "DHCP Option Template");
+    testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[9]/td/a/span", "DHCP option 160 URLs");
+    
+    // Step 1 - Check DHCP option 160 URLs
+  	testFuncs.myDebugPrinting("Step 1 - Check DHCP option 160 URLs");
+    driver.findElement(By.xpath("//*[@id='smallimg']")).click();
+    testFuncs.myWait(2000);
+    testFuncs.verifyStrByXpath(driver, "//*[@id='restartmethodtr']/td/table/tbody/tr[1]/td/div/div[1]"								 , "System URLs");
+    testFuncs.verifyStrByXpath(driver, "//*[@id='restartmethodtr']/td/table/tbody/tr[1]/td/div/div[2]/table/tbody/tr[1]/td[1]/span"  , "EMS accesses phones directly:");
+    testFuncs.verifyStrByXpath(driver, "//*[@id='restartmethodtr']/td/table/tbody/tr[1]/td/div/div[2]/table/tbody/tr[1]/td[2]/b/span", "http://" + testVars.getIp() +  "/firmwarefiles;ipp/dhcpoption160.cfg");
+    testFuncs.verifyStrByXpath(driver, "//*[@id='restartmethodtr']/td/table/tbody/tr[2]/td/div/div[1]"								 , "Region URLs");
+	Select regions = new Select(driver.findElement(By.id("region_id")));
+	int size = regions.getOptions().size();
+	for (int i = 0; i < size; ++i) {
+		
+		regions.selectByIndex(i);
+	    testFuncs.myWait(500);
+	    String region = regions.getFirstSelectedOption().getText();
+	  	testFuncs.myDebugPrinting("regions - " + region);
+	    testFuncs.verifyStrByXpath(driver, "//*[@id='restartmethodtr']/td/table/tbody/tr[2]/td/div/div[2]/table[2]/tbody/tr[1]/td[2]/b/span", "http://" + testVars.getIp() + "/firmwarefiles;ipp/region/" + region);
+        testFuncs.verifyStrByXpath(driver, "//*[@id='restartmethodtr']/td/table/tbody/tr[2]/td/div/div[2]/table[2]/tbody/tr[2]/td[2]/b/span", "http://SBC_PROXY_IP:SBC_PROXY_PORT/firmwarefiles;ipp/region/" + region);
+        testFuncs.verifyStrByXpath(driver, "//*[@id='restartmethodtr']/td/table/tbody/tr[2]/td/div/div[2]/table[2]/tbody/tr[3]/td[2]/b/span", "http://" + testVars.getIp() + "/ipp/region/" + region);
+	}
+	
+    // Step 2 - Select a region with all the templates and use the tester.
+  	testFuncs.myDebugPrinting("Select a region with all the templates and use the tester");
+    driver.findElement(By.id("region_id")).sendKeys(regWithAllTemp);
+    testFuncs.myWait(500);
+	Select models = new Select(driver.findElement(By.id("model_id")));
+	int size2 = models.getOptions().size();
+	String testAnswer;
+	for (int i = 0; i < size2; ++i) {
+		
+		models.selectByIndex(i);
+	    testFuncs.myWait(500);
+	    driver.findElement(By.xpath("//*[@id='restartmethodtr']/td/table/tbody/tr[2]/td/div/div[2]/table[3]/tbody/tr[4]/td/a/span")).click();
+	    testFuncs.myWait(5000);
+	    testAnswer = driver.findElement(By.xpath("//*[@id='restartmethodtr']/td/table/tbody/tr[2]/td/div/div[2]/table[3]/tbody/tr[5]/td/span")).getText();
+	  	testFuncs.myDebugPrinting(testAnswer);
+	  	testFuncs.myAssertTrue("The template was not found for the region with all the templates !!", !testAnswer.contains("not found url"));
+	}
+	
+    // Step 3 - Select a region without any templates and use the tester.
+  	testFuncs.myDebugPrinting("Select a region without any templates and use the tester");
+    driver.findElement(By.id("region_id")).sendKeys(regWithoutAnyTemp);
+    testFuncs.myWait(500);
+	for (int i = 0; i < size2; ++i) {
+		
+		models.selectByIndex(i);
+	    testFuncs.myWait(500);	
+	    driver.findElement(By.xpath("//*[@id='restartmethodtr']/td/table/tbody/tr[2]/td/div/div[2]/table[3]/tbody/tr[4]/td/a/span")).click();
+	    testFuncs.myWait(5000);
+	    testAnswer = driver.findElement(By.xpath("//*[@id='restartmethodtr']/td/table/tbody/tr[2]/td/div/div[2]/table[3]/tbody/tr[5]/td/span")).getText();
+	    testFuncs.myAssertTrue("A template was found for a region that has no Templates !! \n" + testAnswer, testAnswer.contains("not found url"));
+	}
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

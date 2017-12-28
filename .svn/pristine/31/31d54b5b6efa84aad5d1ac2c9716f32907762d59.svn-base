@@ -1,0 +1,160 @@
+package EMS_Tests;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+
+/**
+* ----------------
+* This test tests the region placeholders menu in Monitoring user
+* ----------------
+* Tests:
+* 	 - Login via an Administrator user and create a region-PH
+* 	 - Login via a Monitoring user
+* 	 - Enter Region placeholders menu
+* 	 1. Verify that Add-Region-placeholder button is disabled
+* 	 2. Verify that Edit-Region-placeholder button is disabled
+* 	 3. Verify that Delete-Region-placeholder button is disabled
+* 	 4. Verify that Copy-placholders button is disabled
+* 	 5. Login via an Administrator user and delete the created user
+* 
+* Results:
+*    1-4. All the operation should be not active while we in Monitoring user.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test45__Monitoring_region_placeholders {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+
+
+  
+  // Default constructor for print the name of the used browser 
+  public Test45__Monitoring_region_placeholders(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Monitoring_region_placeholders_menu() throws Exception {
+	
+	Log.startTestCase(this.getClass().getName());
+	  
+    // Login via an Administrator, create a region-placeholder and log off
+	testFuncs.myDebugPrinting("Login via an Administrator, create a region-placeholder and log off");
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Region_placeholders", "Manage Region Placeholders");
+  	testFuncs.myWait(1000);
+    driver.switchTo().frame(1);
+	String Id = testFuncs.getId();
+	String regPhName = "myPlaceHolderName"  + Id;
+	String regValue  = "myPlaceHolderValue" + Id;
+	String regRegion = "TelAviv";
+    testFuncs.addRegionPlaceholder(driver, regPhName, regValue, regRegion);
+    driver.switchTo().defaultContent();
+    driver.findElement(By.xpath("//*[@id='header1']/tbody/tr/td[2]/a[3]")).click();
+	testFuncs.myWait(2000);
+    
+	// Step 1- Login via a Monitoring user, and verify that Add-Region-Placeholder is missing
+	testFuncs.myDebugPrinting("Step 1- Login via a Monitoring user, and verify that Add-Region-Placeholder is missing");
+	testFuncs.login(driver, testVars.getMonitUsername(), testVars.getMonitPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	testFuncs.enterMenu(driver, "Monitoring_Region_placeholders", "Manage Region Placeholders");
+    driver.switchTo().frame(1);
+    String addStatus = driver.findElement(By.xpath("//*[@id='ipp-panel']/div[2]/table/tbody/tr[1]/td[3]/button")).getAttribute("class");
+    testFuncs.myAssertTrue("Add Region placeholder is not deactivated !! (" + addStatus + ")", addStatus.equals("btn btn-success not-active"));
+  
+	// Step 2 - Verify that Edit-Region-Placeholder is disabled
+	testFuncs.myDebugPrinting("Step 2 - Verify that Edit-Region-Placeholder is disabled");
+    driver.findElement(By.xpath("//*[@id='regions1-filtering']")).clear();
+    driver.findElement(By.xpath("//*[@id='regions1-filtering']")).sendKeys(regPhName);
+  	testFuncs.myWait(3000);
+  	
+  	// Some manipulations to detect row ID
+  	String bodyText = driver.findElement(By.tagName("body")).getText();
+  	String rowId = bodyText.substring(bodyText.indexOf("Placeholder Value Region") + "Placeholder Value Region".length(), bodyText.indexOf("%ITCS_") - 1);
+  	testFuncs.myDebugPrinting("rowId - " + rowId, testVars.logerVars.MINOR);
+    String editStatus = driver.findElement(By.xpath("//*[@id='regions1']/tbody/tr[" + rowId + "]/td[6]/button")).getAttribute("class");
+    testFuncs.myAssertTrue("Edit Region placeholder is not deactivated !! (" + editStatus + ")", editStatus.contains("not-active"));
+
+    // Step 3 - Verify that Delete-Region-Placeholder is disabled
+ 	testFuncs.myDebugPrinting("Step 3 - Verify that Delete-Region-Placeholder is disabled");
+ 	String deleteStatus = driver.findElement(By.xpath("//*[@id='regions1']/tbody/tr[" + rowId + "]/td[7]/button")).getAttribute("class");
+    testFuncs.myAssertTrue("Delete Region placeholder is not deactivated !! (" + deleteStatus + ")", deleteStatus.contains("not-active"));
+
+    // Step 4 - Verify that Copy-Region-Placeholder is disabled
+  	testFuncs.myDebugPrinting("Step 4 - Verify that Copy-Region-Placeholder is disabled");
+  	String copyPlaceholders = driver.findElement(By.xpath("//*[@id='ipp-panel']/div[2]/table/tbody/tr[1]/td[1]/button")).getAttribute("class");
+    testFuncs.myAssertTrue("Copy IPP placeholders from button is not deactivated !! (" + copyPlaceholders + ")", copyPlaceholders.contains("not-active"));
+
+	// Step 5 - Log off, relogin as an Administrator and delete the a region placeholder
+	testFuncs.myDebugPrinting("Step 5 - Log off, relogin as an Administrator and delete the a region placeholder");
+    driver.switchTo().defaultContent();
+    driver.findElement(By.xpath("//*[@id='header1']/tbody/tr/td[2]/a[3]")).click();
+	testFuncs.myWait(2000);
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Region_placeholders", "Manage Region Placeholders");
+    driver.switchTo().frame(1);
+    driver.findElement(By.xpath("//*[@id='regions1-filtering']")).clear();
+    driver.findElement(By.xpath("//*[@id='regions1-filtering']")).sendKeys(regPhName);
+  	testFuncs.myWait(3000);
+	testFuncs.deleteRegionPlaceholder(driver, regPhName, regRegion);
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

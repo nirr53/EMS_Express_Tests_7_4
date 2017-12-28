@@ -1,0 +1,142 @@
+package EMS_Tests;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the change language action in multiple-devices-changes menu
+* ----------------
+* Tests:
+* 	 - Enter Manage multiple devices changes menu.
+* 	 1. Create several users using POST query.
+* 	 2. change language.
+* 	 3. Delete the users.
+* 
+* Results:
+*	 1.   Users should be created successfully.
+* 	 2.   The devices language should be changed successfully.
+* 	 3.   Users should be deleted successfully.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test19__multiple_devices_change_language {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test19__multiple_devices_change_language(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Manage_multiple_devices_change_language() throws Exception {
+	 
+	String srcUserPrefix = "cngLngUser";
+	String usersNumber   = "3";
+	int usStartIdx 		 = 1;
+	String successPath   = System.getProperty("user.dir") + "\\" + "success.txt";
+	File file            = new File(successPath);
+    Map<String, String> map = new HashMap<String, String>();
+	Log.startTestCase(this.getClass().getName());
+
+    // Step 1 - Create several users using POST query
+	testFuncs.myDebugPrinting("Step 1 - Create several users using POST query");
+	file.delete();
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	String Id = testFuncs.getId();
+	String srcUserName = srcUserPrefix + Id;
+	String path = System.getProperty("user.dir") + "\\" + testVars.getCrUserBatName();	
+    String[] cmd = {path, testVars.getIp(), testVars.getPort()  , usersNumber,
+    				srcUserName , testVars.getDomain(), "registered",
+    		        "430HD", "TelAviv", "myLocation" };
+    Process p = Runtime.getRuntime().exec(cmd);
+    p.waitFor();
+    testFuncs.waitForPostUsersCreate(successPath, Integer.parseInt(usersNumber) * 50);
+    map.put("usersPrefix",  srcUserName + "_");
+    map.put("usersNumber",  usersNumber); 
+    map.put("startIdx"   ,  String.valueOf(usStartIdx));
+    map.put("srcUsername",  srcUserName + "_");
+    
+    // Step 2 - change language
+  	testFuncs.myDebugPrinting("Step 2 - change language");
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Manage_Multiple_Devices", "Manage Multiple Devices");
+  	testFuncs.myWait(1000);
+    driver.switchTo().frame(1);	
+    testFuncs.selectMultipleUsers(driver, srcUserName, usersNumber);
+    map.put("action"     ,  "Change Language");
+    map.put("language"    ,  "Hebrew");
+    testFuncs.setMultipleDevicesAction(driver, map);
+    
+    // Step 3 - Delete the created users
+  	testFuncs.myDebugPrinting("Step 3 - Delete the created users");
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Manage_Multiple_Users_open", "Manage Multiple Users");
+  	testFuncs.myWait(1000);
+    driver.switchTo().frame(1);	
+    testFuncs.selectMultipleUsers(driver, srcUserName, usersNumber);
+    map.put("action"	 ,  "Delete Users");
+    map.put("srcUsername",  "Finished");
+    testFuncs.setMultipleUsersAction(driver, map);
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

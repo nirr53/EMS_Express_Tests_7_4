@@ -1,0 +1,4 @@
+Name,Password,Display Name,Region,Device 1 Display Name,Device 1 MAC Address,Device 1 IP Phone Model,Device 1 Language,Device 1 VLAN Mode,Device 1 VLAN ID,Device 1 VLAN Priority
+myUserOper 12,&sh&VZlSXRVVONlVtlEejpnQXJ1MShVVB1TP,myDeviceOper 12,TelAviv,,,,,,,
+myUserOper 22,&sh&VZlSXRVVONlVtlEejpnQXJ1MShVVB1TP,myDeviceOper 22,TelAviv,,,,,,,
+myUserOper 32,&sh&VZlSXRVVONlVtlEejpnQXJ1MShVVB1TP,myDeviceOper 32,TelAviv,,,,,,,

@@ -1,0 +1,87 @@
+package EMS_Express_Tests_7_4;
+
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+
+@RunWith(Suite.class)
+
+@Suite.SuiteClasses({
+	
+//	Test1__login_1.class											,
+//	Test2__invalid_login.class										,
+//	Test3__home_screen_buttons.class								,
+//	Test4__devices_buttons.class									,
+//	Test5__add_user_tests.class										,
+//	Test6__add_device.class											,
+//	Test7__add_multiple_devices_to_same_user.class					,
+//	Test8__delete_devices_tests.class								,
+//	Test9__alarms_page_tests.class									,
+	Test10__system_logs_tests.class									,
+//	Test11__import_configuration_tests.class						,
+//	Test12__import_users_devices_tests.class						,
+//	Test13__export_tests.class										,
+//	Test14__search_tests.class										,
+//	Test15__multiple_users_changes_reset_change_password.class		,
+//	Test16__multiple_users_changes_change_tenant.class				,
+//	Test17__multiple_users_update_change_configuration.class		,
+//	Test18__multiple_users_send_message_reset_device.class			,
+//	Test19__multiple_devices_change_language.class					,
+//	Test20__multiple_devices_send_message_delete_device.class		,
+//	Test21__multiple_devices_change_phone_type_reset_device.class	,
+//	Test22__multiple_devices_update_generate_configuration.class	,
+//	Test23__multiple_devices_change_firmware_vlan_mode.class		,
+//	Test24__templates_create_420_430_440_450_templates.class		,
+//	Test25__templates_create_450_405_templates.class				,
+//	Test26__tenant_placeholders.class								,
+//	Test27__system_settings.class									,
+//	Test28__template_placeholders.class								,
+//	Test29__tenant_configuration.class								,
+//	Test30__phone_configuration_files.class							,
+//	Test31__phone_firmware_files.class								,
+//	Test33__import_stop_and_not_continue.class						,
+//	Test34__import_stop_continue.class								,
+//	Test35__upload_conf_files_with_invalid_suffix.class				,
+//	Test36__add_bad_template.class									,
+//	Test64__long_name_users.class									,
+//	Test65__import_diffrent_langs_users.class						,
+//	Test66__SBC_Proxy_Option_configuration.class					,
+//	Test67__DHCP_Option_configuration.class							,
+//	Test68__DHCP_Option_configuration_urls.class					,
+//	Test70__search_tests.class										,
+//	Test73__templates_sherfiles_link.class							,
+//	Test74__multiple_users_export_results.class						,
+//	Test76__long_location_users.class								,
+//	Test77__full_search.class										,
+//	Test78__different_users_same_mac.class							,
+//	Test79__edit_zero_tuch_user.class								,
+//	Test92__LDAP.class												,
+//	Test94__tenant_configuration_features.class						,
+//	Test96__template_features.class									,
+//	Test97__device_actions.class									,
+//	Test98__device_actions_row.class								,
+//	Test101__device_status_export_tests.class						,
+//	Test102__device_status_filter_columns.class						,
+//	Test103__speicel_characters_users.class							,
+//	Test105__device_status_filter_tests.class						,
+//	Test106__device_status_nickname_tests.class						,
+//	Test107__system_settings_http_https.class						,
+//	Test108__alarms_tests.class										,
+//	Test109__alarms_tests2.class									,
+//	Test110__alarms_tests3.class									,
+//	Test111__multiple_browsers.class								,
+//	Test112__multiple_users_add_delete_configuration.class			,
+//	Test113__multiple_users_configuration_key_features.class		,
+//	Test114__different_BToE_status.class							,
+//	Test115__different_BToE_version_numbers.class					,
+//	Test116__upper_menu_buttons.class								,
+//	Test118__user_configuration_features.class						,
+//	Test119__alarms_tests4.class									,
+//	Test120__private_placeholders.class								,
+//	Test121__network_topology.class									,
+//	Test122__tenants_create_edit_delete.class
+	})
+
+public class TestSuite {
+
+}

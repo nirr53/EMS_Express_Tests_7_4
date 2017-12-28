@@ -1,0 +1,157 @@
+package EMS_Tests;
+
+public class MenuPaths {
+	
+	public String[] getPaths(String menuName) {
+		
+		String[] paths = {"", "", "", ""};
+		switch (menuName) {
+			case "Manage_users":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[3]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[3]/ul/li[1]/a";
+	            break;
+  
+	        case "Import_export":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[3]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[3]/ul/li[4]/a";
+	            break;
+	            
+	        case "Manage_Multiple_Users":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[3]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[3]/ul/li[2]/a";
+	            break;
+	            
+	        case "Manage_Multiple_Users_open":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[3]/ul/li[2]/a";
+	            break;    
+	            
+	        case "Devices_menu":
+	            paths[0] = "//*[@id='DashboardTitleHref']/span";
+	            paths[1] = "//*[@id='StatusHref']/span";
+	            break; 
+	            
+	        case "Alarms":
+	            paths[0] = "//*[@id='DashboardTitleHref']/span";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[1]/ul/li[3]/a";
+	            break;
+	            
+	        case "System_logs":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[6]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[6]/ul/li/a";
+	            break;
+	            
+	        case "Templates":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[1]/a";
+	            break;
+	            
+	        case "Templates_open":
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[1]/a";
+	            break;
+	            
+	        case "Manage_Multiple_Devices":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[3]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[3]/ul/li[3]/a";
+	            break;
+	            
+	        case "Manage_Multiple_Devices_open":
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[3]/ul/li[3]/a";
+	            break;
+	    
+	        case "Default_placeholder_values":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[3]/a";
+	            break;
+	            
+	        case "Default_placeholder_values_open":
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[3]/a";
+	            break;
+	            
+	        case "Region_placeholders":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[5]/a";
+	            break;
+	            
+	        case "Operation_Region_placeholders":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[4]/a";
+	            break;
+	            
+	        case "Monitoring_Region_placeholders":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[4]/a";
+	            break;
+	            
+	        case "Templates_placeholders":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[4]/a";
+	            break;
+	            
+	        case "Operation_Templates_placeholders":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[3]/a";
+	            break;
+	            
+	        case "Monitoring_Templates_placeholders":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[3]/a";
+	            break;
+	            
+	        case "Monitoring_Templates":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[1]/a";
+	            break;
+	            
+	        case "System_settings":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[2]/a";
+	            break;
+	            
+	        case "Region_permissions":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[2]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[2]/ul/li/a";
+	            break;
+	            
+	        case "Phone_configuration_files":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[7]/a";
+	            break;
+	            
+	        case "Phone_firmware_files":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[8]/a";
+	            break;
+	            
+	        case "Monitoring_Phone_firmware_files":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[6]/a";
+	            break;
+	            
+	        case "Operation_Phone_firmware_files":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[6]/a";
+	            break;
+	            
+	        case "Device_placeholders":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[6]/a";
+	            break;
+	            
+	        case "Monitoring_Device_placeholders":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[5]/a";
+	            break;
+	            
+	        case "System_License":
+	            paths[0] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[5]/a";
+	            paths[1] = "//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[5]/ul/li/a";
+	            break;
+	            
+	         default:
+	        	 GlobalFuncs testFuncs = new GlobalFuncs();
+	             testFuncs.myFail("Menu name is not recognized !!");    
+			}
+		
+		return paths;      
+     }		
+}

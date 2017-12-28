@@ -1,0 +1,127 @@
+package EMS_Tests;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the phone firmware files menu via an Operation user.
+* ----------------
+* Tests:
+* 	 - Enter the Phone firmware files menu via an Operation user.
+* 	 1. Upload a phone firmware.
+* 	 2. Edit a phone firmware.
+* 	 3. Delete a phone firmware.
+* 
+* Results:
+* 	 1-3. All actions should be performed successfully.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test56__Operation_phone_firmware_files {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test56__Operation_phone_firmware_files(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Opeartion_phone_firmware_files() throws Exception {
+	  
+	Log.startTestCase(this.getClass().getName());
+  
+    // Enter the Phone firmware files menu via an Operation user
+	testFuncs.myDebugPrinting("Enter the Phone firmware files menu via an Operation user");
+	testFuncs.login(driver, testVars.getOpetUsername(), testVars.getOperPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Operation_Phone_firmware_files", "Phone firmware files");
+  	testFuncs.myWait(1000);
+    driver.switchTo().frame(1);
+	String Id = testFuncs.getId();
+	String firmName     = "myFirmName"  + Id;
+	String firmDesc     = "myFirmDesc"  + Id;
+	String firmVersion = String.valueOf(testFuncs.getNum(128)) + "." +
+						 String.valueOf(testFuncs.getNum(128)) + "." +
+						 String.valueOf(testFuncs.getNum(128)) + "." +
+						 String.valueOf(testFuncs.getNum(128));
+	String firmRegion   = "AutoDetection";
+	String firmFileName = testVars.getImportFile("31");
+
+	// Step 1 - Add new IP Phone firmware
+  	testFuncs.myDebugPrinting("Step 1 - Add new IP Phone firmware");
+	testFuncs.addNewFirmware(driver, firmName, firmDesc, firmVersion, firmRegion, firmFileName);
+	
+	// Step 2 - Edit an existing firmware
+  	testFuncs.myDebugPrinting("Step 2 - Edit an existing firmware");
+	String newFirmDesc = "edited"  + firmDesc;
+	firmVersion = String.valueOf(testFuncs.getNum(128)) + "." +
+			  	  String.valueOf(testFuncs.getNum(128)) + "." +
+			  	  String.valueOf(testFuncs.getNum(128)) + "." +
+			  	  String.valueOf(testFuncs.getNum(128));	
+	firmRegion         = "TelAviv";
+  	testFuncs.editFirmware(driver, firmName, firmDesc, newFirmDesc, firmVersion, firmRegion);  	
+		
+	// Step 3 - Delete a firmware
+  	testFuncs.myDebugPrinting("Step 3 - Delete a firmware");
+	testFuncs.deleteFirmware(driver,  firmName, newFirmDesc, firmVersion);
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

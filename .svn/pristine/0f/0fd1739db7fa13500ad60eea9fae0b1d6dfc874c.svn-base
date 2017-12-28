@@ -1,0 +1,141 @@
+package EMS_Tests;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the login mechanism for Operation and Monitoring users
+* ----------------
+* Tests:
+* 	 1.1 Try to login with a  valid   username and an invalid password to Monitoring user
+* 	 1.2 Try to login with an invalid username and a  valid password to Monitoring user
+* 	 1.3 Try to login with an invalid username and an invalid password to Monitoring user
+* 	 1.4 Try to login with an valid   username and a  valid password to Monitoring user
+* 	 2.1 Try to login with a  valid   username and an invalid password to Operation user
+* 	 2.2 Try to login with an invalid username and a  valid password to Operation user
+* 	 2.3 Try to login with an invalid username and an invalid password to Operation user
+* 	 2.4 Try to login with an valid   username and a  valid password to Operation user
+* 
+* Results:
+* 	 1-2. In all tests only a login with valid username and valid password should succeed.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test37__Monitoring_Operation_Login_tests {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test37__Monitoring_Operation_Login_tests(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  //Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass 
+  public static void setting_SystemProperties() {
+	  
+      System.out.println("System Properties seting Key value.");
+  }
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Monitoring_Operation_login() throws Exception {
+	  
+	  Log.startTestCase(this.getClass().getName());
+	
+	  // Set invalid username and password
+	  String monInvUsername = testVars.getMonitUsername().substring(1) ;
+	  String monInvPassword = testVars.getMonitPassword().substring(1);
+	  String opInvUsername  = testVars.getOpetUsername().substring(1);
+	  String opInvPassword  = testVars.getOperPassword().substring(1);
+    
+	  // Step 1.1 - invalid login - valid username + invalid password to Monitoring User
+	  testFuncs.myDebugPrinting("Step 1.1 - invalid login - valid username + invalid password to Monitoring User");
+	  testFuncs.login(driver, testVars.getMonitUsername(), monInvPassword, testVars.getFailLogStr(), "https://", this.usedBrowser);
+	
+	  // Step 1.2 - invalid login - invalid username + valid password to Monitoring User
+	  testFuncs.myDebugPrinting("Step 1.2 - invalid login - invalid username + valid password to Monitoring User");
+	  testFuncs.login(driver, monInvUsername, testVars.getMonitPassword(), testVars.getFailLogStr(), "https://", this.usedBrowser);
+	
+	  // Step 1.3 - invalid login - invalid username + invalid password to Monitoring User
+	  testFuncs.myDebugPrinting("Step 1.3 - invalid login - invalid username + invalid password to Monitoring User");
+	  testFuncs.login(driver, monInvUsername, monInvPassword, testVars.getFailLogStr(), "https://", this.usedBrowser);
+	
+	  // Step 1.4 - valid login - valid username + valid password to Monitoring User
+	  testFuncs.myDebugPrinting("Step 1.4 - invalid login - invalid username + invalid password to Monitoring User");
+	  testFuncs.login(driver, testVars.getMonitUsername(), testVars.getMonitPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	  driver.switchTo().defaultContent();
+	  driver.findElement(By.xpath("//*[@id='header1']/tbody/tr/td[2]/a[3]")).click();
+	  testFuncs.myWait(2000);
+	  if (!driver.getTitle().equals(testVars.getMainPageStr())) {
+		  
+		  testFuncs.myFail("Log off testFuncs.myFailes !! (" + driver.getTitle() + ")");
+	  }
+	  
+	  // Step 2.1 - invalid login - valid username + invalid password to Operation User
+	  testFuncs.myDebugPrinting("Step 2.1 - invalid login - valid username + invalid password to Operation User");
+	  testFuncs.login(driver, testVars.getMonitUsername(), opInvPassword, testVars.getFailLogStr(), "https://", this.usedBrowser);
+	
+	  // Step 2.2 - invalid login - invalid username + valid password to Operation User
+	  testFuncs.myDebugPrinting("Step 2.2 - invalid login - invalid username + valid password to Operation User");
+	  testFuncs.login(driver, opInvUsername, testVars.getMonitPassword(), testVars.getFailLogStr(), "https://", this.usedBrowser);
+	
+	  // Step 2.3 - invalid login - invalid username + invalid password to Operation User
+	  testFuncs.myDebugPrinting("Step 2.3 - invalid login - invalid username + invalid password to Operation User");
+	  testFuncs.login(driver, opInvUsername, opInvPassword, testVars.getFailLogStr(), "https://", this.usedBrowser);
+	
+	  // Step 2.4 - valid login - valid username + valid password to Operation User
+	  testFuncs.myDebugPrinting("Step 2.4 - invalid login - invalid username + invalid password to Operation User");
+	  testFuncs.login(driver, testVars.getOpetUsername(), testVars.getOperPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);  
+  }
+
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+      testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

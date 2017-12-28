@@ -1,0 +1,142 @@
+package EMS_Tests;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the System settings menu
+* ----------------
+* Tests:
+* 	 - Enter System Settings menu
+* 	 1. Insert data and verify headers.
+* 	 2. Enter default placeholders values menu and check headers.
+* 
+* Results:
+* 	 1. Data should be updated successfully in the Default placeholders menu.
+* 	 2. All headers should be verified.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test27__system_settings {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test27__system_settings(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Default_placeholder_values_menu() throws Exception {
+	  
+	Log.startTestCase(this.getClass().getName());
+	  
+	// Set variables
+	String mwiVmNumber = String.valueOf(testFuncs.getNum(9999));
+	String ntpServer   = String.valueOf(testFuncs.getNum(128)) + "." +
+						 String.valueOf(testFuncs.getNum(128)) + "." +
+						 String.valueOf(testFuncs.getNum(128)) + "." +
+						 String.valueOf(testFuncs.getNum(128));
+	String[] langs = {"English", "Finnish", "French", "German", "Hebrew", "Italian", "Japanese", "Korean"};
+	String usedLang = langs[testFuncs.getNum(langs.length -1)];
+	testFuncs.myDebugPrinting("usedLang - " + usedLang);
+	  
+    // Enter System settings menu
+	testFuncs.myDebugPrinting("Step 1 - Check default placeholder values menu");
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "System_settings", "System Settings");
+  	testFuncs.myWait(1000);
+    driver.switchTo().frame(1);
+  
+    // Step 1 - Insert data and verify headers
+	testFuncs.myDebugPrinting("Step 2 - Insert data and verify headers");
+	testFuncs.verifyStrByXpath(driver, "//*[@id='ippserver']", testVars.getIp());
+	testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[6]/td[3]/span", "(%ITCS_ServerIP%)");
+    driver.findElement(By.xpath("//*[@id='ipplanguage']")).sendKeys(usedLang);
+	testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[7]/td[3]/span", "(%ITCS_Language%)");
+    driver.findElement(By.xpath("//*[@id='ntpserver']")).clear();
+	driver.findElement(By.xpath("//*[@id='ntpserver']")).sendKeys(ntpServer);
+	testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[8]/td[3]/span", "(%ITCS_Primary_NTP%)");
+    driver.findElement(By.xpath("//*[@id='MwiVmNumber']")).clear();
+	driver.findElement(By.xpath("//*[@id='MwiVmNumber']")).sendKeys(mwiVmNumber);
+	testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[9]/td[3]/span", "(%ITCS_MwiVmNumber%)");
+	if (!driver.findElement(By.xpath("//*[@id='SRTP']")).isSelected()) {
+		
+		driver.findElement(By.xpath("//*[@id='SRTP']")).click();
+		
+	}
+	testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[11]/td[2]/span", "	(%ITCS_SRTP%)");
+	driver.findElement(By.xpath("//*[@id='submit_img']")).click();;
+  	testFuncs.myWait(2000);
+	testFuncs.verifyStrByXpath(driver, "//*[@id='promt_div_id']", "Server successfully updated.");
+	driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+	
+	// Step 2 - enter default placeholders values menu and check headers
+	testFuncs.myDebugPrinting("Step 2 - enter default placeholders values menu and check headers");
+    driver.switchTo().defaultContent();
+	driver.findElement(By.xpath("//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[3]/a")).click();
+    testFuncs.myWait(1000);
+    driver.switchTo().frame(1);
+    testFuncs.verifyStrByXpath(driver, "//*[@id='placeholders_body']/tr[5]/td[3]", mwiVmNumber);
+	testFuncs.verifyStrByXpath(driver, "//*[@id='placeholders_body']/tr[8]/td[3]", "1");
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

@@ -1,0 +1,498 @@
+package EMS_Tests;
+
+
+/**
+* This class holds all the data which is used by the tests
+* @author Nir Klieman
+* @version 1.00
+*/
+
+public class GlobalVars {
+	
+	/**
+	*  ip             - Ip of the system
+	*  port           - port for create the users (i.e. 8081)
+	*  domain         - domain for create new users (i.e. onebox3.com)
+	*  url  		  - Default url for access the system (created by ip)
+	*  crUserBatName  - Name of the batch file that call the exe that create the users via POST queries
+	*  mainPageStr    - Main page welcome string (used for detect good login)
+	*  sysUsername    - Default username for access the system
+	*  sysPassword    - Default password for access the system
+	*  monitUsername  - Default username for access the system via a Monitoring user
+	*  monitPassword  - Default password for access the system via a Monitoring user
+	*  operUsername   - Default username for access the system via an Operation user
+	*  operPassword   - Default password for access the system via an Operation user
+	*  custUsername   - Default username for access the system via a Customer
+	*  custPassword   - Default password for access the system via a Customer
+	*  sysMainStr     - Default string in the welcome page (used for verify access)
+	*  sysInvalidStr  - Default string for detect invalid login
+	*  chromeDrvPath  - Chrome driver path
+	*  ieDrvPath      - IE driver path
+	*  globalSleep    - Default value for sleep between parts of the tests
+	*  regionsList    - Regions list
+	*  acMacPrefix    - Audicocodes MAC prefix
+	*  downloadsPath  - Downloads path
+	*  exportAlarms   - Name of the alarms page
+	*  sysLogsPrefix  - Prefix of the logs of the system
+	*  sysLogsActPre  - Prefix of the logs of the system (Activity)
+	*/
+    public   LogVars 				logerVars;
+	private  String ip              = "10.21.8.30";
+	private  String port            = "8081";
+	private  String domain          = "onebox3.com";
+    private  String url  		    = ip + "/ipp/admin/logout.php";
+    private  String crUserBatName   = "createUser.bat"; 
+    private  String mainPageStr		= "IPP Management Login";
+    private  String sysUsername     = "nir1";
+	private  String sysPassword     = "1q2w3e4r5t";
+    private  String monitUsername   = "myMonitorUser";
+	private  String monitPassword   = "1q2w3e$r";
+    private  String operUsername    = "myOperationUser";
+	private  String operPassword    = "1q2w3e$r";
+    private  String operUsername1   = "myOperationUser1";
+	private  String operPassword1   = "1q2w3e$r";
+    private  String operUsername2   = "myOperationUser2";
+	private  String operPassword2   = "1q2w3e$r";
+    private  String operUsername3   = "myOperationUser3";
+	private  String operPassword3   = "1q2w3e$r";
+    private  String custUsername    = "nirr53@gmail.com";
+	private  String custPassword    = "1q2w3e$r";
+	private  String sysMainStr      = "Audiocodes IPP Administration";
+	private  String failLogMainStr  = "IPP Management Login";
+	private  String sysInvalidStr   = "Wrong username or password";
+	private  String chromeDrvPath   = "C:\\Users\\nirk\\Desktop\\Selenium\\chromedriver_win32\\chromedriver.exe";
+	private  String ieDrvPath       = "C:\\Users\\nirk\\Desktop\\Selenium\\IEDriverServer_x64_2.53.1\\IEDriverServer.exe";	
+	private  String geckoPath       = "C:\\Users\\nirk\\Desktop\\Selenium\\geckodriver-v0.11.1-win64\\geckodriver.exe";
+	private  String srcFilesPath    = "C:\\Users\\nirk\\Desktop\\myEclipseProjects\\EMS_Tests\\sourceFiles\\EMS";	
+	private  String[] regionsList   = {"AutoDetection", "Lod", "NewYork", "NoTemplate", "TelAviv"};
+	private  String acMacPrefix     = "00908f";
+	private  String version			= "7.2.3075";
+	private  String downloadsPath   = "";
+	private  String exportAlarms    = "ExportAlarmsStatus.csv";
+	private  String sysLogsPrefix   = "IPP.Manage.Web.Admin.";
+	private  String sysLogsActPre   = "IPP.Manage.Activity.";
+	private  String srcImpUser      = "import11_1.csv";
+	private  String srcImpUserDvcs  = "import11_2.csv";
+	private  String srcImp1000Usrs  = "import12.csv";
+	private  String srcConfFile     = "my.cfg";
+	private  String srcFirmFile     = "430HD.img";
+	private  String shFilesFiName   = "Files.zip";
+	private  String srcBigCfgFile   = "templateVeryBig.cfg";
+	private  String srcOperImport1  = "importFile54_1.csv";
+	private  String srcOperImport2  = "importFile54_2.csv";
+	private  String srcOperImport3  = "importFile54_3.csv";
+	private  String srcLangsFile    = "nirDdifferentLanguages.csv";
+	private  String srcDhcpConfFile = "dhcp_option_template.cfg";
+	private  String srcSbcConfFile  = "proxy_dhcp_option_template.cfg";
+	public   String CHROME  	    = "Chrome";
+	public   String FF 			    = "Firefox";
+	public 	 String IE			    = "IE";
+	private  Object[][] browsersList   = {{CHROME}};
+
+    /**
+    *  Non-default constructor for provide another data
+    *  @param _url  	Non-default url for access the system
+	*  @param _username Non-default username for access the system
+	*  @param _password Non-default password for access the system
+	*  @param _mainStr  Non-default string for verify good access
+    */
+	public GlobalVars(String _url, String _username, String _password, String _mainStr) {
+		
+		System.out.println("GlobalVars constructor is called");
+		this.url 		 = _url;
+		this.sysUsername = _username;
+		this.sysPassword = _password;
+		this.sysMainStr  = _mainStr;
+    	this.downloadsPath = "C:\\Users\\" + System.getProperty("user.name") + "\\Downloads";
+    	this.logerVars     = new LogVars();
+	}
+	
+    /**
+    *  Default constructor for provide interface
+    */
+    public GlobalVars() {
+    	
+    	this.logerVars     = new LogVars();
+    	this.downloadsPath = "C:\\Users\\" + System.getProperty("user.name") + "\\Downloads";  		
+	}
+    
+	/**
+    *  Default method for return the url variable
+    *  @return url of the system
+    */
+	public String getUrl() {
+		
+		return this.url;
+	}
+	
+	/**
+    *  Default method for return the mainPageStr variable
+    *  @return main string of the system
+    */
+	public String getMainPageStr() {
+		
+		return this.mainPageStr;
+	}
+		
+    /**
+    *  Default method for return the Customer username variable
+    *  @return username of the system for Customer
+    */
+	public String getCustUsername() {
+		
+		return this.custUsername;
+	}
+	
+    /**
+    *  Default method for return the Customer password variable
+    *  @return password of the system for Customer
+    */
+	public String getCustPassword() {
+		
+		return this.custPassword;
+	}
+
+	
+    /**
+    *  Default method for return the username variable
+    *  @return username of the system for Admin
+    */
+	public String getSysUsername() {
+		
+		return this.sysUsername;
+	}
+	
+    /**
+    *  Default method for return the password variable
+    *  @return password of the system for Admin
+    */
+	public String getSysPassword() {
+		
+		return this.sysPassword;
+	}
+	
+    /**
+    *  Default method for return the main-str variable
+    *  @return sysStr of the system
+    */
+	public String getSysMainStr() {
+		
+		return this.sysMainStr;
+	}
+	
+    /**
+    *  Default method for return the main-str fail-login variable
+    *  @return sysStr of the system
+    */
+	public String getFailLogStr() {
+		
+		return this.failLogMainStr;
+	}
+	
+    /**
+    *  Default method for return the invalid-str variable
+    *  @return sysInvalidStr of the system
+    */
+	public String getSysInvalidStr() {
+		
+		return this.sysInvalidStr;
+	}
+
+    /**
+    *  Default method for return the Chrome driver path
+    *  @return chromeDrvPath of the system
+    */
+	public String getchromeDrvPath() {
+		
+		return this.chromeDrvPath;
+	}
+	
+    /**
+    *  Default method for return the IE driver path
+    *  @return ieDrvPath of the system
+    */
+	public String getIeDrvPath() {
+		
+		return this.ieDrvPath;
+	}
+	
+    /**
+    *  Default method for return the path for the directory of the source files
+    *  @return srcFilesPath of the system
+    */
+	public String getSrcFilesPath() {
+		
+		return this.srcFilesPath;
+	}
+	
+    /**
+    *  Default method for return the Regions list
+    *  @return regionsList
+    */
+	public String[] getRegionList() {
+		
+		return this.regionsList;
+	}
+	
+    /**
+    *  Default method for return the System IP
+    *  @return ip
+    */
+	public String getIp() {
+		
+		return this.ip;
+	}
+	
+    /**
+    *  Default method for return the System Port
+    *  @return port
+    */
+	public String getPort() {
+		
+		return this.port;
+	}
+		
+    /**
+    *  Default method for return the System Domain
+    *  @return port
+    */
+	public String getDomain() {
+		
+		return this.domain;
+	}
+	
+    /**
+    *  Default method for return the Batch filename that create a user
+    *  @return crUserBatName
+    */
+	public String getCrUserBatName() {
+		
+		return this.crUserBatName;
+	}
+	
+    /**
+    *  Default method for return the AC prefix string
+    *  @return acMacPrefix
+    */
+	public String getAcMacPrefix() {
+		
+		return this.acMacPrefix;
+	}
+	
+    /**
+    *  Default method for return the version
+    *  @return version
+    */
+	public String getVersion() {
+		
+		return this.version;
+	}
+	
+    /**
+    *  Default method for return the downloads path
+    *  @return version
+    */
+	public String getDownloadsPath() {
+		
+		return this.downloadsPath;
+	}
+	
+    /**
+    *  Default method for return the alarms export file name
+    *  @return exportAlarms
+    */
+	public String getAlarmsExport() {
+		
+		return this.exportAlarms;
+	}
+	
+    /**
+    *  Default method for return the prefix of the System-logs
+    *  @return sysLogsPrefix
+    */
+	public String getSysLogsPrefix() {
+		
+		return this.sysLogsPrefix;
+	}
+	
+    /**
+    *  Default method for return the prefix of the System-logs-Activity
+    *  @return sysLogsActPre
+    */
+	public String getSysLogsActPre() {
+		
+		return this.sysLogsActPre;
+	}
+	
+    /**
+    *  Default method for return a name of source file by given integer
+    *  @param idx Index of the current test in the format of <test>.<sub-test>
+    *  @return String that represent name of the used file
+    */
+	public String getImportFile(String idx) {
+		
+		String usedSrcFile = "";
+		switch (idx) {
+		
+			case "11.1":
+				 usedSrcFile = this.srcImpUser;
+				 break;		 
+			case "11.2":
+				 usedSrcFile = this.srcImpUserDvcs;
+				 break;	 
+			case "12":
+				 usedSrcFile = this.srcImp1000Usrs;
+				 break;	 
+			case "30":
+				 usedSrcFile = this.srcConfFile;
+				 break;
+			case "31":
+				 usedSrcFile = this.srcFirmFile;
+				 break;	 
+			case "36":
+				 usedSrcFile = this.srcBigCfgFile;
+				 break;
+			case "54.1":
+				 usedSrcFile = this.srcOperImport1;
+				 break;
+			case "54.2":
+				 usedSrcFile = this.srcOperImport2;
+				 break;
+			case "54.3":
+				 usedSrcFile = this.srcOperImport3;
+				 break;
+			case "65":
+				 usedSrcFile = this.srcLangsFile;
+				 break;
+			case "66":
+				 usedSrcFile = this.srcSbcConfFile;
+				 break;
+			case "67":
+				 usedSrcFile = this.srcDhcpConfFile;
+				 break;
+			default:
+				usedSrcFile = "";
+				break;
+		}
+		System.out.println("   usedSrcFile - " + usedSrcFile);
+		
+		return usedSrcFile;
+	}
+
+    /**
+    *  Default method for return the used browsers in the current test
+    *  @return browsersList
+    */
+	public Object[][] getBrowsers() {
+		
+		return this.browsersList;
+	}
+
+    /**
+    *  Default method for return the gecko driver path (the extarnal driver for ff)
+    *  @return ieDrvPath of the system
+    */
+	public String getGeckoPath() {
+		
+		return this.geckoPath;
+	}
+
+    /**
+    *  Default method for return the Monitoring username
+    *  @return monitUsername
+    */
+	public String getMonitUsername() {
+		
+		return this.monitUsername;
+	}
+	
+    /**
+    *  Default method for return the Monitoring password
+    *  @return monitPassword
+    */
+	public String getMonitPassword() {
+		
+		return this.monitPassword;
+	}
+	
+    /**
+    *  Default method for return the Operation username
+    *  @return operUsername
+    */
+	public String getOpetUsername()  {
+		
+		return this.operUsername;
+	}
+	
+    /**
+    *  Default method for return the Operation password
+    *  @return operPassword
+    */
+	public String getOperPassword()  {
+		
+		return this.operPassword;
+	}
+	
+    /**
+    *  Default method for return the Operation username (for 'Operation' user - one region is 'operation' and the rest are 'monitoring')
+    *  @return operUsername
+    */
+	public String getOpetUsername1()  {
+		
+		return this.operUsername1;
+	}
+	
+    /**
+    *  Default method for return the Operation password (for 'Operation' user - one region is 'operation' and the rest are 'monitoring')
+    *  @return operPassword
+    */
+	public String getOperPassword1()  {
+		
+		return this.operPassword1;
+	}
+	
+    /**
+    *  Default method for return the Operation username (for 'Operation' user - one region is 'operation' and the rest are 'not available')
+    *  @return operUsername
+    */
+	public String getOpetUsername2()  {
+		
+		return this.operUsername2;
+	}
+	
+    /**
+    *  Default method for return the Operation password (for 'Operation' user - one region is 'operation' and the rest are 'not available')
+    *  @return operPassword
+    */
+	public String getOperPassword2()  {
+		
+		return this.operPassword2;
+	}
+	
+    /**
+    *  Default method for return the Operation username (for 'Operation' user - all regions are 'operation')
+    *  @return operUsername
+    */
+	public String getOpetUsername3()  {
+		
+		return this.operUsername3;
+	}
+	
+    /**
+    *  Default method for return the Operation password (for 'Operation' user - all regions are 'operation')
+    *  @return operPassword
+    */
+	public String getOperPassword3()  {
+		
+		return this.operPassword3;
+	}
+	
+    /**
+    *  Default method for return the Sharefiles file-name
+    *  @return shareFilesFileName
+    */
+	public String getShareFilesName() {
+		
+		return this.shFilesFiName;
+	}
+}

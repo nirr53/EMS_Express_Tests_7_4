@@ -1,0 +1,225 @@
+package EMS_Tests;
+
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the DHCP Option configuration menu
+* ----------------
+* Tests:
+* 	 - Login the EMS environment.
+* 	 - Enter the system settings menu & the DHCP Option configuration menu.
+* 	 1. Edit configuration template
+*	 2. Restore configuration template.
+*	 3. Upload new configuration template
+*	 4. Generate configuration template
+* 
+* Results:
+* 	 1.4 All actions should succeed.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test67__DHCP_Option_configuration {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test67__DHCP_Option_configuration(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void DHCP_option_configuration_menu() throws Exception {
+	  
+	  String strForEdit = "ems_server/keep_alive_period=" + testFuncs.getId();
+	  String uploadStr  = "1234";
+	  testFuncs.myDebugPrinting("strForEdit - " + strForEdit, testVars.logerVars.MINOR);
+	  Log.startTestCase(this.getClass().getName());
+	  
+	  // Enter System settings and DHCP option configuration menu
+	  testFuncs.myDebugPrinting("Enter System settings and DHCP option configuration menu");
+	  testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	  driver.switchTo().defaultContent();
+	  testFuncs.enterMenu(driver, "System_settings", "System Settings");
+	  testFuncs.myWait(1000);
+	  driver.switchTo().frame(1);
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[25]/td/a[2]")).click();
+	  testFuncs.myWait(1000);	
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='title']"										   		  , "DHCP Option Template");
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[1]/td"		  , "DHCP Option Template");
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[9]/td/a/span", "DHCP option 160 URLs");
+	  
+	  // Step 1 - Edit configuration template
+	  testFuncs.myDebugPrinting("Step 1 - Edit configuration template");
+	  editDHCPConfigurationTemplate(driver, strForEdit);
+	  
+	  // Step 2 - Restore configuration template
+	  testFuncs.myDebugPrinting("Step 2 - Restore configuration template");
+	  restoreDHCPConfigurationTemplate(driver, strForEdit);
+	  
+	  // Step 3 - Upload configuration template
+	  testFuncs.myDebugPrinting("Step 3 - Upload configuration template");
+	  uploadDHCPConfigurationTemplate(driver, testVars.getSrcFilesPath() + "\\" + testVars.getImportFile("67"), uploadStr);
+	  restoreDHCPConfigurationTemplate(driver, uploadStr);
+	  
+	  // Step 4 - Generate configuration template
+	  testFuncs.myDebugPrinting("Step 4 - Generate configuration template");
+	  generateDHCPConfigurationTemplate(driver);
+  }
+  
+  private void generateDHCPConfigurationTemplate(WebDriver driver) {
+	  
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[7]/td/a[1]/span")).click();
+	  testFuncs.myWait(1000); 
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[1]", "DHCP Option template");
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[2]", "Are you sure you want to generate the DHCP option template?");
+	  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+	  testFuncs.myWait(3000);
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]/table/tbody/tr[1]/th", "Generate Template");
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='promt_div_id']"								  , "The DHCP option template was generated");
+	  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+	  testFuncs.myWait(2000);
+  }
+
+  private void uploadDHCPConfigurationTemplate(WebDriver driver, String filePath, String uploadStr) throws UnsupportedFlavorException, IOException {
+	  
+	  testFuncs.myDebugPrinting("filePath - " + filePath, testVars.logerVars.MINOR);
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[4]/td[2]/a")).click();
+	  testFuncs.myWait(1000);
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='title']"								   , "Upload IP Phone Template");
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='IntroScreen']/form/table/tbody/tr[1]/td", "Press the Browse button to locate the file and then press the Submit button. When file upload is complete The file has been uploaded successfully message will be shown.");
+	  driver.findElement(By.xpath("//*[@id='IntroScreen']/form/table/tbody/tr[3]/td/input")).sendKeys(filePath);
+	  testFuncs.myWait(1000);
+	  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+	  testFuncs.myWait(10000);
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='promt_div_id']", "The IP Phone template has been uploaded successfully.");
+	  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+	  testFuncs.myWait(2000);
+	  
+	  // Verify upload
+	  testFuncs.myDebugPrinting("Verify upload", testVars.logerVars.MINOR);
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[2]/td[2]/a")).click();
+	  testFuncs.myWait(1000);
+	  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).click();
+	  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).sendKeys(Keys.chord(Keys.CONTROL, "a"));
+	  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).sendKeys(Keys.chord(Keys.CONTROL, "c"));
+	  Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+	  String txt = (String) clipboard.getData(DataFlavor.stringFlavor);
+	  testFuncs.myAssertTrue("DHCP configuration file was not uploaded successfully !! \n" + txt, txt.contains(uploadStr));
+	  driver.findElement(By.xpath("/html/body/div[2]/div[3]/div/button[2]")).click();
+	  testFuncs.myWait(2000);
+  }
+
+  private void restoreDHCPConfigurationTemplate(WebDriver driver, String strForEdit) throws UnsupportedFlavorException, IOException {
+	  
+	  driver.findElement(By.xpath("//*[@id='restoreToDefId']/span")).click();
+	  testFuncs.myWait(1000);
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[1]", "Reset the DHCP Option Template");
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[2]", "Are you sure you want to reset the DHCP option template?");
+	  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+	  testFuncs.myWait(1000);
+	  
+	  // Verify reset
+	  testFuncs.myDebugPrinting("Verify reset", testVars.logerVars.MINOR);
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[2]/td[2]/a")).click();
+	  testFuncs.myWait(1000);
+	  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).click();
+	  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).sendKeys(Keys.chord(Keys.CONTROL, "a"));
+	  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).sendKeys(Keys.chord(Keys.CONTROL, "c"));
+	  Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+	  String txt = (String) clipboard.getData(DataFlavor.stringFlavor);
+	  testFuncs.myAssertTrue("DHCP configuration file was not reset successfully !!", !txt.contains(strForEdit));
+	  driver.findElement(By.xpath("/html/body/div[2]/div[3]/div/button[2]")).click();
+	  testFuncs.myWait(1000);
+  }
+
+  private void editDHCPConfigurationTemplate(WebDriver driver, String strForEdit) throws UnsupportedFlavorException, IOException {
+	  
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[2]/td[2]/a")).click();
+	  testFuncs.myWait(1000);
+	  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).sendKeys(Keys.ENTER);
+	  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).sendKeys(strForEdit);
+	  testFuncs.myWait(1000);
+	  driver.findElement(By.xpath("/html/body/div[2]/div[3]/div/button[1]")).click();
+	  testFuncs.myWait(3000);
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[1]", "DHCP option template was updated successfully.");
+	  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+	  testFuncs.myWait(1000);
+	    
+	  // Verify edit
+	  testFuncs.myDebugPrinting("Verify edit", testVars.logerVars.MINOR);
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[2]/td[2]/a")).click();
+	  testFuncs.myWait(1000);
+	  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).click();
+	  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).sendKeys(Keys.chord(Keys.CONTROL, "a"));
+	  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).sendKeys(Keys.chord(Keys.CONTROL, "c"));
+	  Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+	  String txt = (String) clipboard.getData(DataFlavor.stringFlavor);
+	  testFuncs.myAssertTrue("DHCP configuration file was not edited successfully !! \n" + txt, txt.contains(strForEdit));
+	  driver.findElement(By.xpath("/html/body/div[2]/div[11]/div/button[2]")).click();
+	  testFuncs.myWait(2000);
+   }
+
+@After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

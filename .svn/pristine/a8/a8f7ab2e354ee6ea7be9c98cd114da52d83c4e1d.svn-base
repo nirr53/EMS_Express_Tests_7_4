@@ -1,0 +1,213 @@
+package EMS_Tests;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the device placeholders menu
+* ----------------
+* Tests:
+* 	 - Create a registered user
+* 	 - Enter Device placeholders menu
+* 	 1. Add a Device placeholder.
+* 	 2. Edit the Device placeholder.
+* 	 3. Delete the Device placeholder.
+* 	 4. Delete the user that we created via the POST query.
+* 
+* Results:
+* 	 1. Device placeholder should be added successfully.
+* 	 2. Device placeholder should be edited successfully.
+* 	 3. Device placeholder should be deleted successfully.
+*	 4. Users should be deleted successfully.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test32__device_placeholders {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test32__device_placeholders(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Device_placeholders_menu() throws Exception {
+	  
+	  String successPath      = System.getProperty("user.dir") + "\\" + "success.txt";
+	  File file               = new File(successPath);
+	  String srcUserPrefix 	  = "devPhTest";
+	  String usersNumber   	  = "1";
+	  int usStartIdx 		  = 1;
+	  Map<String, String> map = new HashMap<String, String>();
+	  map.put("usersNumber",  usersNumber); 
+	  map.put("startIdx"   ,  String.valueOf(usStartIdx));
+	  Log.startTestCase(this.getClass().getName());
+
+	  // Create several users using POST query
+	  testFuncs.myDebugPrinting("Create several users using POST query");
+	  file.delete();
+	  testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	  String Id = testFuncs.getId();
+	  String srcUserName = srcUserPrefix + Id;
+	  map.put("usersPrefix",  srcUserName);
+	  String path = System.getProperty("user.dir") + "\\" + testVars.getCrUserBatName();	
+	  String[] cmd = {path, testVars.getIp(), testVars.getPort()  , usersNumber,
+						srcUserName , testVars.getDomain(), "registered",
+			        "430HD", "TelAviv", "myLocation" };
+	  Process p = Runtime.getRuntime().exec(cmd);
+	  p.waitFor();
+	  testFuncs.waitForPostUsersCreate(successPath, Integer.parseInt(usersNumber) * 40);
+	  
+	  // Step 1 - Add a Device placeholder
+	  testFuncs.myDebugPrinting("Step 1 - Add a Device placeholder");
+	  testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	  driver.switchTo().defaultContent();
+	  testFuncs.enterMenu(driver, "Device_placeholders", "Manage Devices Placeholders");
+	  testFuncs.myWait(1000);
+	  driver.switchTo().frame(1);
+	  
+	  // Step 1 - Add a new device placeholder
+	  String phName  = "DayLightActivate";
+	  String phValue = "18";
+	  testFuncs.myDebugPrinting("Step 1 - Add a new device placeholder");
+	  testFuncs.addDevicePlaceholder(driver, srcUserName, phName, phValue);
+	   
+	  // Step 2 - Edit a device placeholder
+	  String phNewValue = "18";
+	  testFuncs.myDebugPrinting("Step 2 - Edit a device placeholder");
+	  editDevicePlaceholder(driver, srcUserName, phName, phValue, phNewValue);
+	  
+	  // Step 3 - Delete a device placeholder
+	  testFuncs.myDebugPrinting("Step 3 - Delete a device placeholder");
+	  deleteDevicePlaceholder(driver, srcUserName, phName, phNewValue);
+	  
+	  // Step 4 - Delete the created user
+	  testFuncs.myDebugPrinting("Step 4 - Delete the created user");
+	  driver.switchTo().defaultContent();
+	  testFuncs.enterMenu(driver, "Manage_Multiple_Users", "Manage Multiple Users");
+	  driver.switchTo().frame(1);
+	  testFuncs.selectMultipleUsers(driver, srcUserName, usersNumber);
+	  map.put("action"	 ,  "Delete Users");
+	  map.put("srcUsername",  "Finished");
+	  testFuncs.setMultipleUsersAction(driver, map);
+  }
+  
+  /**
+  *  Delete an existing device placeholder
+  *  @param driver     - A given driver
+  *  @param userName   - A pre-create registered user
+  *  @param phName     - An existing placeholder name for edit
+  *  @param phNewValue - A new value for the placeholder
+  */
+  private void deleteDevicePlaceholder(WebDriver driver, String userName, String phName, String phNewValue) {
+	  
+	  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).clear();
+	  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).sendKeys(userName);
+	  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/span/button")).click();
+	  testFuncs.myWait(2000);		  
+	  driver.findElement(By.xpath("//*[@id='placeholders_body']/tr/td[8]/button")).click();
+	  testFuncs.myWait(1000); 
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='ui-id-1']"       , "Delete item: " + phName);
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='dialog-confirm']", "Are you sure you want to delete this value?");
+	  driver.findElement(By.xpath("/html/body/div[2]/div[3]/div/button[1]/span")).click();
+	  testFuncs.myWait(500);
+	  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).clear();
+	  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).sendKeys(userName);
+	  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/span/button")).click();
+	  testFuncs.verifyStrByXpath(driver, "/html/body/div[1]/div/div[2]/div[4]/div/table/tbody[2]/tr/td", "There are no placeholders at present"); 
+  }
+  
+  /**
+  *  Edit an existing device placeholder
+  *  @param driver     - A given driver
+  *  @param userName   - A pre-create registered user
+  *  @param phName     - An existing placeholder name for edit
+  *  @param phValue    - An existing placeholder value
+  *  @param phNewValue - A new value for the placeholder
+  */
+  private void editDevicePlaceholder(WebDriver driver, String userName, String phName, String phValue, String phNewValue) {
+	  
+	  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).clear();
+	  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).sendKeys(userName);
+	  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/span/button")).click();
+	  testFuncs.myWait(2000);		  
+	  driver.findElement(By.xpath("//*[@id='placeholders_body']/tr/td[7]/button")).click();
+	  testFuncs.myWait(1000);
+	  driver.findElement(By.xpath("//*[@id='over_value']")).clear();
+	  driver.findElement(By.xpath("//*[@id='over_value']")).sendKeys(phNewValue);
+	  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+	  testFuncs.myWait(3000);
+	  
+	  // Verify edit
+	  testFuncs.myDebugPrinting("Verify edit", testVars.logerVars.MINOR);  
+	  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).clear();
+	  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).sendKeys(userName);
+	  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/span/button")).click();
+	  testFuncs.myWait(3000);
+	  String bodyText = driver.findElement(By.tagName("body")).getText();
+	  Assert.assertTrue("placeholder name was not found!", bodyText.contains("%ITCS_" + phName + "%"));
+	  Assert.assertTrue("placeholder value was not found!", bodyText.contains(phNewValue));  
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

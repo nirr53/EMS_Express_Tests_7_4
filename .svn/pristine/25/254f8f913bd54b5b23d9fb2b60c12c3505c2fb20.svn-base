@@ -1,0 +1,175 @@
+package EMS_Tests;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the multi user actions via a Monitoring user
+* ----------------
+* Tests:
+* 	 - Login via a Monitoring user and enter Manage multiple users changes menu.
+* 	 1. Verify that Change-region button is deactivated.
+* 	 2. Verify that Reset-password button is deactivated.
+* 	 3. Verify that Delete-users button is deactivated.
+* 	 4. Verify that Restart-devices button is deactivated.
+* 	 5. Verify that Generate-configuration-users button is deactivated.
+* 	 6. Verify that Update-configuration-users button is deactivated.
+*  	 7. Verify that Send-message button is deactivated.
+* 
+* Results:
+*	 1-7. In all actions, in all modes, the selected button should stay inactive.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test48__Monitoring_multi_users_actions {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test48__Monitoring_multi_users_actions(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Monitoring_multi_users_actions() throws Exception {
+	  
+	Log.startTestCase(this.getClass().getName());
+	 
+    // Login via a Monitoring user and enter Multi-user-changes menu
+	testFuncs.myDebugPrinting("Login via a Monitoring user and enter Multi-user-changes menu");
+	testFuncs.login(driver, testVars.getMonitUsername(), testVars.getMonitPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Manage_Multiple_Users", "Manage Multiple Users");
+    driver.switchTo().frame(1);	
+    
+    // Step 1 - Verify that Change-region button is deactivated.
+  	testFuncs.myDebugPrinting("Step 1 - Verify that Change-region button is deactivated.");
+    driver.findElement(By.xpath("//*[@id='action']")).sendKeys("Set Users Region");
+    testFuncs.myWait(2000);
+    driver.findElement(By.xpath("//*[@id='branch']")).sendKeys("AutoDetection");
+    testFuncs.myWait(2000);
+    String chRegButton = driver.findElement(By.xpath("//*[@id='resetRegionTR']/td/table/tbody/tr[2]/td/table/tbody/tr[3]/td/a")).getAttribute("class");
+    testFuncs.myAssertTrue("The Change-region button is active !! \n" + chRegButton, chRegButton.contains("not-active"));
+    
+    // Step 2 - Verify that Reset-password button is deactivated.
+  	testFuncs.myDebugPrinting("Step 2 - Verify that Reset-password button is deactivated.");
+    driver.findElement(By.xpath("//*[@id='action']")).sendKeys("Reset Users Passwords");
+    testFuncs.myWait(2000);
+    String resPassButton = driver.findElement(By.xpath("//*[@id='resetPasswordsTR']/td/table/tbody/tr[5]/td/a")).getAttribute("class");
+    testFuncs.myAssertTrue("The Reset-password button is active !!\n" + resPassButton, resPassButton.contains("not-active"));
+    driver.findElement(By.xpath("//*[@id='resetPassword2All']")).click();
+    testFuncs.myWait(2000);
+    driver.findElement(By.xpath("//*[@id='resetToPassword']")).sendKeys("1234");
+    testFuncs.myWait(2000);
+    resPassButton = driver.findElement(By.xpath("//*[@id='resetPasswordsTR']/td/table/tbody/tr[5]/td/a")).getAttribute("class");
+    testFuncs.myAssertTrue("The Reset-password button is active !!\n" + resPassButton, resPassButton.contains("not-active"));
+
+    // Step 3 - Verify that Delete-users button is deactivated.
+  	testFuncs.myDebugPrinting("Step 3 - Verify that Delete-users button is deactivated.");
+    driver.findElement(By.xpath("//*[@id='action']")).sendKeys("Delete Users");
+    testFuncs.myWait(2000);
+    String delUsersButton = driver.findElement(By.xpath("//*[@id='deleteUsersTR']/td/table/tbody/tr[2]/td/a")).getAttribute("class");
+    testFuncs.myAssertTrue("The Delete-users button is active !!\n" + delUsersButton, delUsersButton.contains("not-active"));
+ 
+    // Step 4 - Verify that Restart-devices button is deactivated.
+   	testFuncs.myDebugPrinting("Step 4 - Verify that Restart-devices button is deactivated.");
+   	driver.findElement(By.xpath("//*[@id='action']")).sendKeys("Restart Devices");
+   	testFuncs.myWait(2000);
+   	String resModes[] = {"Graceful", "Force", "Scheduled"};
+   	String resUsersButton;
+   	for (String resMode : resModes) {
+   		
+   	   	driver.findElement(By.xpath("//*[@id='resetIpPhonesTR']/td/table/tbody/tr[4]/td/select")).sendKeys(resMode);
+   	   	testFuncs.myWait(2000);
+   	   	resUsersButton = driver.findElement(By.xpath("//*[@id='resetIpPhonesTR']/td/table/tbody/tr[2]/td/a")).getAttribute("class");
+   	   	testFuncs.myAssertTrue("The Restart-devices button is active in " + resMode + " mode !!\n" + resUsersButton, resUsersButton.contains("not-active"));	
+   	}
+   	
+    // Step 5 - Verify that Generate-configuration-users button is deactivated.
+  	testFuncs.myDebugPrinting("Step 5 - Verify that Generate-configuration-users button is deactivated.");
+    driver.findElement(By.xpath("//*[@id='action']")).sendKeys("Generate IP Phones Configuration Files");
+    testFuncs.myWait(2000);
+    String genConfButton = driver.findElement(By.xpath("//*[@id='setIpPhonesTR']/td/table/tbody/tr[4]/td/a")).getAttribute("class");
+    testFuncs.myAssertTrue("The Generate-configuration button is active !!\n" + genConfButton, genConfButton.contains("not-active"));    
+    driver.findElement(By.xpath("//*[@id='setIpPhonesTR']/td/table/tbody/tr[2]/td/input")).click();
+    testFuncs.myWait(2000);
+    genConfButton = driver.findElement(By.xpath("//*[@id='setIpPhonesTR']/td/table/tbody/tr[4]/td/a")).getAttribute("class");
+    testFuncs.myAssertTrue("The Generate-configuration button is active !!\n" + genConfButton, genConfButton.contains("not-active"));
+    
+    // Step 6 - Verify that Update-configuration-users button is deactivated.
+  	testFuncs.myDebugPrinting("Step 6 - Verify that Update-configuration-users button is deactivated.");
+    driver.findElement(By.xpath("//*[@id='action']")).sendKeys("Update Configuration Files");
+    testFuncs.myWait(2000);
+    String upConfButton = driver.findElement(By.xpath("//*[@id='updateConfigFilesTR']/td/table/tbody/tr[2]/td/a")).getAttribute("class");
+    testFuncs.myAssertTrue("The Update-configuration button is active !!\n" + upConfButton, upConfButton.contains("not-active"));    
+
+    // Step 7 - Verify that Send-message button is deactivated.
+  	testFuncs.myDebugPrinting("Step 7 - Verify that Send-message button is deactivated.");
+    driver.findElement(By.xpath("//*[@id='action']")).sendKeys("Send Message");
+    testFuncs.myWait(2000);
+    String sndMsgButton = driver.findElement(By.xpath("//*[@id='sendMessageTR']/td/table/tbody/tr[2]/td/a")).getAttribute("class");
+    testFuncs.myAssertTrue("The Send-message button is active !!\n" + sndMsgButton, sndMsgButton.contains("not-active"));    
+    driver.findElement(By.xpath("//*[@id='sendMessageTR']/td/table/tbody/tr[4]/td/input")).sendKeys("message");
+    testFuncs.myWait(2000);
+    sndMsgButton = driver.findElement(By.xpath("//*[@id='sendMessageTR']/td/table/tbody/tr[2]/td/a")).getAttribute("class");
+    testFuncs.myAssertTrue("The Send-message button is active !!\n" + sndMsgButton, sndMsgButton.contains("not-active"));    
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

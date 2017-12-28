@@ -1,0 +1,242 @@
+package EMS_Tests;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.Select;
+
+/**
+* ----------------
+* This test tests the System logs page
+* ----------------
+* Tests:
+* 	 - Enter the System logs page.
+* 	 1. Check the Web-Admin menu and download current log.
+* 	 2. Check the Web-Admin menu by display all display modes.
+* 	 3. Check the Web-Admin menu by download all archive files.
+* 	 4. Check the Activity menu and download current log.
+* 	 5. Check the Activity menu by display all display modes.
+* 	 6. Check the Activity menu by download all archive files and export buttons.
+* 
+* Results:
+* 	 1.6 All the headers should be detected. All downloads should work.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test10__system_logs_tests {
+	
+  private String        usedBrowser = "";
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test10__system_logs_tests(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass 
+  public static void setting_SystemProperties() {
+	  
+      System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void System_logs() throws Exception {
+	  
+	Log.startTestCase(this.getClass().getName());
+	 
+    // Step 1 - Enter the System logs menu & check its appearance and menus
+	testFuncs.myDebugPrinting("Step 1 - Enter the System logs menu & check its appearance and menus");
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	testFuncs.enterMenu(driver, "System_logs", "System Logs");
+    driver.switchTo().frame(1);	
+    testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[1]/td", "System Logs");
+    testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[2]/td/table/tbody/tr[1]/td[2]", "Web Admin");
+    testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[2]/td/table/tbody/tr[2]/td[2]", "Activity");
+  	testFuncs.myWait(2000);
+	
+    // Step 2.1 - Check the Web admin display mode and download last file
+	if (!this.usedBrowser.equals(testVars.IE)) {
+		
+	  	testFuncs.myDebugPrinting("Step 2.1 - Check the Web admin display mode and download last file");
+		testFuncs.deleteFilesByPrefix(testVars.getDownloadsPath(), testVars.getSysLogsPrefix());
+	    driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[2]/td/table/tbody/tr[1]/td[3]/a/img")).click();
+	    testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr[1]/td/table/tbody/tr[1]/td", "Web Admin");
+	  	testFuncs.myWait(2000);
+	    driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr[1]/td/table/tbody/tr[3]/td[3]/a/img")).click();    
+	    testFuncs.myWait(5000);
+	    File getLatestFile = testFuncs.getLatestFilefromDir(testVars.getDownloadsPath());
+	    String fileName = getLatestFile.getName();
+	    testFuncs.myDebugPrinting("fileName - " + fileName, testVars.logerVars.MINOR);
+	    testFuncs.myAssertTrue("Downloaded file does not matches:\n" +
+	    		          	   "fileName - "                         + fileName + "   " +
+	    		          	   "getSystemLogsFilename - "            + getSystemLogsFilename(testVars.getSysLogsPrefix()),
+	    		          fileName.equals(getSystemLogsFilename(testVars.getSysLogsPrefix())));
+		testFuncs.deleteFilesByPrefix(testVars.getDownloadsPath(), testVars.getSysLogsPrefix());
+	    testFuncs.myWait(2000);
+	}
+
+    // Step 2.2 - Check display mode
+  	testFuncs.myDebugPrinting("Step 2.2 - Check display mode");
+	Select displayOptions = new Select(driver.findElement(By.xpath("//*[@id='loglines']")));
+	for (int i = 0; i < 7; ++i) {
+		
+		displayOptions.selectByIndex(i);
+	  	testFuncs.myWait(3000);
+	}
+	
+    // Step 2.3 - Download Archive files
+	if (!this.usedBrowser.equals(testVars.IE)) {
+		
+		testFuncs.myDebugPrinting("Step 2.3 - Download Archive files");
+		driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr[1]/td/table/tbody/tr[2]/td[3]/a/img")).click();    
+		testFuncs.myWait(2000);
+		testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[1]/td", "Web Admin Archive Files");	
+		String txt = driver.findElement(By.tagName("body")).getText();
+		testFuncs.myDebugPrinting("txt - " + txt, testVars.logerVars.MINOR);
+		int numOfFiles = txt.length() - txt.replace(".txt", "aaa").length();
+		testFuncs.myDebugPrinting("numOfFiles - " + numOfFiles, testVars.logerVars.MINOR);
+		for (int i = 2; i < (2 + numOfFiles); ++i) {
+			
+		    driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[" + i + "]/td[3]/a/img")).click();
+		  	testFuncs.myWait(2000);
+		}
+	    File dir = new File(testVars.getDownloadsPath());
+		for(File currF : dir.listFiles()) {
+			
+		    if(currF.getName().startsWith(testVars.getSysLogsPrefix())) {
+		    	
+	 	    	System.out.println("File is: " + currF.getName());	   
+		    	currF.delete();
+		    }
+		}
+	}
+	
+	// Returned to System-logs menu
+    driver.findElement(By.xpath("//*[@id='back_img']")).click();  
+  	testFuncs.myWait(2000);
+    driver.findElement(By.xpath("//*[@id='back_img']")).click();  
+  	testFuncs.myWait(2000);
+
+    // Step 2.4 - Check the System logs menu
+//	testFuncs.myDebugPrinting("Step 2.4 - Check the System logs menu");
+//    f = new File(testVars.getDownloadsPath() + "\\" + testFuncs.getSystemLogsFilename(testVars.getSysLogsActPre()));
+//    f.delete();
+    driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[2]/td/table/tbody/tr[2]/td[3]/a/img")).click();
+  	testFuncs.myWait(2000);
+    testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[1]/td", "Activity");
+  	testFuncs.myWait(2000);
+//    driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[3]/td[3]/a/img")).click();    
+//    testFuncs.myWait(120000);
+//    getLatestFile = testFuncs.getLatestFilefromDir(testVars.getDownloadsPath());
+//    fileName = getLatestFile.getName();
+//    System.out.println("fileName - " + fileName);
+//    testFuncs.myAssertTrue("Downloaded file does not matches" +
+//    		          "fileName - "                      + fileName + "   " +
+//    		          "getSysLogsActPre - "              + testFuncs.getSystemLogsFilename(testVars.getSysLogsActPre()),
+//    		          fileName.equals(testFuncs.getSystemLogsFilename(testVars.getSysLogsActPre())));
+//    f.delete();
+//  	testFuncs.myWait(2000);
+		
+    // Step 2.5 - Check display mode
+  	testFuncs.myDebugPrinting("Step 2.5 - Check display mode");
+	displayOptions = new Select(driver.findElement(By.xpath("//*[@id='loglines']")));
+	for (int i = 0; i < 7; ++i) {
+	
+		displayOptions.selectByIndex(i);
+	  	testFuncs.myWait(3000);
+	}
+	
+    // Step 2.6 - Download Archive files
+	if (!this.usedBrowser.equals(testVars.IE)) {
+		testFuncs.myDebugPrinting("Step 2.6 - Download Archive files");
+	 	driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[2]/td[3]/a/img")).click();
+	 	testFuncs.myWait(2000);
+	 	testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[1]/td", "Activity Archive Files");
+		String txt = driver.findElement(By.tagName("body")).getText();
+		testFuncs.myDebugPrinting("txt - " + txt, testVars.logerVars.MINOR);
+		int numOfFiles = txt.length() - txt.replace(".txt", "aaa").length();
+	 	for (int i = 2; i < (2 + numOfFiles); ++i) {
+	 		
+	 	    driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[" + i + "]/td[3]/a/img")).click();
+	 	  	testFuncs.myWait(2000);
+	 	}
+	    File dir = new File(testVars.getDownloadsPath());
+	 	for(File currF : dir.listFiles()) {
+	 		
+	 	    if(currF.getName().startsWith(testVars.getSysLogsActPre())) {
+	 	    	
+	 	    	System.out.println("File is: " + currF.getName());
+	 	    	currF.delete();
+	 	    }
+	 	}
+	}
+  }
+  
+  /**
+  *  Get System logs name of the log
+  *  @param  logPrefix of the log (I.e. IPP.Manage.Activity.)
+  *  @return Current name of the System logs log
+  */
+  @SuppressWarnings("deprecation")
+  public String getSystemLogsFilename(String logPrefix) {
+	  
+    Date date     = new Date();
+	String day   = Integer.toString(date.getDate());
+	String month = Integer.toString(date.getMonth() + 1);
+	if (day.length() == 1)   { day   = "0" + day;   }
+    if (month.length() == 1) { month = "0" + month; }
+    logPrefix += day + "-" + month + "-";
+    logPrefix += Integer.toString(date.getYear() + 1900) + ".log";
+    return logPrefix;	
+  }
+
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+      testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

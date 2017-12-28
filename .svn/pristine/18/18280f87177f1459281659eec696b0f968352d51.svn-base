@@ -1,0 +1,175 @@
+package EMS_Tests;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the search methods in the Device-status menu
+* ----------------
+* Tests:
+* 	 - Create some registered users.
+* 	 - Enter the Device-status menu.
+*  	 1. Search for device according to part of its name.
+*  	 2. Search for device according to MAC address.
+*  	 3. Delete the registered users.
+*  
+*  Results:
+*   1-2. Devices should be found in all cases.
+*   
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test70__search_tests {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test70__search_tests(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void User_search() throws Exception {
+	  
+		String srcUserPrefix 	= "searchTestUser";
+		String usersNumber   	= "3";
+		int usStartIdx 		 	= 1;
+		String successPath      = System.getProperty("user.dir") + "\\" + "success.txt";
+		File file               = new File(successPath);
+		String bodyText, tempMac;
+	    Map<String, String> map = new HashMap<String, String>();
+	    map.put("usersNumber",  usersNumber); 
+	    map.put("startIdx"   ,  String.valueOf(usStartIdx));
+	    map.put("srcUsername",  "Finished");
+		Log.startTestCase(this.getClass().getName());
+		
+	    // Create several users using POST query
+		testFuncs.myDebugPrinting("Create several users using POST query");
+		file.delete();
+		testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+		String Id = testFuncs.getId();
+		String srcUserName = srcUserPrefix + Id;
+	    map.put("usersPrefix",  srcUserName + "_");
+		String path = System.getProperty("user.dir") + "\\" + testVars.getCrUserBatName();	
+	    String[] cmd = {path, testVars.getIp(), testVars.getPort()  , usersNumber,
+	    				srcUserName , testVars.getDomain(), "registered",
+	    		        "430HD", "TelAviv", "myLocation" };
+	    Process p = Runtime.getRuntime().exec(cmd);
+	    p.waitFor();
+	    testFuncs.waitForPostUsersCreate(successPath, Integer.parseInt(usersNumber) * 40);
+	    
+	    // Step 1 - Search for device according to part of its name
+	  	testFuncs.myDebugPrinting("Step 1 - Search for device according to part of its name");
+	    driver.switchTo().defaultContent();
+		testFuncs.enterMenu(driver, "Devices_menu", "Filter");
+	  	testFuncs.myWait(1000);
+	    driver.switchTo().frame(1);
+	    searchUsers(driver, "//*[@id='inputUser']", srcUserName);
+	    bodyText = driver.findElement(By.tagName("body")).getText();
+	    for (int i = 1; i < Integer.valueOf(usersNumber); i++) {
+	    	
+			testFuncs.myAssertTrue("User " + i + " was not detected!!", bodyText.contains(map.get("usersPrefix") + i));
+	    }
+
+	    // Step 2 - Search for device according to MAC address
+	    testFuncs.myDebugPrinting("Step 2 - Search for device according to MAC address");
+	    int lim = Integer.valueOf(usersNumber) + 1;
+		for (int i = 1; i < lim; i++) {
+
+			tempMac = testFuncs.readFile("mac_" + i + ".txt");
+		  	testFuncs.myDebugPrinting("tempMac - " +  tempMac, testVars.logerVars.MINOR);
+		    searchUsers(driver, "//*[@id='inputmac']", tempMac);
+			bodyText = driver.findElement(By.tagName("body")).getText();
+			testFuncs.myAssertTrue("Mac " + i + " was not detected!!", bodyText.contains(tempMac));
+		}
+		
+	    // Step 3 - Delete the users
+	    testFuncs.myDebugPrinting("Step 3 - Delete the users");
+	    driver.switchTo().defaultContent();
+		testFuncs.enterMenu(driver, "Manage_Multiple_Users", "Manage Multiple Users");
+	  	testFuncs.myWait(1000);
+	    driver.switchTo().frame(1);
+	    testFuncs.selectMultipleUsers(driver, srcUserName, usersNumber);
+	    map.put("action"	 ,  "Delete Users");
+	    map.put("srcUsername",  "Finished");
+	    testFuncs.setMultipleUsersAction(driver, map);
+  }
+  
+  /**
+  *  Search user according to a given field xpath and data
+  *  @param driver  - A given driver
+  *  @param xpField - A given xpath to a field in the Filter-menu
+  *  @param data    - A given data to fill in the given field
+  */
+  private void searchUsers(WebDriver driver, String xpField, String data) {
+	  
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/div/div[2]/a")).click();
+	  testFuncs.myWait(2000);
+	  driver.findElement(By.xpath(xpField)).clear();
+	  driver.findElement(By.xpath(xpField)).sendKeys(data);
+	  testFuncs.myWait(2000);
+	  driver.findElement(By.xpath("//*[@id='searchForm']/div[12]/div/button[1]")).click();
+	  testFuncs.myWait(7000);
+	
+}
+
+@After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

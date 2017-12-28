@@ -1,0 +1,174 @@
+package EMS_Tests;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the max permitted length of Location field during a user create.
+* ----------------
+* Tests:
+*  	 - Login the system
+*  	 1. Create a user with Location field in 2048 characters.
+*  	 2. Create a user with Location field in 2049 characters. 
+*  	 3. Delete the users.
+*  
+* Results:
+*    1. A user with 2048 characters long Location field should be created successfully.
+*    2. A user with 2049 characters long Location field should be created unsuccessfully.
+*  
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test76__long_location_users {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test76__long_location_users(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void User_location() throws Exception {
+	  
+		String successPath      = System.getProperty("user.dir") + "\\" + "success.txt";
+		String usersPrefix      = "location";
+		File file               = new File(successPath);
+		int usStartIdx 		 	= 2048;
+	    Map<String, String> map = new HashMap<String, String>();
+	    map.put("startIdx"   ,  String.valueOf(usStartIdx));
+	    map.put("usersNumber",  "1");
+	    map.put("usersPrefix",  usersPrefix);
+		Log.startTestCase(this.getClass().getName());
+		
+	    // Step 1 - Create a user with Location field in 2048 characters
+		testFuncs.myDebugPrinting("Step 1 - Create a user with Location field in 2048 characters");
+		file.delete();
+		testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+		String path = System.getProperty("user.dir") + "\\" + testVars.getCrUserBatName();	
+	    String[] cmd = {path, testVars.getIp(), testVars.getPort()  , "1",
+	    				usersPrefix + "_2048" , testVars.getDomain(), "registered",
+	    		        "430HD", "TelAviv", "myLocation" };
+	    Process p = Runtime.getRuntime().exec(cmd);
+	    p.waitFor();
+	    testFuncs.waitForPostUsersCreate(successPath, 70);
+		file.delete();
+	    file.delete();
+	  	testFuncs.myWait(10000);
+
+	    // Step 2- Create a user with Location field in 2049 characters
+		testFuncs.myDebugPrinting("Step 2 - Create a user with Location field in 2049 characters");
+		String  path2 = System.getProperty("user.dir") + "\\" + testVars.getCrUserBatName();	
+	    String[] cmd2 = {path2, testVars.getIp(), testVars.getPort()  , "1",
+	    				 usersPrefix + "_2049" , testVars.getDomain(), "registered",
+	    		        "430HD", "TelAviv", "myLocation" };
+	    Process p2 = Runtime.getRuntime().exec(cmd2);
+	    p2.waitFor();
+	    testFuncs.waitForPostUsersCreate(successPath, 70);	
+	    file.delete();
+	    file.delete();
+		testFuncs.myWait(10000);
+	    
+	    // Search the users
+		testFuncs.myDebugPrinting("Search the users");
+	    driver.switchTo().defaultContent();
+		testFuncs.enterMenu(driver, "Devices_menu", "Filter");
+	  	testFuncs.myWait(1000);
+	    driver.switchTo().frame(1);
+	    searchUsers(driver, "//*[@id='inputUser']", usersPrefix);
+	    String bodyText = driver.findElement(By.tagName("body")).getText();
+	    testFuncs.myAssertTrue("User with 2048 characters was not detected !! \n" + bodyText,  bodyText.contains(usersPrefix + "_2048"));
+	    testFuncs.myAssertTrue("User with 2049 characters was do detected !! \n"  + bodyText, !bodyText.contains(usersPrefix + "_2049"));
+	    testFuncs.myWait(2000);
+
+	    // Step 3 - Delete the users
+	    testFuncs.myDebugPrinting("Step 3 - Delete the users");
+	    driver.switchTo().defaultContent();
+		testFuncs.enterMenu(driver, "Manage_Multiple_Users", "Manage Multiple Users");
+	  	testFuncs.myWait(1000);
+	    driver.switchTo().frame(1);
+	    testFuncs.selectMultipleUsers(driver, usersPrefix, "1");
+		map.put("action"	 ,  "Delete Users");
+	    map.put("srcUsername",  "Finished");
+	    map.put("usersPrefix",  usersPrefix + "_2048");
+	    testFuncs.setMultipleUsersAction(driver, map);    
+  }
+  
+  /**
+  *  Search user according to a given field xpath and data
+  *  @param driver  - A given driver
+  *  @param xpField - A given xpath to a field in the Filter-menu
+  *  @param data    - A given data to fill in the given field
+  */
+  private void searchUsers(WebDriver driver, String xpField, String data) {
+	  
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/div/div[2]/a")).click();
+	  testFuncs.myWait(2000);
+	  driver.findElement(By.xpath(xpField)).clear();
+	  driver.findElement(By.xpath(xpField)).sendKeys(data);
+	  testFuncs.myWait(2000);
+	  driver.findElement(By.xpath("//*[@id='searchForm']/div[12]/div/button[1]")).click();
+	  testFuncs.myWait(7000);
+	
+ }
+  
+ @After
+ public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

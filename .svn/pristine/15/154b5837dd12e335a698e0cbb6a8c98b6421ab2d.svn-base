@@ -1,0 +1,7 @@
+ems_server/keep_alive_period=1234
+ems_server/provisioning/url=<HTTP_OR_S>://<PROXY_IP_ADDRESS>/
+provisioning/method=STATIC
+provisioning/configuration/url=<HTTP_OR_S>://<IP_ADDRESS>/configfiles/
+provisioning/firmware/url=<HTTP_OR_S>://<IP_ADDRESS>/firmwarefiles/
+ems_server/user_name=system
+ems_server/user_password={"VvlZOp5/5pM="}

@@ -1,0 +1,141 @@
+package EMS_Tests;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import static org.junit.Assert.*;
+import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+
+/**
+* This test tests the delete devices mechanism
+* 1. Add a user manually & add multiple devices to it.
+* 2. Delete one device
+* 3. Delete the user - > all the devices should be deleted also
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test8__delete_devices_tests {
+	
+  public static int     random = 0;
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test8__delete_devices_tests(String browser) {
+	  System.out.println("Browser - "  + browser);
+  }
+  
+  //Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameterized.Parameters
+   public static Collection data() {
+    //return Arrays.asList(new Object[][]{{"Chrome"},{"Firefox"},{"IE"}});
+    return Arrays.asList(new Object[][]{{"Chrome"}});
+
+   }
+  
+  @BeforeClass public static void setting_SystemProperties(){
+      System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getfirefoxDrvPath());
+	System.out.println("Enter setUp(); random - " + random);
+	if 		  (random == GlobalVars.CHROME) {
+    	driver    = new ChromeDriver();
+        
+    } else if (random == GlobalVars.FIREFOX) {
+    	driver 	  = new FirefoxDriver();
+    	
+    } else if (random == GlobalVars.IE) {
+    	driver 	  = new InternetExplorerDriver();
+
+    }  else {
+    	fail ("random is invalid - " + random);
+    	
+    }
+    driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+    testFuncs = new GlobalFuncs(); 
+  }
+
+  @Test
+  public void testLoginStandAlone1() throws Exception {
+	 
+	String Id       = testFuncs.getId();
+	String userName = "Manual user" + Id;
+	testFuncs.login(driver, testVars.getSysMainStr(), "http://");
+
+    // Step 0.1 - Create user manually
+	System.out.println("Id - " + Id);
+	System.out.println("Step 0.1 - Create user manually");
+	testFuncs.addUser(driver, userName, "1q2w3e$r", "Manual user display name" + Id, "TelAviv");
+    driver.switchTo().defaultContent();
+	testFuncs.myWait(2000);
+	
+	// Step 0.2 - Add multiple devices to the created user
+	System.out.println("Step 0.2 - Add multiple devices to the created user");
+    String [] phoneTypes = {"405HD", "420HD", "430HD", "440HD"};
+	for(String type : phoneTypes) {
+		testFuncs.addDevice(driver, userName, "Audiocodes_" + type, testFuncs.getMacAddress(), type);
+
+    }
+	
+	// Step 1 - delete one of the user devices
+	System.out.println("Step 1 - delete one of the user devices");
+	testFuncs.myWait(2000);
+    driver.switchTo().frame(1);	
+	String deletedDevice = driver.findElement(By.xpath("//*[@id='tr" + userName + "device']/td[2]/table/tbody/tr[1]/td/div/table/tbody/tr[4]/td[2]")).getText();
+	System.out.println("deletedDevice  " + deletedDevice);
+	driver.findElement(By.xpath("//*[@id='tr" + userName + "device']/td[2]/table/tbody/tr[1]/td/div/table/tbody/tr[5]/td/a[2]")).click();
+    testFuncs.myWait(2000);
+    testFuncs.verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Are you sure you want to delete device?");
+    driver.findElement(By.xpath("//*[@id='jqi_state0_buttonDelete']")).click();
+	testFuncs.myWait(7000);
+    String bodyText = driver.findElement(By.tagName("body")).getText();
+    Assert.assertFalse("Device still exist!", bodyText.contains("Firmware:	" + deletedDevice));
+    driver.switchTo().defaultContent();
+	System.out.println("Step 1 - delete one of the user devices ended successfully !!");
+
+	// Step 2 - delete user with mutliple devices
+	System.out.println("Step 2 - delete one of the user devices");
+    driver.switchTo().frame(1);	
+    driver.findElement(By.xpath("//*[@id='results']/tbody/tr[2]/td[8]/a[3]")).click();
+    testFuncs.myWait(2000);
+    Assert.assertTrue("Device still exist!", driver.findElement(By.xpath("//*[@id='jqi_state_state0']/div[1]")).getText().contains("Are you sure you want to delete the User " + userName));
+    testFuncs.myWait(2000);
+    driver.findElement(By.xpath("//*[@id='jqi_state0_buttonDelete']")).click();
+	testFuncs.myWait(7000);
+    bodyText = driver.findElement(By.tagName("body")).getText();
+    Assert.assertFalse("User still exist!", bodyText.contains(userName));
+    driver.switchTo().defaultContent();	
+	System.out.println("Step 2 - delete one of the user devices ended successfully !!");
+    
+    random += 1;
+  }
+
+  @After
+  public void tearDown() throws Exception {
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+      fail(verificationErrorString);
+    }
+  }
+}

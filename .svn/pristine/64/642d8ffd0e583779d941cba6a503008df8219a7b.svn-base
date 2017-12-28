@@ -1,0 +1,181 @@
+package EMS_Tests;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the Device placeholders menu
+* ----------------
+* Tests:
+* 	 - Login via an Administrator user and create via POST a registered user.
+* 	 -	Enter device placeholder menu and create a device-placeholder.
+* 	 - Log off and relogin via a Monitoring user.
+* 	 1. Verify that Add a Device placeholder button is disabled.
+* 	 2. Verify that Edit an existing Device placeholder button is disabled.
+* 	 3. Verify that Delete a Device placeholder button is disabled.
+* 	 4. Log off, relogin as an Administrator and delete the created device placeholder and create user.
+* 
+* Results:
+* 	 1-3. Add, edit and delete buttons should stay disabled while we we login via a Monitoring user.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test47__Monitoring_device_placeholders {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test47__Monitoring_device_placeholders(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Monitoring_Device_placeholders_menu() throws Exception {
+	  
+	  String successPath      = System.getProperty("user.dir") + "\\" + "success.txt";
+	  File file               = new File(successPath);
+	  String srcUserPrefix 	  = "monitDevTest";
+	  Map<String, String> map = new HashMap<String, String>();
+	  map.put("usersNumber",  "1"); 
+	  map.put("startIdx"   ,  "1");
+	  Log.startTestCase(this.getClass().getName());
+
+	  // Create a user using POST query
+	  testFuncs.myDebugPrinting("Create a user using POST query");
+	  file.delete();
+	  testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	  String Id = testFuncs.getId();
+	  String srcUserName = srcUserPrefix + Id;
+	  map.put("usersPrefix",  srcUserName);
+	  String path = System.getProperty("user.dir") + "\\" + testVars.getCrUserBatName();	
+	  String[] cmd = {path, testVars.getIp(), testVars.getPort()  , "1",
+					  srcUserName , testVars.getDomain(), "registered",
+			          "430HD", "TelAviv", "myLocation" };
+	  Process p = Runtime.getRuntime().exec(cmd);
+	  p.waitFor();
+	  testFuncs.waitForPostUsersCreate(successPath, 70);
+	  
+	  // Via an Administrator user add a Device placeholder to the created user and log off
+	  testFuncs.myDebugPrinting("Via an Administrator user add a Device placeholder to the created user and log off");
+	  testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	  driver.switchTo().defaultContent();
+	  testFuncs.enterMenu(driver, "Device_placeholders", "Manage Devices Placeholders");
+	  driver.switchTo().frame(1);
+	  String phName  = "DayLightActivate";
+	  String phValue = "18";
+	  testFuncs.addDevicePlaceholder(driver, srcUserName, phName, phValue);
+	  driver.switchTo().defaultContent();
+	  driver.findElement(By.xpath("//*[@id='header1']/tbody/tr/td[2]/a[3]")).click();
+	  testFuncs.myWait(2000);
+	  
+	  // Step 1 - Verify that Add a Device placeholder button is disabled
+	  testFuncs.myDebugPrinting("Step 1 - Verify that Add a Device placeholder button is disabled");
+	  testFuncs.login(driver, testVars.getMonitUsername(), testVars.getMonitPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	  driver.switchTo().defaultContent();
+	  testFuncs.enterMenu(driver, "Monitoring_Device_placeholders", "Manage Devices Placeholders");
+	  driver.switchTo().frame(1);
+	  String addButton = driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div[2]/a")).getAttribute("class");
+	  testFuncs.myAssertTrue("Add Device placeholder button is not deactivated !! (" + addButton + ")", addButton.contains("not-active"));
+	  
+	  // Step 2 - Verify that Edit a Device placeholder button is disabled
+	  testFuncs.myDebugPrinting("Step 2 - Verify that Edit a Device placeholder button is disabled");
+      driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).clear();
+      driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).sendKeys(srcUserName); 
+      driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/span/button/i")).click();
+	  testFuncs.myWait(2000);
+      driver.findElement(By.xpath("//*[@id='placeholders_body']/tr/td[7]/button")).click();
+	  testFuncs.myWait(2000);
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='title']", "Change IP Phone Device Placeholder");
+	  String submitButton = driver.findElement(By.xpath("//*[@id='t1']/tbody/tr[3]/td/table/tbody/tr/td[3]/a")).getAttribute("class");
+	  testFuncs.myAssertTrue("Submit button is not deactivated !! (" + submitButton + ")", submitButton.contains("not-active"));
+      driver.findElement(By.xpath("//*[@id='back_img']")).click();
+	  testFuncs.myWait(2000);
+
+	  // Step 3 - Verify that Delete a Device placeholder button is disabled
+	  testFuncs.myDebugPrinting("Step 3 - Verify that Delete a Device placeholder button is disabled");
+      driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).clear();
+      driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).sendKeys(srcUserName); 
+      driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/span/button/i")).click();
+	  testFuncs.myWait(2000);
+	  String deleteButton = driver.findElement(By.xpath("//*[@id='placeholders_body']/tr/td[8]/button")).getAttribute("class");
+	  testFuncs.myAssertTrue("Delete button is not deactivated !! (" + deleteButton + ")", deleteButton.contains("not-active"));
+	  
+	  // Step 4 - Log off, re-login as an Administrator and delete the created device placeholder and created user
+	  testFuncs.myDebugPrinting("Step 4 - Log off, reloagin as an Administrator and delete the created device placeholder and created user");
+	  driver.switchTo().defaultContent();
+	  driver.findElement(By.xpath("//*[@id='header1']/tbody/tr/td[2]/a[3]")).click();
+	  testFuncs.myWait(2000);
+	  testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	  driver.switchTo().defaultContent();
+	  testFuncs.enterMenu(driver, "Manage_Multiple_Users", "Manage Multiple Users");
+	  driver.switchTo().frame(1);
+	  testFuncs.selectMultipleUsers(driver, srcUserPrefix, "1");
+	  map.put("action"	        ,  "Delete Users");
+	  map.put("srcUsername"     ,  "Finished");
+	  map.put("skipVerifyDelete",  "true");
+	  testFuncs.setMultipleUsersAction(driver, map); 
+	  String bodyText = driver.findElement(By.tagName("body")).getText();
+	  testFuncs.myAssertTrue("User was not found via Full search !!" + bodyText, bodyText.contains(srcUserName + " Finished"));
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

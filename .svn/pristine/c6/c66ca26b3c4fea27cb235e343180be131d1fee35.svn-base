@@ -1,0 +1,104 @@
+package EMS_Tests;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the add-device mechanism
+* ----------------
+* Tests:
+* 	 1. Add a user manually.
+* 	 2. Add a device to it.
+* 
+* Results:
+* 	 1. User should be added successfully.
+* 	 2. Device should be added successfully.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test6__add_device {
+	
+  private String        usedBrowser = "";
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test6__add_device(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  //Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass 
+  public static void setting_SystemProperties() {
+	  
+      System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Device_add() throws Exception {
+	 
+	String Id       = testFuncs.getId();
+	String userName = "Manual user" + Id;
+	Log.startTestCase(this.getClass().getName());
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+
+    // Create user manually
+	testFuncs.myDebugPrinting("Create user manually");
+	testFuncs.addUser(driver, userName, "1q2w3e$r", "Manual user display name" + Id, "TelAviv");
+    driver.switchTo().defaultContent();
+	testFuncs.myWait(5000);
+		
+    // Step 1 - Create device manually
+	testFuncs.myDebugPrinting("Step 1 - Create device manually");
+	testFuncs.addDevice(driver, userName, userName, "Audiocodes_420HD", testFuncs.getMacAddress(), "420HD");
+  }
+
+  @After
+  public void tearDown() throws Exception {
+	  
+    //driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+      testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

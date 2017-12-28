@@ -1,0 +1,179 @@
+package EMS_Tests;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the reset and change password actions of multiple-users-changes menu
+* ----------------
+* Tests:
+* 	 - Enter Manage multiple users changes menu.
+* 	 1. Create first user using POST query.
+* 	 2. Create a second user with differnt username but with the same MAC address using POST query
+*    3. Verify that in the Device-Status menu only the second user appears
+*    4. Verify that in the Manage-Multiple-Users-Changes menu both users exist
+* 	 5. Delete the users.
+* 
+* Results:
+* 	 1. User should be created successfully.
+* 	 2. The user should be created successfully.
+* 	 3. nd previous device should be deleted.
+* 	 4. The two users should appear.
+* 	 5. All users should be deleted successfully.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test78__different_users_same_mac {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test78__different_users_same_mac(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Different_users_same_mac() throws Exception {
+	 
+	String srcUserPrefix 	= "sameMac";
+	String usersNumber   	= "1";
+	int usStartIdx 		 	= 1;
+	String successPath      = System.getProperty("user.dir") + "\\" + "success.txt";
+	File file               = new File(successPath);
+    Map<String, String> map = new HashMap<String, String>();
+    map.put("usersNumber",  usersNumber); 
+    map.put("startIdx"   ,  String.valueOf(usStartIdx));
+    map.put("srcUsername",  "Finished");
+	Log.startTestCase(this.getClass().getName());
+	
+    // Step 1 - Create a user using POST query
+	testFuncs.myDebugPrinting("Step 1 - Create a user using POST query");
+	file.delete();
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	String srcUserName1 = srcUserPrefix + testFuncs.getId();
+	String path = System.getProperty("user.dir") + "\\" + testVars.getCrUserBatName();	
+    String[] cmd = {path, testVars.getIp(), testVars.getPort()  , usersNumber,
+    				srcUserName1 , testVars.getDomain(), "registered",
+    		        "430HD", "TelAviv", "myLocation" };
+    Process p = Runtime.getRuntime().exec(cmd);
+    p.waitFor();
+    testFuncs.waitForPostUsersCreate(successPath, Integer.parseInt(usersNumber) * 90);
+    
+    // Step 2 - Edit the username and displayname of created user
+	testFuncs.myDebugPrinting("Step 2 - Edit the username and displayname of created user");
+	file.delete();
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	String srcUserName2 = srcUserPrefix + testFuncs.getId();
+    String[] cmd2 = {path, testVars.getIp(), testVars.getPort()  , usersNumber,
+    				srcUserName2 , testVars.getDomain(), "registered",
+    		        "430HD", "TelAviv", "myLocation" };
+    p = Runtime.getRuntime().exec(cmd2);
+    p.waitFor();
+    testFuncs.waitForPostUsersCreate(successPath, Integer.parseInt(usersNumber) * 90);
+    
+    // Step 3 - Verify that in the Device-Status menu only the second user appears
+ 	testFuncs.myDebugPrinting("Step 3 - Verify that in the Device-Status menu only the second user appears");
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Devices_menu", "Filter");
+  	testFuncs.myWait(5000);
+    driver.switchTo().frame(1);
+    searchUsers(driver, "//*[@id='inputUser']", srcUserPrefix);
+    String bodyText = driver.findElement(By.tagName("body")).getText();
+	testFuncs.myAssertTrue("Second user (" + srcUserName2 + ") was not detected!!",  bodyText.contains(srcUserName2));
+	testFuncs.myAssertTrue("First user (" + srcUserName1 + ") was detected!!"     , !bodyText.contains(srcUserName1));
+
+	// Step 4 - Verify that in the Manage-Multiple-Users-Changes menu both users exist
+	testFuncs.myDebugPrinting("Step 4 - Verify that in the Manage-Multiple-Users-Changes menu both users exist");
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Manage_Multiple_Users", "Manage Multiple Users");
+  	testFuncs.myWait(5000);
+    driver.switchTo().frame(1);
+    testFuncs.selectMultipleUsers(driver, srcUserPrefix, "2");
+    
+   // Step 5 - Delete the user
+  	testFuncs.myDebugPrinting("Step 5 - Delete the user");
+    map.put("action"	 ,  "Delete Users");
+    map.put("srcUsername",  "Finished");
+    map.put("usersPrefix",  srcUserName1);
+    testFuncs.setMultipleUsersAction(driver, map);
+    bodyText = driver.findElement(By.tagName("body")).getText();
+	testFuncs.myAssertTrue("Seceond user was not deleted !! (" + bodyText + ")", bodyText.contains(srcUserName2 + " Finished"));
+  }
+  
+  /**
+  *  Search user according to a given field xpath and data
+  *  @param driver  - A given driver
+  *  @param xpField - A given xpath to a field in the Filter-menu
+  *  @param data    - A given data to fill in the given field
+  */
+  private void searchUsers(WebDriver driver, String xpField, String data) {
+	  
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/div/div[2]/a")).click();
+	  testFuncs.myWait(2000);
+	  driver.findElement(By.xpath(xpField)).clear();
+	  driver.findElement(By.xpath(xpField)).sendKeys(data);
+	  testFuncs.myWait(2000);
+	  driver.findElement(By.xpath("//*[@id='searchForm']/div[12]/div/button[1]")).click();
+	  testFuncs.myWait(10000);
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+ 
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

@@ -1,0 +1,160 @@
+package EMS_Tests;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests a users import mechanism while login Via Operation users
+* ----------------
+* Tests:
+* 	 1. Login via an Operation user (one 'Operation' region and the rest are 'Monitoring'), enter the Import users menu and import users.
+* 	 2. Login via an Operation user (one 'Operation' region and the rest are 'NA'), enter the Import users menu and import users.
+* 	 3. Login via an Operation user (All regions are 'Operation'), enter the Import users menu and import users.
+* 	 4. Delete the imported users.
+* 
+* Results:
+* 	1-3. Via an Operation user (from all types) the import mechanism should work successfully.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test54__Operation_import {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test54__Operation_import(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Operation_import() throws Exception {
+	 
+	String usrNamePref = "myUserOper";
+	String path        = "";
+	int idxImpUsrs     = 1;
+	Log.startTestCase(this.getClass().getName());
+	
+    // Step 1 - Login via an Operation user (one 'Operation' region and the rest are 'Monitoring') , import some users and log off
+	testFuncs.myDebugPrinting("Step 1 - Login via an Operation user (one 'Operation' region and the rest are 'Monitoring'), import some users and log off");
+	testFuncs.login(driver, testVars.getOpetUsername1(), testVars.getOperPassword1(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	testFuncs.enterMenu(driver, "Import_export", "Import Users and Devices information");
+	driver.switchTo().frame(1);
+	path  = testVars.getSrcFilesPath() + "\\" + testVars.getImportFile("54.1");
+	int usersNumber1 = testFuncs.readFileLines(path, true);
+	testFuncs.uploadFile(driver, path, usrNamePref, idxImpUsrs, usersNumber1, "Added");
+	driver.switchTo().defaultContent();
+	driver.findElement(By.xpath("//*[@id='header1']/tbody/tr/td[2]/a[3]")).click();
+	testFuncs.myWait(2000);
+	
+    // Step 2 - Login via an Operation user (one 'Operation' region and the rest are 'NA') , import some users and log off
+	testFuncs.myDebugPrinting("Step 2 - Login via an Operation user (one 'Operation' region and the rest are 'NA'), import some users and log off");
+	testFuncs.login(driver, testVars.getOpetUsername2(), testVars.getOperPassword2(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	testFuncs.enterMenu(driver, "Import_export", "Import Users and Devices information");
+	driver.switchTo().frame(1);
+	path  = testVars.getSrcFilesPath() + "\\" + testVars.getImportFile("54.2");
+	int usersNumber2 = testFuncs.readFileLines(path, true);
+	testFuncs.uploadFile(driver, path, usrNamePref, idxImpUsrs, usersNumber2, "Added");
+	driver.switchTo().defaultContent();
+	driver.findElement(By.xpath("//*[@id='header1']/tbody/tr/td[2]/a[3]")).click();
+	testFuncs.myWait(2000);
+	
+    // Step 3 - Login via an Operation user (All regions are 'Operation') , import some users
+	testFuncs.myDebugPrinting("Step 3 - Login via an Operation user (All regions are 'Operation'), import some users");
+	testFuncs.login(driver, testVars.getOpetUsername3(), testVars.getOperPassword3(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	testFuncs.enterMenu(driver, "Import_export", "Import Users and Devices information");
+	driver.switchTo().frame(1);
+	
+	path  = testVars.getSrcFilesPath() + "\\" + testVars.getImportFile("54.3");
+	int usersNumber3 = testFuncs.readFileLines(path, true);
+	testFuncs.uploadFile(driver, path, usrNamePref, idxImpUsrs, usersNumber3, "Added");
+  	
+    // Step 4 - Delete users
+  	testFuncs.myDebugPrinting("Step 4 - Delete users");
+ 	driver.switchTo().defaultContent();
+    driver.findElement(By.xpath("//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[3]/ul/li[2]/a")).click();
+  	testFuncs.myWait(1000);
+    driver.switchTo().frame(1);	
+    testFuncs.verifyStrByXpath(driver, "//*[@id='title']", "Manage Multiple Users");
+    String usersTotalNumberString = String.valueOf(usersNumber1 + usersNumber2 + usersNumber3);
+
+    testFuncs.selectMultipleUsers(driver, usrNamePref, usersTotalNumberString);
+    Map<String, String> map = new HashMap<String, String>();
+    map.put("usersPrefix",  usrNamePref);
+    map.put("usersNumber",  usersTotalNumberString); 
+    map.put("startIdx"   ,  String.valueOf(idxImpUsrs));
+    map.put("srcUsername",  "Finished");
+    map.put("action"	 ,  "Delete Users");
+    map.put("skipVerifyDelete",  "true");
+    testFuncs.setMultipleUsersAction(driver, map);
+    String bodyText = driver.findElement(By.tagName("body")).getText();
+    String tempSuffix;
+    for (int i = 1; i <= 3; i++) {
+    	
+    	for (int j = 1; j <= 3; ++j) {
+    		
+    		tempSuffix = String.valueOf(i) +  String.valueOf(j);
+    		testFuncs.myAssertTrue("User " + usrNamePref + " " + tempSuffix + " was not found !!" + bodyText, bodyText.contains("myUserOper " + tempSuffix));    	
+    	}
+    }
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

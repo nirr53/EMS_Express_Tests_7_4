@@ -1,0 +1,2222 @@
+package EMS_Tests;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.Assert;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.ui.Select;
+import static org.junit.Assert.*;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
+/**
+* This class holds all the functions which been used by the tests
+* @author Nir Klieman
+* @version 1.00
+*/
+
+public class GlobalFuncs {
+	
+	  /**
+	  *  webUrl  		- Default url for the used funcs
+	  *  username  	- Default username for the used funcs
+	  *  password 	- Default password for the used funcs
+	  *  StringBuffer - Default string for errors buffering
+	  */
+	  GlobalVars 		   testVars;
+	  MenuPaths            testMenuPaths;
+	  private String 	   username;
+	  private String 	   password;
+	  private String	   webUrl;
+	  @SuppressWarnings("unused")
+	  private StringBuffer verificationErrors = new StringBuffer();
+	  private static final Logger logger = LogManager.getLogger();
+
+
+	  /**
+	  *  Default constructor
+	  */
+	  public GlobalFuncs() {
+		  
+		  testVars 		= new GlobalVars();
+		  testMenuPaths = new  MenuPaths();
+		  webUrl   = testVars.getUrl();
+		  username = testVars.getSysUsername();
+		  password = testVars.getSysPassword();
+	  }
+	  
+	  /**
+	  *  Constructor which get data
+	  *  @param givenUrl A given url
+	  *  @param givenUsername A given username
+	  *  @param givenPassword A given password
+	  */
+	  public GlobalFuncs(String givenUrl, String givenUsername, String givenPassword) {
+		 
+		  testVars      = new GlobalVars();
+		  testMenuPaths = new  MenuPaths(); 
+		  webUrl   = givenUrl;
+		  username = givenUsername;
+		  password = givenPassword;		 
+	  }
+	  
+	  /**
+	  *  login method
+	  *  @param driver  A given driver for make all tasks
+	  *  @param username A given string for system
+	  *  @param password A given password for the system
+	  *  @param mainStr A given string for verify good access
+	  *  @param httpStr A given string for using as a prefix for the url
+	  *  @param brwType A name of the used browser
+	  */
+	  public void login(WebDriver 	driver, String username, String password, String mainStr, String httpStr, String brwType) {
+		  
+	      String title = driver.getTitle();
+    	  myDebugPrinting("1. title - "   + title  ,testVars.logerVars.MINOR);
+	      driver.get(httpStr + webUrl);
+	      testFuncs.myWait(3000);
+	      if (brwType.equals("IE") && title.equals("WebDriver")) {
+	    	  driver.findElement(By.xpath("//a[@id='overridelink']")).click();
+	    	  testFuncs.myWait(3000);
+	    	  
+	      }
+	      assertTrue("EMS was not reached !! (" + driver.getTitle() + ")", driver.getTitle().equals(testVars.getMainPageStr()));
+    	  myDebugPrinting("username - " + username ,testVars.logerVars.MINOR);
+    	  myDebugPrinting("password - " + password ,testVars.logerVars.MINOR);
+	      driver.findElement(By.name("auth_admin_user_")).clear();
+	      driver.findElement(By.name("auth_admin_user_")).sendKeys(username);
+    	  testFuncs.myWait(500);
+	      driver.findElement(By.name("auth_admin_password_")).clear();
+	      driver.findElement(By.name("auth_admin_password_")).sendKeys(password); 
+	      driver.findElement(By.xpath("//*[@id='Submit1']")).click();
+	      testFuncs.myWait(3000);
+	      
+	      // Verify good access
+	      title = driver.getTitle();
+    	  myDebugPrinting("2. title - "   + title  ,testVars.logerVars.MINOR);
+	      try {  
+	    	  assertTrue("Text <" + mainStr + "> not found! (" + title + ")", title.equals(mainStr));
+	    	  if (mainStr.equals(testVars.getFailLogStr())) {
+		    	  assertTrue("Failure headers were not detected !!", driver.findElement(By.xpath("//*[@id='Table5']/tbody/tr[1]/td/font")).getText().equals("Wrong username or password."));
+	    		  
+	    	  }
+	      
+	      } catch (Error e) {
+	    	  myDebugPrinting("title - "   + title  ,testVars.logerVars.MINOR);
+	    	  myDebugPrinting("mainStr - " + mainStr,testVars.logerVars.MINOR);
+	    	  fail(e.toString());
+	    	  
+	      }
+	  }
+	  
+	  /**
+	  *  Delete all files in directory by given prefix
+	  *  @param dir - given directory path
+	  *  @param prefix - a given prefix
+	  */
+	  public void deleteFilesByPrefix(String dir, String prefix) {
+	    	
+		myDebugPrinting("dir    - " + dir   ,  testVars.logerVars.MINOR);
+		myDebugPrinting("prefix - " + prefix,  testVars.logerVars.MINOR);
+    	File[] dirFiles = new File(dir).listFiles();
+    	int filesNum = dirFiles.length;
+    	for (int i = 0; i < filesNum; i++) {
+			//myDebugPrinting(dirFiles[i].getName(),  testVars.logerVars.MINOR);
+    	    if (dirFiles[i].getName().startsWith(prefix, 0)) {
+    			myDebugPrinting("Delete file - " + dirFiles[i].getName(),  testVars.logerVars.MINOR);
+    	        new File(dir + "\\" + dirFiles[i].getName()).delete();
+    		    testFuncs.myWait(3000);
+    	        
+    	    }
+    	}	
+	  }
+	  
+	  /**
+	  *  read file method
+	  *  @param path  A given path for file to read
+	  */
+	  String readFile(String path) {
+		  
+		    String content = null;
+		    File file = new File(path);
+		    FileReader reader = null;
+		    try {
+		        reader = new FileReader(file);
+		        char[] chars = new char[(int) file.length()];
+		        reader.read(chars);
+		        content = new String(chars);
+		        reader.close();
+		    } catch (IOException e) {
+		    } finally {
+		        if(reader !=null) {
+		        	try {
+		        		reader.close();
+		        	} catch (IOException e) {}
+		        }
+		    }
+		    return content;
+	  }
+	   
+	  /**
+	  *  invalidlogin method
+	  *  @param driver  A given driver for make all tasks
+	  *  @param mainStr A given string for verify bad access
+	  *  @param i A integer to mark the tested test
+	  *  @param browsertype
+	  */
+	  public void invalidLogin(WebDriver driver, String mainStr, int i, String brwType) {
+	  
+	      driver.get("https://" + webUrl);      
+	      if (brwType.equals("IE") && i == 0) {
+	    	  driver.findElement(By.xpath("//a[@id='overridelink']")).click();
+	    	  testFuncs.myWait(3000);
+	    	  
+	      }
+	      
+	      assertTrue("EMS was not reached !! (" + driver.getTitle() + ")", driver.getTitle().equals(testVars.getMainPageStr()));
+	      driver.findElement(By.name("auth_admin_user_")).clear();
+	      driver.findElement(By.name("auth_admin_password_")).clear();	      
+	      if (i == 0) {
+	    	  
+		      driver.findElement(By.name("auth_admin_user_")).sendKeys(username.substring(1));
+		      driver.findElement(By.name("auth_admin_password_")).sendKeys(password);     
+	      } else if (i == 1) {
+	    	  
+		      driver.findElement(By.name("auth_admin_user_")).sendKeys(username);
+		      driver.findElement(By.name("auth_admin_password_")).sendKeys(password.substring(1));   
+	      } else if (i == 2) {
+	      
+		      driver.findElement(By.name("auth_admin_user_")).sendKeys(username.substring(1));
+		      driver.findElement(By.name("auth_admin_password_")).sendKeys(password.substring(1));
+	      }
+	      driver.findElement(By.xpath("//*[@id='Submit1']")).click();
+    	  testFuncs.myWait(4000);
+    	  
+    	  
+	      String title = driver.getTitle();
+    	  myDebugPrinting("title - " + title, testVars.logerVars.MINOR);
+	      if (title.contains(mainStr)) {
+	    	  fail("Login succeded !!");
+	      }
+	  }
+	  
+	  /**
+	  *  Verify string  method by css
+	  *  @param driver    A given driver
+	  *  @param elemName  A given element name
+	  *  @param strName   A given string for detect
+	  */
+	  public void verifyStrByCss(WebDriver 	driver, String elemName, String strName) {
+	  	  
+		markElemet(driver, driver.findElement(By.cssSelector(elemName)));
+		try {
+			
+	        assertEquals(strName, driver.findElement(By.cssSelector(elemName)).getText());
+	    } catch (Error e) {
+	    	
+	  	  fail(e.toString());
+	    }
+	  }
+	  
+	  
+	  /**
+	  *  Verify xpath contains a string
+	  *  @param driver    A given driver
+	  *  @param elemName  A given element xpath
+	  *  @param strName   A given string for detect
+	  */
+	  public void verifyStrByXpathContains(WebDriver 	driver, String xpath, String strName) {
+	  	  
+		  if (driver.findElement(By.xpath(xpath)).getText().contains(strName)) {
+
+		  } else {
+			  fail (strName + " was not detected !!");
+			  
+		  }
+	  }
+	  
+	  /**
+	  *  Print a given string to the console
+	  *  @param str   - A given string to print
+	  *  @param level - A given print level (MAJOR, NORMAL, MINOR, DEBUG)
+	  */
+	  public void myDebugPrinting(String str, int level) {
+		  
+		  String spaces = testVars.logerVars.debug[level];
+		  logger.info(spaces + str);
+	  }
+	 
+	  /**
+	  *  Print a given string to the console with default level of MAJOR
+	  *  @param str   - A given string to print
+	  */
+      public void myDebugPrinting(String str) {
+			
+		String spaces = testVars.logerVars.debug[testVars.logerVars.MAJOR];
+		logger.info(spaces + str);
+	  }
+	 
+	  /**
+	  *  Verify string  method by xpath
+	  *  @param driver    A given driver
+	  *  @param elemName  A given element name
+	  *  @param strName   A given string for detect
+	  */
+	  public void verifyStrByXpath(WebDriver 	driver, String elemName, String strName) {
+		  
+	   markElemet(driver, driver.findElement(By.xpath(elemName)));
+	   try {
+	        assert (driver.findElement(By.xpath(elemName)).getText().contains(strName)); 
+	        
+	   } catch (Error e) {
+	    	myDebugPrinting("The curr str is " + strName, testVars.logerVars.DEBUG);
+	   }
+	  }
+	  
+	  /**
+	  *  Highlight given element
+	  *  @param driver     A given driver
+	  *  @param element    A given element
+	  */
+	  public void markElemet(WebDriver 	driver, WebElement element) {
+			
+		// Mark element
+	    try {
+	    	
+		    ((JavascriptExecutor)driver).executeScript("arguments[0].style.border='3px solid yellow'", element);
+			TimeUnit.MILLISECONDS.sleep(500);
+		} catch (InterruptedException e1) {
+		}
+	   ((JavascriptExecutor)driver).executeScript("arguments[0].style.border=''", element);
+	  }
+	
+	  /**
+	  *  Sleep for a given time
+	  *  @param sleepValue     A given sleep factor
+	  */
+	  public void testFuncs.myWait(int sleepValue) {
+			
+	    try {
+	    	
+			TimeUnit.MILLISECONDS.sleep(sleepValue);		
+		} catch (InterruptedException e1) {
+		}	
+	  }
+
+	  /**
+	  *  Add user manually
+	  *  @param driver       Given driver
+	  *  @param currUsername Username for the created user
+	  *  @param userPass     Password for the created user
+	  *  @param userDisName  Display name for the created user
+	  *  @param region       Region for the created user
+	  */
+	  public void addUser(WebDriver 	driver, String currUsername, String userPass, String userDisName, String region) {
+		
+		// Enter the Manage-users menu
+		enterMenu(driver, "Manage_users", "Manage Users");
+	    driver.switchTo().frame(1);
+		driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[1]/td[4]/a")).click();
+	    this.verifyStrByXpath(driver, "//*[@id='title']", "Add User");
+
+	    // Fill details
+		myDebugPrinting("currUsername - " + currUsername, testVars.logerVars.MINOR);
+		myDebugPrinting("userDisName - "  + userDisName , testVars.logerVars.MINOR);
+	    driver.findElement(By.xpath("//*[@id='extension']")).clear();
+	    driver.findElement(By.xpath("//*[@id='extension']")).sendKeys(currUsername);
+	    driver.findElement(By.xpath("//*[@id='secret']")).clear();
+	    driver.findElement(By.xpath("//*[@id='secret']")).sendKeys(userPass);
+	    driver.findElement(By.xpath("//*[@id='displayName']")).clear();
+	    driver.findElement(By.xpath("//*[@id='displayName']")).sendKeys(userDisName);
+	    
+	    // Set region
+		myDebugPrinting("Set region - " + region, testVars.logerVars.MINOR);
+		Select displayOptions = new Select(driver.findElement(By.xpath("//*[@id='branch']")));
+		for (int i = 0; ; ++i) {
+			displayOptions.selectByIndex(i);
+	        if (displayOptions.getAllSelectedOptions().get(0).getText().isEmpty()) {
+	        	fail ("Region was not detected !!");
+	        	
+	        } else if (displayOptions.getAllSelectedOptions().get(0).getText().equals(region)) {	
+	        	break;
+	        	
+	        }
+	        
+		}
+		
+		// Submit
+		myDebugPrinting("Submit", testVars.logerVars.MINOR);
+	    driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+	    testFuncs.myWait(2000);
+	    driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+	    testFuncs.myWait(7000);
+	    
+	    // Verify Create
+		myDebugPrinting("Verify Create", testVars.logerVars.MINOR);
+		searchUser(driver, currUsername);  
+	  }
+	
+	  /**
+	  *  Create a unique Id based on current time
+	  */
+	  public String getId() {
+		
+	    // set id
+	    DateFormat dateFormat = new SimpleDateFormat("HH_mm_ssdd");
+	    Date date     = new Date();
+	    String id     = dateFormat.format(date);
+	    id = id.replaceAll("_", "");
+		myDebugPrinting("Id is:" + id, testVars.logerVars.MINOR);
+	    return id;
+	  }
+	  
+	  /**
+	  *  Get Random number
+	  *  @return random number in range of [1 - 50]
+	  */
+	  public int getNum() {
+		  
+		  Random rand = new Random();
+		  return (rand.nextInt(50) + 1);
+	  }
+	  
+	  /**
+	  *  Get Random number according to given limit
+	  *  @param limit - upper limit for the random function
+	  *  @return random number in range of [1 - <limit>]
+	  */
+	  public int getNum(int limit) {
+		  
+		  Random rand = new Random();
+		  return (rand.nextInt(limit) + 1);
+	  }
+	
+	  /**
+	  *  Verify the create /non-create of POST user
+	  *  @param driver       - A given driver
+	  *  @param username     - username name (same name for the device)
+	  *  @param dispName     - display name
+	  *  @param isRegistsred - A flag for identify if a registered user was created
+	  */
+	  public void verifyPostUserCreate(WebDriver driver, String username, String dispName, boolean isRegistered) {
+		
+		// Search user
+	    driver.switchTo().frame(1);
+	    driver.findElement(By.xpath("//*[@id='searchtext']")).clear();
+	    driver.findElement(By.xpath("//*[@id='searchtext']")).sendKeys(username);
+	    driver.findElement(By.xpath("//*[@id='searchusersform']/table/tbody/tr/td[7]/a")).click();
+	    testFuncs.myWait(5000);
+	    if (isRegistered) {
+	       verifyStrByXpath(driver, "//*[@id='results']/tbody/tr[2]/td[5]", dispName);
+	    
+	    } else {
+		   verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[2]/td/font", "No users found");
+	    
+	    }
+	    testFuncs.myWait(5000);
+
+		// Verify that the device was also created
+	    driver.switchTo().defaultContent();
+		enterMenu(driver, "Devices_menu", "Filter");
+	    username = username.trim();
+	    //driver.switchTo().defaultContent();
+	    driver.switchTo().frame(1);
+	    
+	    driver.findElement(By.xpath("//*[@id='trunkTBL']/div/div[2]/a")).click();
+	    testFuncs.myWait(1000);
+	    driver.findElement(By.xpath("//*[@id='inputUser']")).clear();
+	    driver.findElement(By.xpath("//*[@id='inputUser']")).sendKeys(username);
+	    driver.findElement(By.xpath("//*[@id='searchForm']/div[12]/div/button[1]")).click();
+	    testFuncs.myWait(7000);
+	    driver.findElement(By.xpath("//*[@id='trunkTBL']/div/div[2]/div[1]/div[2]/form/div/span/button/i")).click();
+	    testFuncs.myWait(7000);
+	    if (isRegistered) { 	
+		    verifyStrByXpath(driver, "//*[@id='table']/tbody[1]/tr/td[6]", dispName.trim()); 
+		    if (driver.findElement(By.xpath("//*[@id='table']/tbody[1]/tr/td[4]/a")).isDisplayed()) {
+		    	fail("Approve button is displayed !!");
+		    	
+		    }
+		    
+	    } else {
+		    if (!driver.findElement(By.xpath("//*[@id='table']/tbody[1]/tr/td[4]/a")).isDisplayed()) { 	
+		    	fail("Approve button is not displayed !!");
+		    	
+		    }  
+	    }
+	    testFuncs.myWait(1000);		
+	  }
+	
+	  /**
+	  *  Create device which added to user
+	  *  @param driver       - A given driver
+	  *  @param username     - user name
+	  *  @param deviceName   - device name
+	  *  @param phoneType    - phone type
+	  *  @param macAddName   - MAC address name
+	  *  @param firmWareType - firmware ID
+	  */
+	  public void addDevice(WebDriver driver, String username, String deviceName, String phoneType, String macAddName, String firmWareType) {
+		
+	    driver.findElement(By.xpath("//*[@id='results']/tbody/tr[2]/td[8]/a[1]")).click();
+	    testFuncs.myWait(1000);		
+	    this.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr[1]/td", "Add new device to " + deviceName);
+	    
+	    // Set device name
+		myDebugPrinting("Set device name " + deviceName, testVars.logerVars.MINOR);
+	    driver.findElement(By.xpath("//*[@id='display_name']")).clear();
+	    driver.findElement(By.xpath("//*[@id='display_name']")).sendKeys(deviceName);    
+	      
+	    // Set IP phone type	
+		myDebugPrinting("Set IP phone type " + phoneType, testVars.logerVars.MINOR);
+		Select displayOptions = new Select(driver.findElement(By.xpath("//*[@id='ipphoneid']")));
+		String currType = "";
+		for (int i = 0;; ++i) {
+			displayOptions.selectByIndex(i);
+		    currType = displayOptions.getAllSelectedOptions().get(0).getText();
+	        if (currType.isEmpty()) {
+	        	fail ("Phone type was not detected !!");
+	        	
+	        } else if (currType.equals(phoneType)) {
+	        	break;
+	        
+	        }
+	        
+		} 
+	      
+	    // Set MAC address
+		myDebugPrinting("Set MAC address " + macAddName, testVars.logerVars.MINOR);
+	    driver.findElement(By.xpath("//*[@id='macaddress_val']")).clear();
+	    driver.findElement(By.xpath("//*[@id='macaddress_val']")).sendKeys(macAddName);
+	    
+	    // Set firmware
+		myDebugPrinting("Set firmware " + firmWareType, testVars.logerVars.MINOR);
+		Select firmwareOptions = new Select(driver.findElement(By.xpath("//*[@id='firmware_id']")));
+		String currType2 = "";
+		for (int i = 0;; ++i) {
+			firmwareOptions.selectByIndex(i);
+		    currType2 = firmwareOptions.getAllSelectedOptions().get(0).getText();
+	        if (currType2.isEmpty()) {
+	        	fail("Firmware was not detected !!");
+	        	
+	        } else if (currType2.equals(firmWareType)) {
+	        	break;
+	        	
+	        }
+		}
+	    
+		// Submit & verify create
+		myDebugPrinting("Submit & verify create", testVars.logerVars.MINOR);
+	    driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+	    testFuncs.myWait(5000);
+	   if( driver instanceof InternetExplorerDriver) {
+	        System.out.println("IE it is!!");
+	   }
+	   
+
+	    driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+	    testFuncs.myWait(500);	
+	    driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+	    testFuncs.myWait(500);	
+	    driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+	    testFuncs.myWait(5000);
+	    driver.findElement(By.xpath("//*[@id='" + username + "tree']")).click();
+	    testFuncs.myWait(5000);
+	    String bodyText = driver.findElement(By.tagName("body")).getText();
+	    Assert.assertTrue("Text not found!", bodyText.contains("Devices Display name: " + deviceName));
+	    driver.switchTo().defaultContent();
+	  }
+	  
+	  /**
+	  *  Search user in the Manage multiple users menu by given username
+	  *  @param driver       - A given driver
+	  *  @param deviceName   - user name
+	  */
+	  public void searchUser(WebDriver driver, String username) {
+		
+		    driver.findElement(By.xpath("//*[@id='searchtext']")).clear();
+		    driver.findElement(By.xpath("//*[@id='searchtext']")).sendKeys(username);
+		    testFuncs.myWait(1000);
+		    driver.findElement(By.xpath("//*[@id='searchusersform']/table/tbody/tr/td[7]/a")).click();
+		    testFuncs.myWait(5000);
+		    String bodyText = driver.findElement(By.tagName("body")).getText();
+		    Assert.assertTrue("Text not found!", bodyText.contains(username));
+		    testFuncs.myWait(1000); 
+	  }
+	  
+	  /**
+	  *  Delete a device from Users menu by given username
+	  *  @param driver     - A given driver
+	  *  @param username   - user name
+	  *  @param deviceName - device name
+	  */
+	  public void deleteDevice(WebDriver driver, String userName, String deviceName) {
+	
+		  driver.findElement(By.xpath("//*[@id='tr" + userName + "device']/td[2]/table/tbody/tr[1]/td/div/table/tbody/tr[5]/td/a[2]")).click();
+		  testFuncs.myWait(2000);
+		  verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Are you sure you want to delete device?");
+		  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonDelete']")).click();
+		  testFuncs.myWait(7000);
+		  Assert.assertFalse("Device still exist!", driver.findElement(By.tagName("body")).getText().contains(deviceName));
+	  }
+	  
+	  /**
+	  *  Delete a user from Users menu by given username
+	  *  @param driver       - A given driver
+	  *  @param deviceName   - user name
+	  */
+	  public void deleteUser(WebDriver driver, String userName) {
+		  
+		  driver.findElement(By.xpath("//*[@id='results']/tbody/tr[2]/td[8]/a[3]")).click();
+		  testFuncs.myWait(2000);
+		  Assert.assertTrue("Device still exist!", driver.findElement(By.xpath("//*[@id='jqi_state_state0']/div[1]")).getText().contains("Are you sure you want to delete the User " + userName));
+		  testFuncs.myWait(2000);
+		  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonDelete']")).click();
+		  testFuncs.myWait(7000);
+		  Assert.assertFalse("User still exist!", driver.findElement(By.tagName("body")).getText().contains(userName)); 
+	  }
+	  
+	  /**
+	  *  Find files in a given directory by a given prefix
+	  *  @param dir - given directory path
+	  *  @param prefix - a given prefix
+	  *  @return true if files were found
+	  */
+	  public boolean findFilesByGivenPrefix(String dir, String prefix) {
+	    	
+			myDebugPrinting("dir    - " + dir   ,  testVars.logerVars.MINOR);
+			myDebugPrinting("prefix - " + prefix,  testVars.logerVars.MINOR);
+	    	File[] dirFiles = new File(dir).listFiles();
+	    	int filesNum = dirFiles.length;
+	    	for (int i = 0; i < filesNum; i++) {
+	    	    if (dirFiles[i].getName().startsWith(prefix, 0)) {
+	    			myDebugPrinting("Find a file ! (" + dirFiles[i].getName() + ")",  testVars.logerVars.MINOR);
+	    	        return true;
+	    	    }
+	    	}
+	    	return false;
+	  }
+	
+	  /**
+	  *  Create random MAC address
+	  *  @return MAC address based on AC prefix (i.e. 00908f) + random 6 characters long hex
+	  */
+	  public String getMacAddress() {
+		
+		char[] chars = "abcdef1234567890".toCharArray();
+		StringBuilder sb = new StringBuilder();
+		Random random2 = new Random();
+		for (int i = 0; i < 6; i++) {
+			
+		    char c = chars[random2.nextInt(chars.length)];
+		    sb.append(c);
+		}
+		return testVars.getAcMacPrefix() + sb.toString();	
+	  }
+	
+	  /**
+	  *  Get last file save on given path
+	  *  @param  dirPath - directory path
+	  *  @return last modified file
+	  */
+	  public File getLatestFilefromDir(String dirPath) {
+		
+	    File dir = new File(dirPath);
+	    File[] files = dir.listFiles();
+	    if (files == null || files.length == 0) {
+	    	
+	        return null;
+	    }
+	    File lastModifiedFile = files[0];
+	    for (int i = 1; i < files.length; i++) {
+	    	
+	       if (lastModifiedFile.lastModified() < files[i].lastModified()) {
+	    	   
+	           lastModifiedFile = files[i];
+	       }
+	    }
+	    return lastModifiedFile;
+	  }
+	
+	  /**
+	  *  Get System logs name of the log
+	  *  @param  logPrefix of the log (I.e. IPP.Manage.Activity.)
+	  *  @return Current name of the System logs log
+	  */
+	  @SuppressWarnings("deprecation")
+	  public String getSystemLogsFilename(String logPrefix) {
+		  
+	    Date date     = new Date();
+		String day   = Integer.toString(date.getDate());
+		String month = Integer.toString(date.getMonth() + 1);
+		if (day.length() == 1)   { day   = "0" + day;   }
+	    if (month.length() == 1) { month = "0" + month; }
+	    logPrefix += day + "-" + month + "-";
+	    logPrefix += Integer.toString(date.getYear() + 1900) + ".log";
+	    return logPrefix;	
+	  }
+
+	  /**
+	   *  Wait till the given string not displayed on the screen
+	   *  @param driver       - A given driver
+	   *  @param string       - A given string that indicate if we should stop the loop
+	   */
+	  public void waitTillString(WebDriver driver, String string) {
+		
+		String bodyText = "";
+		int idx         = 0;
+		int gapTime     = 5;
+		int gapDelay    = gapTime  * 1000;
+		while (true) {
+	      bodyText = driver.findElement(By.tagName("body")).getText();
+	      if (!bodyText.contains(string) && !bodyText.contains("Performing")) {	  
+	    	  if (bodyText.contains("Already exists")) {
+	    		  fail("Users are already exist ..");
+	    		  
+	    	  }
+	    	  break;
+	    	  
+	      } else { 
+	    	  idx += gapTime;
+	    	  myDebugPrinting(string + " is still detected after " + idx + " seconds", testVars.logerVars.MINOR);
+	    	  testFuncs.myWait(gapDelay);
+	    	  
+	      }
+	      
+		}
+	    testFuncs.myWait(2000);		
+	  }
+	
+	  /**
+	  *  Upload file with given path displayed on the screen
+	  *  @param driver  - A given driver
+	  *  @param path    - A path for a file for upload  
+	  *  @param prefix  - A  prefix for identify the created users
+	  *  @param initIdx - An initial integer to start the search for
+	  *  @param usrsNum - A number of total created users
+	  *  @param suffix  - A suffix to search for (I.e. Added, Already exists etc.)
+	  */
+	  public void uploadFile(WebDriver driver, String path, String prefix, int initIdx, int usrsNum, String suffix) {
+	      		  
+		myDebugPrinting("path -   " + path, testVars.logerVars.NORMAL);
+		myDebugPrinting("prefix - " + prefix, testVars.logerVars.NORMAL);
+		driver.findElement(By.xpath("//*[@id='file_source']")).sendKeys(path);
+		testFuncs.myWait(2000);
+		driver.findElement(By.xpath("//*[@id='uploadForm']/table/tbody/tr[5]/td/a")).click();
+		testFuncs.myWait(3000);
+	    verifyStrByXpath(driver, "//*[@id='promt_div_id']", "The import action can take a few minutes. Do you want to continue?");
+		driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+		testFuncs.myWait(2000);
+	    verifyStrByXpath(driver, "//*[@id='title']", "Manage Multiple Devices");
+	    testFuncs.myWait(1000);
+	    
+	    // In test 11.3 we do add an existing users, therefore we can't user waitTillString()
+	    if (suffix == "Already exists") { 
+		    testFuncs.myWait(20000);
+		    
+	    } else {
+	    	waitTillString(driver, "Waiting");
+	    	
+	    }
+	    
+		// Verify create
+	    if (prefix.contains("lang") || prefix.contains("myUserOper")){
+	    	return;
+	    	
+	    } else {
+		    String bodyText = driver.findElement(By.tagName("body")).getText();
+		    int lim = initIdx + usrsNum;
+			for (int i = initIdx; i < lim; i++) {
+				
+				if (!bodyText.contains(prefix + i + " " + suffix)) {
+					myDebugPrinting(prefix + i + " " + suffix, testVars.logerVars.MINOR);
+					fail("error - the following header was not detected !\n" + prefix + i + " " + suffix);
+				}
+			}
+		    driver.switchTo().defaultContent();
+		    
+	    }
+	  }
+	
+	  /**
+	  *  Select multiple users in the Manage multiple users menu according to a given prefix
+	  *  @param driver    - A given driver
+	  *  @param prefix    - A  prefix for search the created users
+	  *  @param expNumber - The expected number of users
+	  */
+	  public void selectMultipleUsers(WebDriver driver, String prefix, String expNumber) {
+		
+	    driver.findElement(By.xpath("//*[@id='filterinput']")).sendKeys(prefix);
+	    driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr[2]/td/table/tbody/tr/td[5]/a/span")).click();
+	    testFuncs.myWait(7000);
+	    if (Integer.parseInt(expNumber) == 0) {
+	      	myDebugPrinting("verify delete", testVars.logerVars.NORMAL);
+	    	verifyStrByXpath(driver, "//*[@id='promt_div_id']", "No device " + prefix + " found.");
+	    	return;
+
+	    }
+	    driver.findElement(By.xpath("//*[@id='maintable']/tbody/tr[1]/td/table/tbody/tr[2]/td[2]/table/tbody/tr[4]/td/a/span")).click();
+	    testFuncs.myWait(3000);
+	    if (Integer.parseInt(expNumber) > 500) {
+		    driver.findElement(By.xpath("//*[@id='left_total_id']/a[1]")).click();
+		    testFuncs.myWait(2000);
+		    driver.findElement(By.xpath("//*[@id='maintable']/tbody/tr[1]/td/table/tbody/tr[2]/td[2]/table/tbody/tr[4]/td/a/span")).click();
+		    testFuncs.myWait(2000); 
+		    verifyStrByXpathContains(driver, "//*[@id='left_total_id']", "of " + expNumber + " users");	    	
+  		    
+	    } else if (Integer.parseInt(expNumber) == -1) {
+	      	myDebugPrinting("users number is unknown ..", testVars.logerVars.MINOR);
+	    } else {
+	    	verifyStrByXpath(driver, "//*[@id='left_total_id']", "Showing 1 to " + expNumber + " of " + expNumber + " users");
+	    }
+	  }
+	  
+	  
+	  /**
+	  *  Verify that all the actions were made
+	  *  @param bodyText - A text of the page
+	  *  @param arg1	 - users prefix
+	  *  @param arg2     - users number
+	  *  @param arg3     - user initial prefix
+	  *  @param arg4     - action suffix
+	  */
+	  private void verifyAction(String bodyText, String arg1, int arg2, int arg3, String arg4) throws IOException {
+
+	    int lim     = arg2 + arg3;
+	    String temp = "";
+	    Boolean isEqSuffix = false;
+	    Boolean isMac      = false;
+
+	    if (arg4.equals(arg1)) {
+	    	myDebugPrinting("isEqSuffix - true", testVars.logerVars.MINOR);
+	    	isEqSuffix = true;
+	    }
+	    if (arg4.equals("isMac")) {
+	    	myDebugPrinting("isMac - true", testVars.logerVars.MINOR);
+	    	isMac = true;
+	    }
+	    temp = arg4;
+		for (int i = arg3; i < lim; i++) {
+			
+			if (isEqSuffix) {
+				temp = arg1 + i;
+			}
+			if (isMac) {
+				temp = readFile("mac_" + i + ".txt");
+				myDebugPrinting("temp - " + temp, testVars.logerVars.MINOR);
+			}
+			if (arg2 == 1) {				
+				if (!bodyText.contains(arg1 + " " + temp)) {
+					fail("Error, the string <" +  arg1 + " " + temp + "> was not recognized !!");
+				} else { 	return;			}
+
+			}
+			if (!bodyText.contains(arg1 + i + " " + temp)) {	
+				myDebugPrinting("The search prefix is:" + arg1 + i + " " + temp, testVars.logerVars.MINOR);
+				myDebugPrinting("bodyText - \n" + bodyText, testVars.logerVars.MINOR);
+				fail("Error, the string <" +  arg1 + i + " " + temp + "> was not recognized !!");
+				
+			}
+		}  
+	  }
+
+	  /**
+	  *  Enter a menu
+	  *  @param driver   A given driver for make all tasks
+	  *  @param menuName A given menu name for the paths function
+	  *  @param verifyHeader A string for verify that enter the menu succeeded
+	  */
+	  public void enterMenu(WebDriver 	driver, String menuName, String verifyHeader) {
+		  
+		  myDebugPrinting("enterMenu  - " +  menuName, testVars.logerVars.NORMAL);
+		  String paths[] = testMenuPaths.getPaths(menuName);
+		  int length = paths.length;
+		  for (int i = 0; i < length; ++i) {
+		  
+			  if (paths[i].isEmpty()) {
+				  break;
+			  }
+			  myDebugPrinting("paths[" + i + "] - " +  paths[i], testVars.logerVars.MINOR);
+			  markElemet(driver, driver.findElement(By.xpath(paths[i])));
+			  testFuncs.myWait(1000);
+		      driver.findElement(By.xpath(paths[i])).click();
+			  testFuncs.myWait(2000);
+		  }
+		  
+		  driver.switchTo().frame(1);	
+		  String title = driver.findElement(By.tagName("body")).getText();
+		  driver.switchTo().defaultContent();
+		  Assert.assertTrue("Title was not found (" + title + ")", title.contains(verifyHeader));
+		  myDebugPrinting("enterMenu  - " +  menuName + " ended successfully !!", testVars.logerVars.NORMAL);
+      }
+
+	  /**
+	  * Set a driver according to a given browser name
+	  * @param  usedBrowser - given browser name (Chrome, FireFox or IE)
+	  * @return driver      - a driver object
+	  */
+	  public WebDriver defineUsedBrowser(String usedBrowser) {
+			
+		if 		  (usedBrowser.equals(testVars.CHROME)) {
+			return new ChromeDriver();
+		    
+		} else if (usedBrowser.equals(testVars.FF))     {
+			
+			
+			myDebugPrinting(testVars.getGeckoPath());
+			System.setProperty("webdriver.gecko.driver", testVars.getGeckoPath());
+			System.setProperty("webdriver.firefox.marionette", "false");
+			
+//			
+//			FirefoxProfile profile = new FirefoxProfile();
+//			profile.setPreference("network.proxy.type", 1);
+//			profile.setPreference("network.proxy.http","207.229.122.162");
+//			profile.setPreference("network.proxy.http_port", 3128); 
+//			WebDriver driver = new FirefoxDriver(profile);
+//			selenium = new WebDriverBackedSelenium(driver, "http://www.example.com/");
+
+
+			
+			
+			//DesiredCapabilities capabilities = new DesiredCapabilities();
+			//capabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
+			//driver = new FirefoxDriver(capabilities);
+			
+			return new FirefoxDriver();
+			
+		} else if (usedBrowser.equals(testVars.IE))     {    	
+			DesiredCapabilities capabilities = DesiredCapabilities.internetExplorer();
+			capabilities.setCapability(InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS, true);
+			capabilities.setCapability("requireWindowFocus", true);   	
+			return new InternetExplorerDriver(capabilities);	
+		
+		}  else                                       {
+			fail ("The browser type is invalid - " + usedBrowser);
+			
+		}
+		return null;
+	  }
+	  
+	  /**
+	  * Wait to a file from the au3 script that marks the end of users create
+	  * @param filePath - given full path to file that marks a successful create
+	  * @param maxWait  - max waiting time
+	  */
+	  public void waitForPostUsersCreate(String filePath, int maxWait) {
+		  
+	    File f = new File(filePath);
+	    int i = 0;
+	    while (true) {   	
+	    	if (i > maxWait) {
+	    		fail("maxWait was over .. (" + maxWait + ")");
+	    		
+	    	} else {
+	    		i++;
+			    if(f.exists() && !f.isDirectory() && i > 20) {
+			    	break;
+			    	
+			    } else {
+			    	testFuncs.myWait(1100);
+			    	myDebugPrinting(i + ".waiting .. (" + maxWait + ")", testVars.logerVars.MINOR);
+		
+			    }
+			    
+	    	}
+	    	
+	    }
+    	myDebugPrinting("Waiting was over ..", testVars.logerVars.MINOR);
+
+	  }  
+	  
+	  /**
+	  *  Perform an action to multiple selected users in the Manage multiple users menu
+	  *  @param driver    - A given driver
+	  *  @param map       - an abstract data for the function
+	 *   @throws IOException 
+	  */
+	  public void setMultipleUsersAction(WebDriver driver, Map<String, String> map) throws IOException {
+		
+			String action     = map.get("action");
+		    String usrsPrefix = map.get("usersPrefix");
+		    String acSuffix   = map.get("srcUsername");
+		    int    usrsNumber = Integer.parseInt(map.get("usersNumber"));
+		    int    usrsInIdx  = Integer.parseInt(map.get("startIdx"));
+			int    i = 0;
+		    
+			// Set action
+			org.openqa.selenium.support.ui.Select acionsList = new Select(driver.findElement(By.xpath("//*[@id='action']")));
+			int actionListNum = acionsList.getOptions().size();
+			for (i = 0; i < actionListNum; ++i) {
+				acionsList.selectByIndex(i);
+				testFuncs.myWait(200);
+		        if (acionsList.getAllSelectedOptions().get(0).getText().equals(action)) {	
+		        	break;
+		        }
+			}
+			if (i == actionListNum) { fail("The given action <" + action + "> was not found !!"); }
+			testFuncs.myWait(2000);
+			
+			// Perform action
+			switch (action) {
+				case "Delete Users":				
+					myDebugPrinting("Enter Delete Users block", testVars.logerVars.NORMAL);
+					driver.findElement(By.xpath("//*[@id='deleteUsersTR']/td/table/tbody/tr[2]/td/a/span")).click();
+				    testFuncs.myWait(3000);
+					verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Are you sure you want to delete the selected users?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage multiple changes");
+				    testFuncs.myWait(1000);
+				    
+				    // test 34 - Stop and continue test
+				    if (usrsPrefix.contains("stopAndContUser")) {
+						myDebugPrinting("stopAndContUser - TRUE (stop action  at middle and than continue)", testVars.logerVars.NORMAL);
+					    testFuncs.myWait(1000);
+						driver.findElement(By.xpath("//*[@id='trunkTBL']/div/div/div/div/table[2]/tbody/tr/td[1]/a")).click();
+						myDebugPrinting("STOP button was pressed ..", testVars.logerVars.MINOR);
+					    testFuncs.myWait(10000);
+					    String bodyText = driver.findElement(By.tagName("body")).getText();
+					    assertTrue("Delete action continued although Stop was pressed /n bodyText - " + bodyText, bodyText.contains("Waiting"));
+						driver.findElement(By.xpath("//*[@id='trunkTBL']/div/div/div/div/table[2]/tbody/tr/td[3]/a")).click();
+					    myDebugPrinting("Continue button was pressed ..", testVars.logerVars.MINOR);
+				    	waitTillString(driver, "Waiting");
+				    
+				    }
+				    // test 33 - Stop and not continue test
+				    else if (usrsPrefix.contains("stopDelUser") && usrsNumber != -1) {
+						myDebugPrinting("stopAndContUser - TRUE (stop action  at middle and than continue)", testVars.logerVars.NORMAL);
+					    testFuncs.myWait(1000);
+						driver.findElement(By.xpath("//*[@id='trunkTBL']/div/div/div/div/table[2]/tbody/tr/td[1]/a")).click();
+						myDebugPrinting("STOP button was pressed ..", testVars.logerVars.MINOR);
+					    testFuncs.myWait(10000);
+					    String bodyText = driver.findElement(By.tagName("body")).getText();
+					    assertTrue("Delete action continued although Stop was pressed /n bodyText - " + bodyText, bodyText.contains("Waiting"));
+						driver.findElement(By.xpath("//*[@id='trunkTBL']/div/div/div/div/table[2]/tbody/tr/td[5]/a")).click();
+					    testFuncs.myWait(2000);
+						verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[1]", "Stop action");
+						verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[2]", "Are you sure you want to stop the action?");
+					    driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+					    testFuncs.myWait(3000);
+					    return;   
+				    	
+				    } else {
+				    	waitTillString(driver, "Waiting");
+				
+				    }
+				    
+				    if (usrsPrefix.contains("lang")) {
+				    	return;
+				    } else  
+				    {
+				    	if (map.containsKey("skipVerifyDelete") && map.get("skipVerifyDelete").equals("true")){
+							myDebugPrinting("skipVerifyDelete - TRUE", testVars.logerVars.MINOR);
+				    		break;
+				    	} else {
+							myDebugPrinting("skipVerifyDelete - FALSE", testVars.logerVars.MINOR);
+				    		verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, acSuffix);
+				    	}
+				    }
+				    break;
+					
+				case "Reset Users Passwords":
+					String subAction   = map.get("subAction");
+					String password    = map.get("password");
+					if (!subAction.isEmpty() && subAction.equals("changePassword")) {
+						myDebugPrinting("Enter Change Users Passwords block", testVars.logerVars.NORMAL);
+						driver.findElement(By.xpath("//*[@id='resetPassword2All']")).click();
+						driver.findElement(By.xpath("//*[@id='resetToPassword']")).clear();
+					    testFuncs.myWait(1000);
+						myDebugPrinting("The password we want to modify is - " + password, testVars.logerVars.MINOR);
+						driver.findElement(By.xpath("//*[@id='resetToPassword']")).sendKeys(password);
+					    testFuncs.myWait(1000);
+					    
+					} else {
+						myDebugPrinting("Enter Reset Users Passwords block", testVars.logerVars.NORMAL);
+					
+					}
+					driver.findElement(By.xpath("//*[@id='resetPasswordsTR']/td/table/tbody/tr[5]/td/a/span")).click();
+				    testFuncs.myWait(1000);
+					verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Are you sure you want to change the password to selected user(s) ?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage multiple changes");
+				    testFuncs.myWait(1000);
+					waitTillString(driver, "Waiting");
+					verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, acSuffix);
+					break;
+					
+				case "Set Users Region":
+					String region     = map.get("region");
+					myDebugPrinting("Enter Set Users region block", testVars.logerVars.NORMAL);
+					org.openqa.selenium.support.ui.Select regionsList = new Select(driver.findElement(By.xpath("//*[@id='branch']")));
+					myDebugPrinting("The wanted region is - " + region, testVars.logerVars.MINOR);
+					int regionListNum = regionsList.getOptions().size();
+					for (i = 0; i < regionListNum; ++i) {
+						regionsList.selectByIndex(i);
+						testFuncs.myWait(200);
+				        if (regionsList.getAllSelectedOptions().get(0).getText().equals(region)) {	
+				        	break;	
+				        }    
+					}
+					if (i == regionListNum) {
+						fail("The given region <" + region + "> was not found !!");	
+					}
+					driver.findElement(By.xpath("//*[@id='resetRegionTR']/td/table/tbody/tr[2]/td/table/tbody/tr[3]/td/a/span")).click();
+				    testFuncs.myWait(1000);
+					verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Are you sure you want to change the region to selected user(s) ?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage multiple changes");
+				    testFuncs.myWait(1000);
+					waitTillString(driver, "Waiting");
+					verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, acSuffix);
+					break;
+					
+				case "Update Configuration Files":
+					myDebugPrinting("Enter Update Configuration Files block", testVars.logerVars.NORMAL);
+					driver.findElement(By.xpath("//*[@id='updateConfigFilesTR']/td/table/tbody/tr[2]/td/a/span")).click();
+				    testFuncs.myWait(1000);
+					verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Note: update configuration command will work only on supported IP Phones.\nAre you sure you want to update the selected IP Phones files?Are you sure you want to change the region to selected user(s) ?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage multiple changes");
+				    testFuncs.myWait(1000);
+					waitTillString(driver, "Waiting");
+					verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, acSuffix);
+					break;
+					
+				case "Generate IP Phones Configuration Files":
+					myDebugPrinting("Enter Generate IP Phones Configuration Files block", testVars.logerVars.NORMAL);
+					driver.findElement(By.xpath("//*[@id='setIpPhonesTR']/td/table/tbody/tr[4]/td/a/span")).click();
+				    testFuncs.myWait(1000);
+					verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Note: update configuration command will work only on supported IP Phones.\nAre you sure you want to update the selected IP Phones files?Are you sure you want to change the region to selected user(s) ?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage multiple changes");
+				    testFuncs.myWait(1000);
+					waitTillString(driver, "Waiting");
+					verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, acSuffix);
+					break;				
+					
+				case "Send Message":
+					myDebugPrinting("Enter Send Message block", testVars.logerVars.NORMAL);
+					String message = map.get("message");
+					driver.findElement(By.xpath("//*[@id='sendMessageTR']/td/table/tbody/tr[4]/td/input")).clear();
+					driver.findElement(By.xpath("//*[@id='sendMessageTR']/td/table/tbody/tr[4]/td/input")).sendKeys(message);
+				    testFuncs.myWait(1000);
+					driver.findElement(By.xpath("//*[@id='sendMessageTR']/td/table/tbody/tr[2]/td/a/span")).click();
+				    testFuncs.myWait(1000);
+					verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Are you sure you want to send the message to the selected user(s) ?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage multiple changes");
+				    testFuncs.myWait(1000);
+					waitTillString(driver, "Waiting");
+					verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, acSuffix);
+					break;
+					
+				case "Restart Devices":
+					myDebugPrinting("Enter Restart Devices block", testVars.logerVars.NORMAL);
+					String resetMode = map.get("resMode");
+					Select resetList = new Select(driver.findElement(By.xpath("//*[@id='resetIpPhonesTR']/td/table/tbody/tr[4]/td/select")));
+					int resListNum = resetList.getOptions().size();
+					for (i = 0; i < resListNum; ++i) {
+						resetList.selectByIndex(i);
+				        if (resetList.getAllSelectedOptions().get(0).getText().equals(resetMode)) {	
+				        	break;
+				        }
+					}					
+				    testFuncs.myWait(2000);
+					myDebugPrinting("Reset mode is - " + resetMode, testVars.logerVars.MINOR);
+					if (resetMode.equals("Scheduled")) {
+						String scDelay = map.get("scMinutes");
+						Select resetList2 = new Select(driver.findElement(By.xpath("//*[@id='resetIpPhonesTR']/td/table/tbody/tr[6]/td/select")));
+						int resListNum2 = resetList2.getOptions().size();
+						for (i = 0; i < resListNum2; ++i) {
+							resetList2.selectByIndex(i);
+					        if (resetList2.getAllSelectedOptions().get(0).getText().equals(scDelay)) {	
+					        	break;
+					        }
+						}
+						
+					}
+				    testFuncs.myWait(2000);
+					driver.findElement(By.xpath("//*[@id='resetIpPhonesTR']/td/table/tbody/tr[2]/td/a/span")).click();
+				    testFuncs.myWait(3000);
+					verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Note: restart command will work only on supported IP Phones.\nAre you sure you want to restart the selected IP Phones?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage multiple changes");
+				    testFuncs.myWait(1000);
+					waitTillString(driver, "Waiting");
+					verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, acSuffix);
+					break;
+					
+				default:
+					fail("Action is not recognized !!");	
+					break;
+				}
+	  }
+	  
+	  /**
+	  *  Perform an action to multiple selected devices in the Manage multiple devices menu
+	  *  @param driver    - A given driver
+	  *  @param map       - an abstract data for the function
+	  *   @throws IOException 
+	  */
+	  public void setMultipleDevicesAction(WebDriver driver, Map<String, String> map) throws IOException {
+		
+			String action     = map.get("action");
+		    String usrsPrefix = map.get("usersPrefix");
+		    int    usrsNumber = Integer.parseInt(map.get("usersNumber"));
+		    int    usrsInIdx  = Integer.parseInt(map.get("startIdx"));
+		    
+			// Set action
+			driver.findElement(By.xpath("//*[@id='action']")).sendKeys(action);
+		    testFuncs.myWait(1000);
+	
+			// Perform action
+			switch (action) {	
+				case "Change Language":
+					myDebugPrinting("Enter Change Language block", testVars.logerVars.NORMAL);
+					String language = map.get("language");
+					driver.findElement(By.xpath("//*[@id='deviceLanguage']")).sendKeys(language);
+				    testFuncs.myWait(1000);
+					driver.findElement(By.xpath("//*[@id='changeLanguageTR']/td/table/tbody/tr[2]/td/table/tbody/tr/td[4]/a/span")).click();
+				    testFuncs.myWait(1000);
+					verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Are you sure you want to change the device's language?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage Multiple Devices");
+				    testFuncs.myWait(1000);
+					waitTillString(driver, "Waiting");
+					verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, "isMac");
+					break;
+					
+				case "Send Message":
+					myDebugPrinting("Enter Send Message block", testVars.logerVars.NORMAL);
+					String message = map.get("message");
+					driver.findElement(By.xpath("//*[@id='sendMessageTR']/td/table/tbody/tr[4]/td/input")).sendKeys(message);
+				    testFuncs.myWait(1000);
+					driver.findElement(By.xpath("//*[@id='sendMessageTR']/td/table/tbody/tr[2]/td/a/span")).click();
+				    testFuncs.myWait(1000);
+					verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Are you sure you want to send message to the selected devices?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage Multiple Devices");
+				    testFuncs.myWait(1000);
+					waitTillString(driver, "Waiting");
+					verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, "isMac");
+					break;
+					
+				case "Change IP Phone Type":
+					myDebugPrinting("Enter Change IP Phone Type block", testVars.logerVars.NORMAL);
+					String phoneType = map.get("phoneType");
+					driver.findElement(By.xpath("//*[@id='ipptype']")).sendKeys(phoneType);
+				    testFuncs.myWait(1000);
+					driver.findElement(By.xpath("//*[@id='changeTypeTR']/td/table/tbody/tr[2]/td/table/tbody/tr/td[4]/a/span")).click();
+				    testFuncs.myWait(1000);
+					verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Are you sure you want to change the IP Phone type of the selected devices?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage Multiple Devices");
+				    testFuncs.myWait(1000);
+					waitTillString(driver, "Waiting");
+					verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, "isMac");
+					break;
+					
+				case "Restart Devices":
+					myDebugPrinting("Enter Restart Devices block", testVars.logerVars.NORMAL);
+					String resMode = map.get("resMode");
+					myDebugPrinting("resMode - " + resMode, testVars.logerVars.MINOR);
+					driver.findElement(By.xpath("//*[@id='resetIpPhonesTR']/td/table/tbody/tr[4]/td/select")).sendKeys(resMode);
+					testFuncs.myWait(1000);
+					if (resMode.equals("Scheduled")) {
+						String scTime = map.get("schTime");
+						myDebugPrinting("scTime - " + scTime, testVars.logerVars.MINOR);
+						driver.findElement(By.xpath("//*[@id='resetIpPhonesTR']/td/table/tbody/tr[6]/td/select")).sendKeys(scTime);
+					    testFuncs.myWait(1000);
+						
+					}
+					driver.findElement(By.xpath("//*[@id='resetIpPhonesTR']/td/table/tbody/tr[2]/td/a/span")).click();
+				    testFuncs.myWait(1000);
+					verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Note: restart command will work only on supported IP Phones.\nAre you sure you want to restart the selected IP Phones?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage Multiple Devices");
+				    testFuncs.myWait(1000);
+					waitTillString(driver, "Waiting");
+					verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, "isMac");
+					break;	
+					
+				case "Generate IP Phones Configuration Files":
+					myDebugPrinting("Enter Generate IP Phone Configuration block", testVars.logerVars.NORMAL);
+					driver.findElement(By.xpath("//*[@id='setIpPhonesTR']/td/table/tbody/tr[4]/td/a/span")).click();
+				    testFuncs.myWait(1000);
+					verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "The configuration files will be generate to the location define in the template (destinationDir).\nDo you want to continue?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage Multiple Devices");
+				    testFuncs.myWait(1000);
+					waitTillString(driver, "Waiting");
+					verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, "isMac");
+					break;
+					
+				case "Update Configuration file":
+					myDebugPrinting("Enter Update Configuration block", testVars.logerVars.NORMAL);
+					driver.findElement(By.xpath("//*[@id='updateConfigFilesTR']/td/table/tbody/tr[2]/td/a/span")).click();
+				    testFuncs.myWait(1000);
+					verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Note: update configuration command will work only on supported IP Phones.\nAre you sure you want to update the selected IP Phones files?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage Multiple Devices");
+				    testFuncs.myWait(1000);
+					waitTillString(driver, "Waiting");
+					verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, "isMac");
+					break;
+					
+				case "Change Firmware":
+					myDebugPrinting("Enter Change Firmware block", testVars.logerVars.NORMAL);
+					String firmware = map.get("firmware");
+					driver.findElement(By.xpath("//*[@id='firmware_id']")).sendKeys(firmware);
+				    testFuncs.myWait(1000);
+					driver.findElement(By.xpath("//*[@id='updateFirmwareTR']/td/table/tbody/tr[2]/td/table/tbody/tr[1]/td[4]/a/span")).click();
+				    testFuncs.myWait(1000);
+				    verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Are you sure you want to change the device's firmware?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage Multiple Devices");
+				    testFuncs.myWait(1000);
+					waitTillString(driver, "Waiting");
+					verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, "isMac");
+					break;
+					
+				case "Change VLAN Discovery Mode":
+					myDebugPrinting("Enter Change VLAN Discovery Mode block", testVars.logerVars.NORMAL);
+					String vlanMode = map.get("vlanMode");
+					myDebugPrinting("vlanMode - " + vlanMode, testVars.logerVars.MINOR);
+					driver.findElement(By.xpath("//*[@id='changeVlanTR']/td/table/tbody/tr[2]/td/table/tbody/tr[1]/td[1]/select")).sendKeys(vlanMode);
+				    testFuncs.myWait(1000);
+				    if (vlanMode.equals("Manual Configuration")) {
+						String vlanId = map.get("vlanId");
+						String vlanpr = map.get("vlanPriority");
+						driver.findElement(By.xpath("//*[@id='changeVlanTR']/td/table/tbody/tr[2]/td/table/tbody/tr[2]/td[1]/input")).sendKeys(vlanId);
+					    testFuncs.myWait(500);
+						driver.findElement(By.xpath("//*[@id='changeVlanTR']/td/table/tbody/tr[2]/td/table/tbody/tr[3]/td[1]/input")).sendKeys(vlanpr);
+					    testFuncs.myWait(500);
+
+				    }
+					driver.findElement(By.xpath("//*[@id='changeVlanTR']/td/table/tbody/tr[2]/td/table/tbody/tr[1]/td[4]/a/span")).click();
+				    testFuncs.myWait(1000);
+				    verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Are you sure you want to change the device's VLAN discovery mode?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage Multiple Devices");
+				    testFuncs.myWait(1000);
+					waitTillString(driver, "Waiting");
+					verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, "isMac");
+					break;	
+					
+				case "Delete Devices":
+					myDebugPrinting("Enter Delete Devices block", testVars.logerVars.NORMAL);
+					driver.findElement(By.xpath("//*[@id='deleteDevicesTR']/td/table/tbody/tr[2]/td/a/span")).click();
+				    testFuncs.myWait(1000);
+				    verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Are you sure you want to delete the selected devices?");
+					driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+				    testFuncs.myWait(3000);
+				    verifyStrByXpath(driver, "//*[@id='title']", "Manage Multiple Devices");
+				    testFuncs.myWait(1000);
+					waitTillString(driver, "Waiting");
+					verifyAction(driver.findElement(By.tagName("body")).getText(), usrsPrefix, usrsNumber, usrsInIdx, "isMac");
+					break;
+					
+				default:
+					fail("Action is not recognized !!");	
+					break;
+			}
+	  }
+	  
+	  /**
+	  *  Add new template according to given parameters
+	  *  @param driver    - A given driver
+	  *  @param tempName  - A given template name
+	  *  @param tempDesc  - A given template description
+	  *  @param region    - A given template region
+	  *  @param map       - An object for all the optional parameters
+	  */
+	  public void addTemplate(WebDriver driver, String tempName, String tempDesc, String region, String type, Map<String, String> map) {
+		  
+		// Create new template
+		myDebugPrinting("Create new template"    , testVars.logerVars.MINOR);
+		myDebugPrinting("tempName - "  + tempName, testVars.logerVars.MINOR);
+		myDebugPrinting("type - "      + type    , testVars.logerVars.MINOR);
+		
+		driver.findElement(By.xpath("//*[@id='tbTemps']/tbody/tr[1]/td/a")).click();
+		testFuncs.myWait(3000);
+		verifyStrByXpath(driver, "//*[@id='title']", "Add new Template");
+		driver.findElement(By.xpath("//*[@id='modelname']")).clear();
+		driver.findElement(By.xpath("//*[@id='modelname']")).sendKeys(tempName);
+		driver.findElement(By.xpath("//*[@id='description']")).clear();
+		driver.findElement(By.xpath("//*[@id='description']")).sendKeys(tempDesc);
+		driver.findElement(By.xpath("//*[@id='region_id']")).sendKeys(region);
+		driver.findElement(By.xpath("//*[@id='region_id']")).sendKeys(region);
+		driver.findElement(By.xpath("//*[@id='model_type']")).sendKeys(type);
+	  
+		// Check region default template check-box
+		if (map.get("isRegionDefault").equals("true")) {
+			myDebugPrinting("isRegionDefault - TRUE", testVars.logerVars.MINOR);
+
+		}
+	  
+		// Is clone from other template is needed
+		if (!map.get("cloneFromtemplate").isEmpty()) {
+			myDebugPrinting("cloneFromtemplate is not empty, clone starts !", testVars.logerVars.MINOR);
+
+		}
+	  
+		// Is download shared templates
+		if (map.get("isDownloadSharedTemplates").equals("true")) {
+			myDebugPrinting("isDownloadSharedTemplates - TRUE", testVars.logerVars.MINOR);
+			driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[8]/td/a/b")).click();
+			testFuncs.myWait(7000);
+			verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[8]/td/a/b", "AudioCodes");
+			ArrayList<?> tabs = new ArrayList<Object> (driver.getWindowHandles());
+			driver.switchTo().window((String) tabs.get(1));
+			assertTrue("Latest header was not detected !! ("  + driver.findElement(By.tagName("body")).getText() + ")", driver.findElement(By.tagName("body")).getText().contains("Latest EMS IPP configuration templates"));
+			assertTrue("Confirm header was not detected !! (" + driver.findElement(By.tagName("body")).getText() + ")", driver.findElement(By.tagName("body")).getText().contains("I agree: Terms and Conditions"));
+			driver.findElement(By.xpath("//*[@id='applicationHost']/div/div[2]/div[3]/div/div/div/input")).click();
+			String shareFilesFile = testVars.getShareFilesName();
+			deleteFilesByPrefix(testVars.getDownloadsPath(), shareFilesFile);
+			driver.findElement(By.xpath("//*[@id='download-btn']")).click();
+			testFuncs.myWait(10000);
+			if (findFilesByGivenPrefix(testVars.getDownloadsPath(), shareFilesFile)) {
+				myDebugPrinting("File " + shareFilesFile + " was downloaded successfully !!");
+				} else {
+					fail("File was not downloaded successfully !!");
+			}
+			deleteFilesByPrefix(testVars.getDownloadsPath(), shareFilesFile);
+			return;
+		}
+		
+		driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+		testFuncs.myWait(3000);
+		
+		if (map.containsKey("secondCreate")) {
+			myDebugPrinting("secondCreate - TRUE (create two templates with same name test)", testVars.logerVars.NORMAL);
+			verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "Please choose another name");
+		    driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+		    testFuncs.myWait(2000);
+			driver.findElement(By.xpath("//*[@id='back_img']")).click();
+			testFuncs.myWait(3000);
+			driver.findElement(By.xpath("//*[@id='back_img']")).click();
+			testFuncs.myWait(3000);
+			return;
+			
+		} else if (map.containsKey("falseCreateName")) {
+			
+			myDebugPrinting("falseCreateName - TRUE (false data)", testVars.logerVars.NORMAL);
+			tempName = map.get("falseCreateName");
+			tempDesc = map.get("falseCreateDesc");
+			verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[1]", "Please enter template name");
+		    driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+		    testFuncs.myWait(2000);
+			driver.findElement(By.xpath("//*[@id='modelname']")).sendKeys(tempName);
+			driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+			testFuncs.myWait(3000);
+			verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[1]", "Please enter template description");
+		    driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+		    testFuncs.myWait(2000);
+			driver.findElement(By.xpath("//*[@id='description']")).sendKeys(tempDesc);
+			driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+			testFuncs.myWait(3000);
+		
+		}
+		
+		verifyStrByXpath(driver, "//*[@id='title']"                                                  , "IP Phone " + tempName + " Configuration Template");
+		verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[1]/td"        , "IP Phone " + tempName + " Configuration Template");
+		verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[2]/td[2]/font", tempName);
+		verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[3]/td[2]/font", tempDesc);
+		testFuncs.myWait(1000);
+		
+		if (map.containsKey("secondCreate")) {
+			myDebugPrinting("secondCreate - TRUE (upload big cfg file test)", testVars.logerVars.NORMAL);
+//			driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[7]/td[2]/a")).click();
+//			testFuncs.myWait(3000);
+//			verifyStrByXpath(driver, "//*[@id='title']", "Upload IP Phone Template " + tempName);
+//			String bigCfgPath = testVars.getSrcFilesPath() + "\\" + testVars.getImportFile("36");
+//			myDebugPrinting("bigCfgPath - " + bigCfgPath, testVars.logerVars.MINOR);
+//			driver.findElement(By.xpath("//*[@id='IntroScreen']/form/table/tbody/tr[3]/td/input")).sendKeys(bigCfgPath);
+//			testFuncs.myWait(5000);
+//			driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+//			testFuncs.myWait(45000);
+//			verifyStrByXpath(driver, "//*[@id='promt_div_id']"        , "Please choose a cfg file.");
+//		    driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+//		    testFuncs.myWait(2000);
+		    driver.findElement(By.xpath("//*[@id='back_img']")).click();
+		    testFuncs.myWait(2000);
+			return;
+		}
+		
+		driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+		testFuncs.myWait(3000);
+		verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[1]", "Server updated succesfully");
+		driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+		testFuncs.myWait(3000);
+		
+		// Verify create
+	    String bodyText = driver.findElement(By.tagName("body")).getText();
+	    Assert.assertTrue("Text not found!", bodyText.contains(tempName + " The template file is missing in the system.   " + region + " " + type + " Edit Delete")); 	
+	  }
+	  
+	  /**
+	  *  Delete a template
+	  *  @param driver    - A given driver
+	  *  @param tempName  - A given template name
+	  */
+	  public void deleteTemplate(WebDriver driver, String tempName) {
+		  
+		  myDebugPrinting("tempName - " + tempName, testVars.logerVars.MINOR);
+		  driver.findElement(By.cssSelector("a[href*='" + tempName + "']")).click();
+		  testFuncs.myWait(2000);
+		  verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]/table/tbody/tr[1]/th", "Delete Template");
+		  verifyStrByXpath(driver, "//*[@id='promt_div_id']"								, "Are you sure you want to delete the " + tempName + " IP Phone Model?");
+		  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+		  testFuncs.myWait(3000);
+		  
+		  // Verify delete
+		  String bodyText = driver.findElement(By.tagName("body")).getText();
+		  Assert.assertFalse("Delete didn't succeed !! (" + tempName + " still appear)", bodyText.contains(tempName));
+	  }
+	  
+	  /**
+	  *  Edit a template
+	  *  @param driver        - A given driver
+	  *  @param tempName     - A given template name
+	  *  @param valueForEdit - A given value for edit
+	  *  @throws IOException 
+	  *  @throws UnsupportedFlavorException 
+	  */
+	  public void editTemplate(WebDriver driver, String tempName, String valueForEdit) throws UnsupportedFlavorException, IOException {
+		  
+		  myDebugPrinting("tempName - " + tempName, testVars.logerVars.MINOR);
+		  
+		  // Get id of the created template
+		  myDebugPrinting("Get id of the created template", testVars.logerVars.NORMAL);
+		  String href = driver.findElement(By.cssSelector("a[href*='" + tempName + "']")).getAttribute("href");
+		  myDebugPrinting("href - " + href, testVars.logerVars.MINOR); 
+		  int first  = href.indexOf('\"') + 1;
+		  int second = href.indexOf('\"', first);
+		  String id  = href.substring(first, second);
+		  myDebugPrinting("id - " + id, testVars.logerVars.MINOR);
+		  driver.findElement(By.cssSelector("a[href*='" + id + "']")).click();
+		  
+		  // Verify headers
+		  verifyStrByXpath(driver, "//*[@id='title']"                                                  , "IP Phone " + tempName + " Configuration Template");
+		  verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[1]/td"        , "IP Phone " + tempName + " Configuration Template");
+		  verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[2]/td[2]/font", tempName);
+
+		  // Edit template
+		  myDebugPrinting("Edit template", testVars.logerVars.NORMAL); 
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[5]/td[2]/a")).click();
+		  testFuncs.myWait(2000);
+		  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).sendKeys(valueForEdit);		  
+		  driver.findElement(By.xpath("/html/body/div[2]/div[3]/div/button[1]/span")).click();
+		  testFuncs.myWait(2000);
+		  verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[1]"        , "Template was updated successfully.");
+		  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+		  testFuncs.myWait(2000);
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[5]/td[2]/a")).click();
+		  testFuncs.myWait(3000);
+		  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).click();
+		  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).sendKeys(Keys.chord(Keys.CONTROL, "a"));
+		  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).sendKeys(Keys.chord(Keys.CONTROL, "c"));
+		  Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		  String text = (String) clipboard.getData(DataFlavor.stringFlavor);
+		  Assert.assertTrue("Value was not detected !", text.contains(valueForEdit));
+		  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).click();
+		  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).sendKeys(valueForEdit);	  
+		  driver.findElement(By.xpath("/html/body/div[2]/div[11]/div/button[1]/span")).click();
+		  testFuncs.myWait(4000);
+		  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+		  testFuncs.myWait(2000);
+		    
+		  // Restore to default
+		  myDebugPrinting("Restore to default", testVars.logerVars.NORMAL); 
+		  driver.findElement(By.xpath("//*[@id='restoreToDefId']/span")).click();
+		  testFuncs.myWait(2000);
+		  verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[1]", "Reset the IP Phone template");
+		  verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[2]", "Are you sure you want to reset the IP Phone template?");
+		  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+		  testFuncs.myWait(2000);
+		  verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]", "The template was reset to default");
+		  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+		  testFuncs.myWait(2000);
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[5]/td[2]/a")).click();
+		  testFuncs.myWait(3000);
+		  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).click();
+		  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).sendKeys(Keys.chord(Keys.CONTROL, "a"));
+		  driver.findElement(By.xpath("//*[@id='templateDiv']/textarea")).sendKeys(Keys.chord(Keys.CONTROL, "c"));
+		  clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		  text = (String) clipboard.getData(DataFlavor.stringFlavor);
+		  //Assert.assertFalse("Value was detected !", text.contains(valueForEdit));
+		  driver.findElement(By.xpath("/html/body/div[2]/div[3]/div/button[2]/span")).click();
+		  testFuncs.myWait(3000); 
+		  driver.findElement(By.xpath("//*[@id='back_img']")).click();
+		  testFuncs.myWait(2000);		  
+	  }  
+	  
+	  /**
+	  *  Add a new region placeholder
+	  *  @param driver       - A given driver
+	  *  @param regPhName     - A given region placeholder name
+	  *  @param regValue - A given region placeholder value
+	  *  @param regRegion - A given region placeholder region
+	  */
+	  public void addRegionPlaceholder(WebDriver driver, String regPhName, String regValue, String regRegion) {
+		  
+		  driver.findElement(By.xpath("//*[@id='ipp-panel']/div[2]/table/tbody/tr[1]/td[3]/button/span")).click();
+		  
+		  
+		  testFuncs.myWait(3000);
+		  verifyStrByXpath(driver, "//*[@id='title']", "Add new placeholder");
+		  driver.findElement(By.xpath("//*[@id='project']")).sendKeys(regPhName);	  
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/form/table/tbody/tr/td/table/tbody/tr[3]/td[2]/input")).sendKeys(regValue);	  
+		  driver.findElement(By.xpath("//*[@id='region_id']")).sendKeys(regRegion);	  
+		  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+		  testFuncs.myWait(3000);
+		  
+		  // verify create
+		  myDebugPrinting("verify create", testVars.logerVars.MINOR);
+		  driver.findElement(By.xpath("//*[@id='regions1-filtering']")).clear(); 
+		  driver.findElement(By.xpath("//*[@id='regions1-filtering']")).sendKeys(regPhName);	  
+		  testFuncs.myWait(3000);
+		  String bodyText = driver.findElement(By.tagName("body")).getText();
+		  Assert.assertTrue("regPhName not found! \n" + bodyText, bodyText.contains(regPhName));
+		  Assert.assertTrue("regValue not found! \n"  + bodyText, bodyText.contains(regValue));
+		  Assert.assertTrue("regRegion not found \n!" + bodyText, bodyText.contains(regRegion)); 
+	  }//*[@id="regions1"]/tbody/tr[3]/td[3]/b
+	  
+	  /**
+	  *  Edit an existing region placeholder
+	  *  @param driver    - A given driver
+	  *  @param regPhName - A given region placeholder name for modify
+	  *  @param regValue  - A given region placeholder value for modify
+	  *  @param regRegion - A given region placeholder region for modify
+	  */
+	  public void editRegionPlaceholder(WebDriver driver, String regPhName, String regValue, String regRegion) {
+		  
+		  // Some manipulations to detect row ID
+		  String bodyText = driver.findElement(By.tagName("body")).getText();
+		  String rowId = bodyText.substring(bodyText.indexOf("Placeholder Value Region") + "Placeholder Value Region".length(), bodyText.indexOf("%ITCS_") - 1);
+		  myDebugPrinting("rowId - " + rowId, testVars.logerVars.MINOR);
+		  
+		  driver.findElement(By.xpath("//*[@id='regions1']/tbody/tr[" + rowId + "]/td[6]/button")).click();
+		  testFuncs.myWait(3000);
+		  verifyStrByXpath(driver, "//*[@id='title']", "Edit placeholder");
+		  driver.findElement(By.xpath("//*[@id='project']")).clear();  
+		  driver.findElement(By.xpath("//*[@id='project']")).sendKeys(regPhName);
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/form/table/tbody/tr/td/table/tbody/tr[3]/td[2]/input")).clear();
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/form/table/tbody/tr/td/table/tbody/tr[3]/td[2]/input")).sendKeys(regValue);	  
+		  driver.findElement(By.xpath("//*[@id='region_id']")).sendKeys(regRegion);	  
+		  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+		  testFuncs.myWait(3000);
+		  		  
+		  // verify edit
+		  myDebugPrinting("verify edit", testVars.logerVars.MINOR);
+		  driver.findElement(By.xpath("//*[@id='regions1-filtering']")).clear(); 
+		  driver.findElement(By.xpath("//*[@id='regions1-filtering']")).sendKeys(regPhName);	  
+		  testFuncs.myWait(3000);
+		  verifyStrByXpath(driver, "//*[@id='regions1']/tbody/tr[9]/td[3]/b", regPhName);
+		  verifyStrByXpath(driver, "//*[@id='regions1']/tbody/tr[9]/td[4]"  , regValue);
+		  verifyStrByXpath(driver, "//*[@id='regions1']/tbody/tr[9]/td[5]"  , regRegion);  
+	  }
+	  
+	  /**
+	  *  Delete a region placeholder
+	  *  @param driver    - A given driver
+	  *  @param regPhName - A given region placeholder name for delete
+	  *  @param regRegion - A given region placeholder region for modify
+	  */
+	  public void deleteRegionPlaceholder(WebDriver driver, String regPhName, String regRegion) {
+		  
+		  // Some manipulations to detect row ID
+		  String bodyText = driver.findElement(By.tagName("body")).getText();
+		  String rowId = bodyText.substring(bodyText.indexOf("Placeholder Value Region") + "Placeholder Value Region".length(), bodyText.indexOf("%ITCS_") - 1);
+		  myDebugPrinting("rowId - " + rowId, testVars.logerVars.MINOR);  
+		  driver.findElement(By.xpath("//*[@id='regions1']/tbody/tr[" + rowId + "]/td[7]/button")).click();
+		  testFuncs.myWait(1000);
+		  verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]/table/tbody/tr[1]/th"  , "Delete Region - " + regPhName);  
+		  verifyStrByXpath(driver, "//*[@id='promt_div_id']"  , "Are you sure you want to delete this region?:");  
+		  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+		  testFuncs.myWait(3000);
+		  verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]/table/tbody/tr[1]/th"  , "Delete Region");  
+		  verifyStrByXpath(driver, "//*[@id='promt_div_id']"  								  , "The selected " + regPhName + " placeholder has been successfully removed from " + regRegion);
+		  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+
+		  // verify delete
+		  myDebugPrinting("verify delete", testVars.logerVars.MINOR);
+		  driver.findElement(By.xpath("//*[@id='regions1-filtering']")).clear(); 
+		  driver.findElement(By.xpath("//*[@id='regions1-filtering']")).sendKeys(regPhName);	  
+		  testFuncs.myWait(3000);
+		  bodyText = driver.findElement(By.tagName("body")).getText();
+		  if (bodyText.contains(regPhName)){
+			  fail("Delete did not succeeded !!");
+		  }
+	  }
+	  
+	  /**
+	  *  Copy a placeholder from another region
+	  *  @param driver      - A given driver
+	  *  @param regThatCopy - A region to whom who copy a placeholder
+	  *  @param regPhName   - A given region placeholder name
+	  *  @param regValue    - A given region placeholder value
+	  *  @param regRegion   - A given region placeholder region
+	  */
+	  public void copyPlaceholder(WebDriver driver, String regThatCopy, String regPhName, String regValue, String regRegion) {
+		    
+		  driver.findElement(By.xpath("//*[@id='ipp-panel']/div[2]/table/tbody/tr[1]/td[1]/select")).sendKeys(regThatCopy);
+		  testFuncs.myWait(2000);
+		  driver.findElement(By.xpath("//*[@id='ipp-panel']/div[2]/table/tbody/tr[1]/td[1]/button/span")).click();
+		  testFuncs.myWait(1000);
+		  verifyStrByXpath(driver, "//*[@id='ui-id-1']"      , "Copy Region Placeholders From");
+		  verifyStrByXpath(driver, "//*[@id='dialog-form']/p", "Please select the Region Placeholders to copy.");
+		  driver.findElement(By.xpath("//*[@id='region']")).sendKeys(regRegion);
+		  testFuncs.myWait(2000);
+		  driver.findElement(By.xpath("/html/body/div[2]/div[3]/div/button[1]/span")).click();
+		  testFuncs.myWait(2000);
+		  verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]/table/tbody/tr[1]/th", "Copy Region Placeholders");
+		  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+		  testFuncs.myWait(1000);
+		  
+		  // verify copy
+		  myDebugPrinting("verify copy", testVars.logerVars.MINOR);
+		  driver.findElement(By.xpath("//*[@id='regions1-filtering']")).clear(); 
+		  driver.findElement(By.xpath("//*[@id='regions1-filtering']")).sendKeys(regPhName);
+		  testFuncs.myWait(3000);
+		  verifyStrByXpath(driver, "//*[@id='regions1']/tbody/tr[9]/td[3]/b", regPhName);
+		  verifyStrByXpath(driver, "//*[@id='regions1']/tbody/tr[9]/td[4]"  , regValue);
+		  verifyStrByXpath(driver, "//*[@id='regions1']/tbody/tr[9]/td[5]"  , regThatCopy); 
+	  }
+	  
+	  /**
+	  *  Add new Template placeholder
+	  *  @param driver      	  - A given driver
+	  *  @param tempName     	  - A template for which we create the placeholder
+	  *  @param tempPhName   	  - A name for the Template placeholder
+	  *  @param tempPhValue       - A value for the Template placeholder
+	  *  @param tempPhDescription - A description for the Template placeholder
+	  */  
+	  public void addTemplatePlaceholder(WebDriver driver, String tempName, String tempPhName, String tempPhValue, String tempPhDescription) {
+		  
+		  driver.findElement(By.xpath("//*[@id='models']")).sendKeys(tempName);
+		  testFuncs.myWait(5000);
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr[1]/td/table/tbody/tr[1]/td[2]/a/span")).click();
+		  testFuncs.myWait(5000);
+		  verifyStrByXpath(driver, "//*[@id='trunkTBL']/form/table/tbody/tr/td/table/tbody/tr[1]/td", "IP Phone Model - " + tempName);
+		  driver.findElement(By.xpath("//*[@id='project']")).sendKeys(tempPhName);
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/form/table/tbody/tr/td/table/tbody/tr[3]/td[2]/input")).sendKeys(tempPhValue);
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/form/table/tbody/tr/td/table/tbody/tr[4]/td[2]/input")).sendKeys(tempPhDescription);
+		  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+
+		  // Verify create
+		  myDebugPrinting("verify create", testVars.logerVars.MINOR);
+		  driver.findElement(By.xpath("//*[@id='results-filtering']")).clear(); 
+		  driver.findElement(By.xpath("//*[@id='results-filtering']")).sendKeys(tempPhName);
+		  testFuncs.myWait(3000);
+		  verifyStrByXpath(driver, "//*[@id='placeholder']/span/b", "%ITCS_" + tempPhName + "%");
+		  verifyStrByXpath(driver, "//*[@id='vals']/span"         , tempPhValue);
+		  verifyStrByXpath(driver, "//*[@id='desc']/a/span"       , tempPhDescription);
+	  }
+	  
+	  /**
+	  *  Edit an existing Template placeholder
+	  *  @param driver      	  - A given driver
+	  *  @param tempName     	  - A template for which we edit the placeholder
+	  *  @param tempPhName   	  - A name for edit in the Template placeholder
+	  *  @param tempPhValue       - A value for edit in the Template placeholder
+	  *  @param tempPhDescription - A description for edit in the Template placeholder
+	  */ 
+	  public void editTemplatePlaceholder(WebDriver driver,  String tempName, String tempPhName, String tempPhValue, String tempPhDescription) {
+		   
+		  // Some manipulations to detect row ID
+		  String bodyText = driver.findElement(By.tagName("body")).getText();
+		  String rowId = bodyText.substring(bodyText.indexOf("Placeholder Value Description") + "Placeholder Value Description".length(), bodyText.indexOf("%ITCS_") - 1);
+		  myDebugPrinting("rowId - " + rowId, testVars.logerVars.MINOR);
+		  driver.findElement(By.xpath("//*[@id='results']/tbody/tr[" + rowId + "]/td[6]/a[1]")).click();
+		  testFuncs.myWait(3000);
+		  driver.findElement(By.xpath("//*[@id='project']")).clear();
+		  driver.findElement(By.xpath("//*[@id='project']")).sendKeys(tempPhName);
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/form/table/tbody/tr/td/table/tbody/tr[3]/td[2]/input")).clear();
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/form/table/tbody/tr/td/table/tbody/tr[3]/td[2]/input")).sendKeys(tempPhValue);
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/form/table/tbody/tr/td/table/tbody/tr[4]/td[2]/input")).clear();
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/form/table/tbody/tr/td/table/tbody/tr[4]/td[2]/input")).sendKeys(tempPhDescription);
+		  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+
+		  // Verify edit
+		  myDebugPrinting("verify edit", testVars.logerVars.MINOR);
+		  driver.findElement(By.xpath("//*[@id='results-filtering']")).clear(); 
+		  driver.findElement(By.xpath("//*[@id='results-filtering']")).sendKeys(tempPhName);
+		  testFuncs.myWait(3000);
+		  verifyStrByXpath(driver, "//*[@id='placeholder']/span/b", "%ITCS_" + tempPhName + "%");
+		  verifyStrByXpath(driver, "//*[@id='vals']/span"         , tempPhValue);
+		  verifyStrByXpath(driver, "//*[@id='desc']/a/span"       , tempPhDescription);
+	  }
+	  
+	  /**
+	  *  Delete a template placeholder
+	  *  @param driver     - A given driver
+	  *  @param tempName   - A given Template from whom we want to delete a placeholder
+	  *  @param tempPhName - A given Template placeholder
+	  */
+	  public void deleteTemplatePlaceholder(WebDriver driver, String tempName, String tempPhName) {
+		  		  
+		  driver.findElement(By.cssSelector("a[title*='Delete placeholder " + tempPhName + "']")).click();
+		  testFuncs.myWait(1000);
+		  verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[1]"  , "Are you sure you want to delete this value?");  
+		  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+		  testFuncs.myWait(3000);
+
+		  // Verify delete
+		  myDebugPrinting("verify delete", testVars.logerVars.MINOR);
+		  driver.findElement(By.xpath("//*[@id='models']")).sendKeys(tempName); 
+		  driver.findElement(By.xpath("//*[@id='results-filtering']")).clear(); 
+		  driver.findElement(By.xpath("//*[@id='results-filtering']")).sendKeys(tempPhName); 
+		  testFuncs.myWait(3000);
+		  String bodyText = driver.findElement(By.tagName("body")).getText();
+		  if (bodyText.contains(tempPhName)) {
+			  fail("Delete did not succeeded !!");
+			  
+		  }  
+	  }
+	  
+	  /**
+	  *  Copy a template placeholder from other Template
+	  *  @param driver         - A given driver
+	  *  @param tempWecopyFrom - A given Template from whom we want to delete a placeholder
+	  *  @param tempWeCopyTo   - A given Template placeholder name
+	  */
+	  public void copyTemplatePlaceholder(WebDriver driver, String tempWecopyFrom, String tempWeCopyTo, String tempPhName) {
+		  
+			driver.findElement(By.xpath("//*[@id='models']")).sendKeys(tempWeCopyTo); 
+			testFuncs.myWait(1000);
+			driver.findElement(By.xpath("//*[@id='import']/span")).click();
+			testFuncs.myWait(2000);
+			verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[1]"						   , "Import Place Holders");
+			verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[2]/table/tbody/tr/td[1]/label", "Please selcet a model:");
+			driver.findElement(By.xpath("//*[@id='modelToImport']")).sendKeys(tempWecopyFrom); 
+			testFuncs.myWait(1000);
+			driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+			testFuncs.myWait(2000);
+			
+			// Copy a template place holder to Default Template should not be possible
+			if (tempWecopyFrom.contains("operTemplate")) {
+				
+				myDebugPrinting("Copy a template place holder to Default Template should not be possible", testVars.logerVars.MINOR);
+				verifyStrByXpath(driver, "/html/body/div/div/div[1]/h3"     , "Unauthorized");
+				verifyStrByXpath(driver, "/html/body/div/div/div[2]/div/div", "You do not have permission to modify this item"); 
+				return;
+			}
+			verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[1]", "Import Place Holders");
+			verifyStrByXpath(driver, "//*[@id='jqistate_state0']/div[2]", "Import place holders succesfully");
+			driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+			
+			// Verify import
+			myDebugPrinting("verify import", testVars.logerVars.MINOR);
+			driver.findElement(By.xpath("//*[@id='results-filtering']")).clear(); 
+			driver.findElement(By.xpath("//*[@id='results-filtering']")).sendKeys(tempPhName);
+			testFuncs.myWait(3000);
+			verifyStrByXpath(driver, "//*[@id='placeholder']/span/b", "%ITCS_" + tempPhName + "%");
+	  }
+	  
+	  /**
+	  *  Upload a configuration file
+	  *  @param driver   - A given driver
+	  *  @param filePath - A given path to configuration file we want to upload
+	  *  @param fileName - A name of the uploaded file
+	  */
+	  public void uploadConfigurationFile(WebDriver driver, String filePath, String fileName) {
+		  
+			driver.findElement(By.xpath("//*[@id='myfile']")).sendKeys(filePath);
+			testFuncs.myWait(1000);
+			driver.findElement(By.xpath("//*[@id='form_upload']/p/input[4]")).click();
+			testFuncs.myWait(2000);
+		    verifyStrByXpath(driver, "//*[@id='promt_div_id']", "\"" + fileName + "\" File Successfully Uploaded.");
+			driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+			testFuncs.myWait(1000);
+
+			// Verify upload
+			driver.findElement(By.xpath("//*[@id='trunkTBL']/div/form/p[1]/input")).clear();
+			driver.findElement(By.xpath("//*[@id='trunkTBL']/div/form/p[1]/input")).sendKeys(fileName);
+			testFuncs.myWait(2000);
+		    verifyStrByXpath(driver, "//*[@id='filetable']/tbody/tr[2]/td[2]/span/a[2]", fileName);
+	  }
+	  
+	  /**
+	  *  Download a configuration file
+	  *  @param driver   - A given driver
+	  *  @param fileName - A name of the uploaded file
+	  */	  
+	  public void downloadConfigurationFile(WebDriver driver, String fileName) {
+		  
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/div/form/p[1]/input")).clear();
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/div/form/p[1]/input")).sendKeys(fileName);
+		  deleteFilesByPrefix(testVars.getDownloadsPath(), fileName);
+		  testFuncs.myWait(2000);
+		  driver.findElement(By.cssSelector("a[href*='" + fileName + "']")).click();
+		  testFuncs.myWait(5000);
+		  if (findFilesByGivenPrefix(testVars.getDownloadsPath(), fileName)) {
+			  	myDebugPrinting("File " + fileName + " was downloaded successfully !!");
+		  } else {
+				fail("File was not downloaded successfully !!");
+		  }
+		  deleteFilesByPrefix(testVars.getDownloadsPath(), fileName);
+	  }
+	  
+	  /**
+	  *  Delete a configuration file
+	  *  @param driver   - A given driver
+	  *  @param fileName - A name of the deleted file
+	  */
+	  public void deleteConfigurationFile(WebDriver driver, String fileName) {
+		  
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/div/form/p[1]/input")).clear();
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/div/form/p[1]/input")).sendKeys(fileName);
+		  driver.findElement(By.xpath("//*[@id='selall']")).click();
+		  testFuncs.myWait(2000);
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/div/form/p[2]/input[4]")).click();
+		  testFuncs.myWait(2000);
+		  Alert alert = driver.switchTo().alert();
+		  if (alert.getText().contains("Are you sure want to delete the selected files?")){}
+		  else {
+			  fail("Alert message was not detected !! (" + alert.getText() + ")");
+		   }
+		  alert.accept(); 
+		  testFuncs.myWait(2000);
+		  verifyStrByXpath(driver, "//*[@id='promt_div_id']", "File Deleted Successfully: \"" + fileName + "\"");
+		  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+		  testFuncs.myWait(1000);
+		  
+		  // Verify delete
+		  myDebugPrinting("verify delete", testVars.logerVars.MINOR);
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/div/form/p[1]/input")).clear();
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/div/form/p[1]/input")).sendKeys(fileName);
+		  testFuncs.myWait(3000);
+		  String bodyText = driver.findElement(By.tagName("body")).getText();
+		  if (bodyText.contains(fileName)) {
+			  fail("Delete did not succeeded !!");
+			  
+		  }
+	  }
+	  
+	  /**
+	  *  Add new IP phone firmware
+	  *  @param driver       - A given driver
+	  *  @param firmName     - A name of the added firmware
+	  *  @param firmDesc     - A description of the added firmware
+	  *  @param firmVersion  - A version of the added firmware
+	  *  @param firmRegion   - A name of the region for the added firmware
+	  *  @param firmFileName - A name for the file we want to upload for the firmware
+	  */
+	  public void addNewFirmware(WebDriver driver, String firmName, String firmDesc, String firmVersion, String firmRegion, String firmFileName) {
+		  
+		  driver.findElement(By.xpath("//*[@id='tbTemps']/tbody/tr[1]/td/a/span")).click();
+		  testFuncs.myWait(2000);
+		  
+		  // Fill data at created firmware
+		  myDebugPrinting("Fill data at created firmware", testVars.logerVars.MINOR);
+		  verifyStrByXpath(driver, "//*[@id='title']"										   , "Add new IP Phone firmware");
+		  verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[1]/td", "Add new IP Phone firmware");
+		  driver.findElement(By.xpath("//*[@id='name']")).sendKeys(firmName);
+		  driver.findElement(By.xpath("//*[@id='description']")).sendKeys(firmDesc);
+		  driver.findElement(By.xpath("//*[@id='version']")).sendKeys(firmVersion);
+		  driver.findElement(By.xpath("//*[@id='region_id']")).sendKeys(firmRegion);
+		  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+		  testFuncs.myWait(3000);
+		
+		  // Upload file
+		  myDebugPrinting("Upload file", testVars.logerVars.MINOR);
+		  verifyStrByXpath(driver, "//*[@id='title']"										   , "IP Phone " + firmName + " Firmware");
+		  verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[1]/td", "IP Phone " + firmName + " Firmware");
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[10]/td[2]/a")).click();
+		  testFuncs.myWait(3000);
+		  verifyStrByXpath(driver, "//*[@id='title']"								 , "Upload IP Phone Firmware " + firmName);
+		  verifyStrByXpath(driver, "//*[@id='IntroScreen']/form/table/tbody/tr[1]/td", "Press the Browse button to locate the file and then press the Submit button. When file upload is complete The file has been uploaded successfully message will be shown.");
+		  driver.findElement(By.xpath("//*[@id='IntroScreen']/form/table/tbody/tr[3]/td/input")).sendKeys(testVars.getSrcFilesPath() + "\\" + firmFileName);
+		  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+		  testFuncs.myWait(7000);
+		  verifyStrByXpath(driver, "//*[@id='promt_div_id']", "The IP Phone firmware has been uploaded successfully.");
+		  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+		  testFuncs.myWait(5000);
+		  verifyStrByXpath(driver, "//*[@id='title']"										   , "IP Phone " + firmName + " Firmware");
+		  verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[6]/td[2]", firmName + ".img");
+
+		  // Download file
+		  if(driver instanceof InternetExplorerDriver) {
+			  myDebugPrinting(" Download is not activated in IE", testVars.logerVars.MINOR);
+
+		  } else {
+			  myDebugPrinting("Download file and submit", testVars.logerVars.MINOR);
+			  deleteFilesByPrefix(testVars.getDownloadsPath(), firmName);
+			  driver.findElement(By.xpath("//*[@id='downloadRowId']/td[2]/a")).click();
+			  testFuncs.myWait(15000);
+			  if (findFilesByGivenPrefix(testVars.getDownloadsPath(), firmName + ".img")) {
+			  } else {
+					fail("File was not downloaded successfully !! (" + firmName + ".img" + ")");
+			  }
+			  deleteFilesByPrefix(testVars.getDownloadsPath(), firmName + ".img");
+ 
+		  }
+		  
+		  // Submit and verify create
+		  myDebugPrinting("Submit and verify create", testVars.logerVars.MINOR);
+		  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+		  testFuncs.myWait(5000);
+		  String bodyText = driver.findElement(By.tagName("body")).getText();
+		  if (!bodyText.contains(firmName)) {
+			  fail("Firmware was not detected !! (" + firmName + ")");
+			  
+		  }
+	  }
+	  
+	  /**
+	  *  Edit an existing IP phone firmware
+	  *  @param driver       - A given driver
+	  *  @param firmName     - A name of the created firmware
+	  *  @param firmDesc     - A description of the created firmware
+	  *  @param newFirmDesc  - A description of the edited firmware
+	  *  @param newFirmVersion  - A version of the edited firmware
+	  *  @param nreFirmRegion   - A name of the region for the edited firmware
+	  */
+	  public void editFirmware(WebDriver driver, String firmName, String firmDesc, String newFirmDesc, String newFirmVersion, String nreFirmRegion) {
+		  
+		  driver.findElement(By.cssSelector("a[title*='" + firmDesc + "']")).click();
+		  testFuncs.myWait(3000);  
+		  verifyStrByXpath(driver, "//*[@id='title']"											  ,"IP Phone " + firmName + " Firmware");
+		  verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[1]/td"	  ,"IP Phone " + firmName + " Firmware");
+		  verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[2]/td[2]", firmName);
+		  driver.findElement(By.xpath("//*[@id='description']")).clear();
+		  driver.findElement(By.xpath("//*[@id='description']")).sendKeys(newFirmDesc);
+		  driver.findElement(By.xpath("//*[@id='version']")).clear();
+		  driver.findElement(By.xpath("//*[@id='version']")).sendKeys(newFirmVersion);
+		  driver.findElement(By.xpath("//*[@id='region_id']")).sendKeys(nreFirmRegion);
+		  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+		  testFuncs.myWait(5000);
+		
+		  // Verify edit
+		  myDebugPrinting("Verify edit", testVars.logerVars.MINOR);
+		  String bodyText = driver.findElement(By.tagName("body")).getText();
+	      assertTrue("Edited name was not detected !! (" + firmName + ")"       , bodyText.contains(firmName));
+	      assertTrue("Edited description was not detected !! (" + newFirmDesc + ")", bodyText.contains(newFirmDesc));
+	      assertTrue("Edited version was not detected !! (" + newFirmVersion + ")" , bodyText.contains(newFirmVersion));	  
+	  }
+	  
+	  /**
+	  *  Delete an existing IP phone firmware
+	  *  @param driver         - A given driver
+	  *  @param firmName       - A name of the deleted firmware
+	  *  @param newFirmDesc    - A description of the deleted firmware
+	  *  @param newFirmVersion - A version of the deleted firmware
+	  */
+	  public void deleteFirmware(WebDriver driver, String firmName, String newFirmDesc, String firmVersion) {
+		  
+		  driver.findElement(By.cssSelector("a[title*='" + firmName + "']")).click();
+		  testFuncs.myWait(2000);
+		  verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]/table/tbody/tr[1]/th", "Delete Firmware");
+		  verifyStrByXpath(driver, "//*[@id='promt_div_id']"								, "Are you sure you want to delete the " + firmName + " IP Phone firmware?");
+		  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+		  testFuncs.myWait(3000);
+		  
+		  // Verify delete
+		  myDebugPrinting("Verify delete", testVars.logerVars.MINOR);
+		  String bodyText = driver.findElement(By.tagName("body")).getText();
+	      assertFalse("Firmware name still detected !! (" + firmName + ")"          , bodyText.contains(firmName));
+	      assertFalse("Firmware description still detected !! (" + newFirmDesc + ")", bodyText.contains(newFirmDesc));
+	      assertFalse("Firmware version still detected !! (" + firmVersion + ")"    , bodyText.contains(firmVersion));	  
+	  }
+	  
+	  /**
+	  *  Upload non-cfg file to created Template
+	  *  @param driver         - A given driver
+	  *  @param nonCfgFileName -  An invalid file path
+	  */
+	  public void uploadNonCfgToTemplates(WebDriver driver, String nonCfgFileName) {
+		  
+		  String Id = getId();
+		  String tempTemplateName = "tempName" + Id;
+		  
+		  // Enter the Templates menu and create a Template
+		  driver.findElement(By.xpath("//*[@id='tbTemps']/tbody/tr[1]/td/a")).click();
+		  testFuncs.myWait(3000);
+		  verifyStrByXpath(driver, "//*[@id='title']", "Add new Template");
+		  driver.findElement(By.xpath("//*[@id='modelname']")).sendKeys(tempTemplateName);
+		  driver.findElement(By.xpath("//*[@id='description']")).sendKeys("tempdesc");
+		  driver.findElement(By.xpath("//*[@id='region_id']")).sendKeys("AutoDetection");
+		  driver.findElement(By.xpath("//*[@id='model_type']")).sendKeys("420HD");
+		  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+		  testFuncs.myWait(3000);
+		  
+		  // Try to upload a non-cfg to the created Template
+		  myDebugPrinting("Try to upload a non-cfg to the created Template", testVars.logerVars.MINOR);
+		  driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[7]/td[2]/a")).click();
+		  testFuncs.myWait(3000);
+		  verifyStrByXpath(driver, "//*[@id='title']", "Upload IP Phone Template");
+		  driver.findElement(By.xpath("//*[@id='IntroScreen']/form/table/tbody/tr[3]/td/input")).sendKeys(testVars.getSrcFilesPath() + "\\" + nonCfgFileName);
+		  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+		  testFuncs.myWait(3000);
+		  verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]/table/tbody/tr[1]/th", "IP Phone upload template");
+		  verifyStrByXpath(driver, "//*[@id='promt_div_id']"								, "Please choose a cfg file.");
+		  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+		  testFuncs.myWait(3000);
+		  
+		  // Return to the Templates menu and delete the created Template
+		  myDebugPrinting("Return to the Templates menu and delete the created Template", testVars.logerVars.MINOR);
+		  driver.switchTo().defaultContent();
+		  driver.findElement(By.xpath("//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[1]/a")).click();
+		  driver.switchTo().frame(1);
+		  deleteTemplate(driver, tempTemplateName);
+	  }
+	  
+	  /**
+	  *  Upload non-cfg file to Phone configuration menu
+	  *  @param driver         - A given driver
+	  *  @param nonCfgFileName -  An invalid file path
+	  */
+	  public void uploadNonCfgToPhoneConfiguration(WebDriver driver, String nonCfgFileName) {
+		  
+		  driver.findElement(By.xpath("//*[@id='myfile']")).sendKeys(testVars.getSrcFilesPath() + "\\" + nonCfgFileName);
+		  driver.findElement(By.xpath("//*[@id='form_upload']/p/input[4]")).click();
+		  testFuncs.myWait(1000);
+		  verifyStrByXpath(driver, "//*[@id='promt_div_id']", "Please choose a cfg file");
+	  }
+	  
+	  /**
+	  *  Add a device placeholder to existing registered user
+	  *  @param driver   - A given driver
+	  *  @param userName - A pre-create registered user
+	  *  @param phName   - A placeholder name
+	  *  @param phValue  - A placeholder value to override
+	  */
+	  public void addDevicePlaceholder(WebDriver driver, String userName, String phName, String phValue) {
+		  
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[2]/div[2]/a/span")).click();
+		  testFuncs.myWait(1000);
+		  verifyStrByXpath(driver, "//*[@id='title']"						 , "Change IP Phone Device Placeholder");
+		  verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr[1]/td", "Change IP Phone Device Placeholder");
+		  driver.findElement(By.xpath("//*[@id='add_id']")).click();
+		  testFuncs.myWait(1000);
+		  verifyStrByXpath(driver, "//*[@id='table_all']/tbody/tr/td/div/div/div[1]/h3", "Please select a device");
+		  driver.findElement(By.xpath("//*[@id='table_all']/tbody/tr/td/div/div/div[2]/div[1]/div[2]/div/input")).clear();
+		  driver.findElement(By.xpath("//*[@id='table_all']/tbody/tr/td/div/div/div[2]/div[1]/div[2]/div/input")).sendKeys(userName);
+		  driver.findElement(By.xpath("//*[@id='table_all']/tbody/tr/td/div/div/div[2]/div[1]/div[2]/div/span/button/i")).click();
+		  testFuncs.myWait(2000);
+		  driver.findElement(By.xpath("//*[@id='devices_body']/tr/td[3]/b")).click();
+		  testFuncs.myWait(3000);
+		  String txt = driver.findElement(By.xpath("//*[@id='device_id']")).getText();
+		  myDebugPrinting("txt - " + txt, testVars.logerVars.MINOR);
+		  driver.findElement(By.xpath("//*[@id='key']")).sendKeys(phName);
+		  driver.findElement(By.xpath("//*[@id='over_value']")).sendKeys(phValue);
+		  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+		  testFuncs.myWait(3000);
+		  
+		  // Verify create
+		  myDebugPrinting("Verify create", testVars.logerVars.MINOR);  
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).clear();
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).sendKeys(userName);
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/span/button")).click();
+		  testFuncs.myWait(3000);
+		  String bodyText = driver.findElement(By.tagName("body")).getText();
+		  Assert.assertTrue("placeholder name was not found!", bodyText.contains("%ITCS_" + phName + "%"));
+		  Assert.assertTrue("placeholder value was not found!", bodyText.contains(phValue));
+	  }
+	  
+	  /**
+	  *  Edit an existing device placeholder
+	  *  @param driver     - A given driver
+	  *  @param userName   - A pre-create registered user
+	  *  @param phName     - An existing placeholder name for edit
+	  *  @param phValue    - An existing placeholder value
+	  *  @param phNewValue - A new value for the placeholder
+	  */
+	  public void editDevicePlaceholder(WebDriver driver, String userName, String phName, String phValue, String phNewValue) {
+		  
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).clear();
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).sendKeys(userName);
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/span/button")).click();
+		  testFuncs.myWait(2000);		  
+		  driver.findElement(By.xpath("//*[@id='placeholders_body']/tr/td[7]/button")).click();
+		  testFuncs.myWait(1000);
+		  driver.findElement(By.xpath("//*[@id='over_value']")).clear();
+		  driver.findElement(By.xpath("//*[@id='over_value']")).sendKeys(phNewValue);
+		  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+		  testFuncs.myWait(3000);
+		  
+		  // Verify edit
+		  myDebugPrinting("Verify edit", testVars.logerVars.MINOR);  
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).clear();
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).sendKeys(userName);
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/span/button")).click();
+		  testFuncs.myWait(3000);
+		  String bodyText = driver.findElement(By.tagName("body")).getText();
+		  Assert.assertTrue("placeholder name was not found!", bodyText.contains("%ITCS_" + phName + "%"));
+		  Assert.assertTrue("placeholder value was not found!", bodyText.contains(phNewValue));  
+	  }
+	  
+	  /**
+	  *  Delete an existing device placeholder
+	  *  @param driver     - A given driver
+	  *  @param userName   - A pre-create registered user
+	  *  @param phName     - An existing placeholder name for edit
+	  *  @param phNewValue - A new value for the placeholder
+	  */
+	  public void deleteDevicePlaceholder(WebDriver driver, String userName, String phName, String phNewValue) {
+		  
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).clear();
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).sendKeys(userName);
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/span/button")).click();
+		  testFuncs.myWait(2000);		  
+		  driver.findElement(By.xpath("//*[@id='placeholders_body']/tr/td[8]/button")).click();
+		  testFuncs.myWait(1000); 
+		  verifyStrByXpath(driver, "//*[@id='ui-id-1']"       , "Delete item: " + phName);
+		  verifyStrByXpath(driver, "//*[@id='dialog-confirm']", "Are you sure you want to delete this value?");
+		  driver.findElement(By.xpath("/html/body/div[2]/div[3]/div/button[1]/span")).click();
+		  testFuncs.myWait(500);
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).clear();
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/input")).sendKeys(userName);
+		  driver.findElement(By.xpath("/html/body/div[1]/div/div[2]/div[1]/div[3]/form/div/span/button")).click();
+		  verifyStrByXpath(driver, "/html/body/div[1]/div/div[2]/div[4]/div/table/tbody[2]/tr/td", "There are no placeholders at present"); 
+	  }
+	  
+	  /**
+	  *  Enter to menu according to given href
+	  *  @param driver    - A given driver
+	  *  @param locHref   - A given href for enter the menu
+	  *  @param locHeader - A given header to search in the menu we enter
+	  */
+	  public void enterMenuByHref(WebDriver driver, String locHref, String locHeader) {
+		  
+		  driver.findElement(By.cssSelector("a[href*='" + locHref + "']")).click();
+		  testFuncs.myWait(2000);
+		  String bodyText = driver.findElement(By.tagName("body")).getText();
+		  Assert.assertFalse("Menu header was not detected !! \n" + bodyText, bodyText.contains(locHeader));  
+	  }
+}

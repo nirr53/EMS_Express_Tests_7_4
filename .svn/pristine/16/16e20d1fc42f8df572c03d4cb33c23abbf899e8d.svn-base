@@ -1,0 +1,249 @@
+package EMS_Tests;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the Template placeholders menu via an Operation user.
+* ----------------
+* Tests:
+* 	 - Enter Template placeholders menu via an Operation user.
+* 	 1. Verify that add a new placeholder for default Template is impossible.
+* 	 2. Verify that edit default placeholder of default Template is impossible.
+* 	 3. Verify that edit default placeholder of default Template is impossible.
+* 	 4. Create a new Template and perform the next steps on him.
+* 	 5. Verify that add a new placeholder for the created Template is possible.
+* 	 6. Verify that edit a placeholder from the created Template is possible.
+* 	 7. Verify that delete a placeholder from the default Template is possible.
+* 	 8  Verify that copy a place holder from a default template is impossible.
+* 	 9. Delete the created Template.
+* 
+* Results:
+* 	 1-3. All actions should be not available when the template is a default template.
+*  	 5-7. All actions should be available when the template is a default template.
+*    8. A copy from a default template should be impossible.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test58__Operation_template_placeholders {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test58__Operation_template_placeholders(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Operation_template_placeholders_menu() throws Exception {
+	  
+	String tempName = "Audiocodes_420HD";
+	Log.startTestCase(this.getClass().getName());
+	 
+    // Enter the Add new template placeholder menu
+	testFuncs.myDebugPrinting("Enter the Add new template placeholder menu");
+	testFuncs.login(driver, testVars.getOpetUsername(), testVars.getOperPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Operation_Templates_placeholders", "Template Placeholders");
+ 	testFuncs.myWait(1000);
+    driver.switchTo().frame(1);
+	
+	// Step 1 - Verify that you cannot add a new Template placeholder to default Template
+	testFuncs.myDebugPrinting("Step 1 - Verify that you cannot add a new Template placeholder to default Template");
+    addTemplatePlaceholder(driver, tempName);
+
+	// Step 2 - Verify that edit default placeholder of default Template is impossible
+	testFuncs.myDebugPrinting("Step 2 - Verify that edit default placeholder of default Template is impossible");;
+    editTemplatePlaceholder(driver, tempName);
+    
+	// Step 3 - Verify that delete default placeholder of default Template is impossible
+	testFuncs.myDebugPrinting("Step 3 - Verify that delete default placeholder of default Template is impossible");;
+    deleteTemplatePlaceholder(driver, tempName);
+    
+    // Step 4 - Move to the Template-place holders menu, and create a Template for the next steps
+	testFuncs.myDebugPrinting("Step 4 - Move to the Template-place holders menu, and create a Template for the next steps");;
+    driver.switchTo().defaultContent();
+    driver.findElement(By.xpath("//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[1]/a")).click();
+ 	testFuncs.myWait(1000);
+    Map<String, String> map = new HashMap<String, String>();
+    map.put("isRegionDefault"		   ,  "false");
+    map.put("cloneFromtemplate"        ,  ""); 
+    map.put("isDownloadSharedTemplates",  "false");
+	String Id 			     = testFuncs.getId();
+	String tempPhName        = "myPHolderName"        + Id;
+	String tempPhValue       = "myPHolderValue"       + Id;
+	String tempPhDescription = "myPHolderDescription" + Id;
+		   tempName 		 = "operTemplate"         + Id;
+
+    driver.switchTo().frame(1);
+	testFuncs.addTemplate(driver, "operTemplate" + Id, "operTemplate description", "TelAviv", "420HD", map);
+	enterTemplatePlaceholdersMenu(driver);
+	
+	// Step 5 - Add a new Template placeholder
+	testFuncs.myDebugPrinting("Step 5 - Add a new Template placeholder");
+    testFuncs.addTemplatePlaceholder(driver, tempName, tempPhName, tempPhValue, tempPhDescription);
+    
+	// Step 6 - Edit an existing Template placeholder
+	testFuncs.myDebugPrinting("Step 6 - Edit an existing Template placeholder");
+	tempPhName        = "new" + tempPhName;
+	tempPhValue       = "new" + tempPhValue;
+	tempPhDescription = "new" + tempPhDescription;
+    testFuncs.editTemplatePlaceholder(driver, tempName, tempPhName, tempPhValue, tempPhDescription);
+    
+	// Step 7 - Delete a Template placeholder
+	testFuncs.myDebugPrinting("Step 7 - Delete a Template placeholder");
+    testFuncs.deleteTemplatePlaceholder(driver, tempName, tempPhName);
+    
+	// Step 8 - Copy a Template placeholder
+	testFuncs.myDebugPrinting("Step 8 - Copy a Template placeholder");
+    testFuncs.addTemplatePlaceholder(driver, tempName, tempPhName, tempPhValue, tempPhDescription);
+	testFuncs.copyTemplatePlaceholder(driver, tempName, "Audiocodes_420HD", tempPhName);
+	
+	// Step 9 - Delete the created Template
+	testFuncs.myDebugPrinting("Step 9 - Delete the created Template");
+	enterTemplatePlaceholdersMenu(driver);
+    driver.switchTo().defaultContent();
+    driver.findElement(By.xpath("//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[1]/a")).click();
+ 	testFuncs.myWait(1000);
+    driver.switchTo().frame(1);
+	testFuncs.deleteTemplate(driver, tempName); 
+  }
+  
+  /**
+  *  Try to add a new Template placeholder to default Template via an Operation user
+  *  @param driver      	  - A given driver
+  *  @param tempName     	  - A template for which we create the placeholder
+  */  
+  private void addTemplatePlaceholder(WebDriver driver, String tempName) {
+	  
+	  driver.findElement(By.xpath("//*[@id='models']")).sendKeys(tempName);
+	  testFuncs.myWait(5000);
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr[1]/td/table/tbody/tr[1]/td[2]/a/span")).click();
+	  testFuncs.myWait(5000);
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/form/table/tbody/tr/td/table/tbody/tr[1]/td", "IP Phone Model - " + tempName);
+	  driver.findElement(By.xpath("//*[@id='project']")).sendKeys("tempName");
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/form/table/tbody/tr/td/table/tbody/tr[3]/td[2]/input")).sendKeys("tempvalue");
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/form/table/tbody/tr/td/table/tbody/tr[4]/td[2]/input")).sendKeys("tempDescription");
+	  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+
+	  //  Verify that add a new placeholder for default Template is impossible
+	  testFuncs.myDebugPrinting("Verify that add a new placeholder for default Template is impossible", testVars.logerVars.MINOR);
+	  testFuncs.verifyStrByXpath(driver, "/html/body/div/div/div[1]/h3"     , "Unauthorized");
+	  testFuncs.verifyStrByXpath(driver, "/html/body/div/div/div[2]/div/div", "You do not have permission to modify this item");
+	  enterTemplatePlaceholdersMenu(driver);
+  }
+  
+  /**
+  *  Try to edit a new Template placeholder to default Template via an Operation user
+  *  @param driver      	  - A given driver
+  *  @param tempName     	  - A template for which we create the placeholder
+  */  
+  private void editTemplatePlaceholder(WebDriver driver, String tempName) {
+	  
+	  driver.findElement(By.xpath("//*[@id='models']")).sendKeys(tempName);
+	  testFuncs.myWait(5000);
+	  driver.findElement(By.xpath("//*[@id='results']/tbody/tr[1]/td[6]/a[1]")).click();
+	  testFuncs.myWait(5000);  
+	  driver.findElement(By.xpath("//*[@id='project']")).sendKeys("tempName");
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/form/table/tbody/tr/td/table/tbody/tr[3]/td[2]/input")).sendKeys("tempvalue");
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/form/table/tbody/tr/td/table/tbody/tr[4]/td[2]/input")).sendKeys("tempDescription");
+	  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+
+	  // Verify that edit default placeholder of default Template is impossible
+	  testFuncs.myDebugPrinting(" Verify that edit default placeholder of default Template is impossible", testVars.logerVars.MINOR);
+	  testFuncs.verifyStrByXpath(driver, "/html/body/div/div/div[1]/h3"     , "Unauthorized");
+	  testFuncs.verifyStrByXpath(driver, "/html/body/div/div/div[2]/div/div", "You do not have permission to modify this item"); 
+	  enterTemplatePlaceholdersMenu(driver);
+  }
+  
+  /**
+  *  Try to delete a new Template placeholder to default Template via an Operation user
+  *  @param driver      	  - A given driver
+  *  @param tempName     	  - A template for which we create the placeholder
+  */  
+  private void deleteTemplatePlaceholder(WebDriver driver, String tempName) {
+	  
+	  driver.findElement(By.xpath("//*[@id='models']")).sendKeys(tempName);
+	  testFuncs.myWait(5000);
+	  driver.findElement(By.xpath("//*[@id='deletePh']")).click();
+	  testFuncs.myWait(5000);  
+	  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+	  testFuncs.myWait(2000);
+
+	  // Verify that delete default placeholder of default Template is impossible
+	  testFuncs.myDebugPrinting(" Verify that delete default placeholder of default Template is impossible", testVars.logerVars.MINOR);
+	  testFuncs.verifyStrByXpath(driver, "/html/body/div/div/div[1]/h3"     , "Unauthorized");
+	  testFuncs.verifyStrByXpath(driver, "/html/body/div/div/div[2]/div/div", "You do not have permission to modify this item"); 
+	  enterTemplatePlaceholdersMenu(driver);
+  }
+  
+  public void enterTemplatePlaceholdersMenu(WebDriver driver) {
+	  
+	  // Return to Template placeholders menu
+	  testFuncs.myDebugPrinting("Return to Template placeholders menu", testVars.logerVars.MINOR);
+	  driver.switchTo().defaultContent();
+	  driver.findElement(By.xpath("//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[3]/a")).click();
+	  testFuncs.myWait(2000);
+	  driver.switchTo().frame(1);
+  }
+    
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

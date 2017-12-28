@@ -1,0 +1,130 @@
+package EMS_Tests;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the Stop and continue feature
+* ----------------
+* Tests:
+* 	 - Enter the Import users menu
+* 	 - Create several users via POST query
+* 	 1. Enter the Manage-multiple-users menu and delete the import users.
+*       Stop the import at the middle and after some seconds continue it.
+*       Verify that all the users were deleted.
+*       
+* Results:
+* 	 1. After the 'stop' pressing, users should not be deleted.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test34__import_stop_continue {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test34__import_stop_continue(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Manage_multiple_users_stop_and_continue() throws Exception {
+	  
+	String srcUserPrefix 	= "stopAndContUser";
+	String usersNumber   	= "6";
+	int usStartIdx 		    = 1;
+	String successPath      = System.getProperty("user.dir") + "\\" + "success.txt";
+	File file               = new File(successPath);
+	Map<String, String> map = new HashMap<String, String>();
+	map.put("usersNumber",  usersNumber); 
+	map.put("startIdx"   ,  String.valueOf(usStartIdx));
+	map.put("srcUsername",  "Finished");
+	Log.startTestCase(this.getClass().getName());
+	
+	// Create several users using POST query
+	testFuncs.myDebugPrinting("Create several users using POST query");
+	file.delete();
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	String Id = testFuncs.getId();
+	String srcUserName = srcUserPrefix + Id;
+	map.put("usersPrefix",  srcUserName + "_");
+	String path = System.getProperty("user.dir") + "\\" + testVars.getCrUserBatName();	
+	String[] cmd = {path, testVars.getIp(), testVars.getPort()  , usersNumber,
+					srcUserName , testVars.getDomain(), "registered",
+		        "430HD", "TelAviv", "myLocation" };
+	Process p = Runtime.getRuntime().exec(cmd);
+	p.waitFor();
+	testFuncs.waitForPostUsersCreate(successPath, Integer.parseInt(usersNumber) * 40);
+  	
+    // Step 1 - Delete users, stop at middle and than continue delete
+  	testFuncs.myDebugPrinting("Step 1 - Delete users, stop at middle and than continue delete");
+ 	driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Manage_Multiple_Users", "Manage Multiple Users");
+    driver.switchTo().frame(1);	
+    testFuncs.selectMultipleUsers(driver, srcUserPrefix, "6");
+    map.put("srcUsername",  "Finished");
+    map.put("action"	 ,  "Delete Users");
+    testFuncs.setMultipleUsersAction(driver, map);
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

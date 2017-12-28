@@ -1,0 +1,130 @@
+package EMS_Tests;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the create-user options (manually and via POST query)
+* ----------------
+* Tests:
+* 	 1. Add new user manually.
+* 	 2. Add a registered user.
+* 	 3. Add an unregistered user.
+* 
+* Results:
+* 	 1. User should be added successfully.
+* 	 2. User should be added successfully and appear 'registered' in DEvice-status menu.
+* 	 3. User should be added unsuccessfully.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test5__add_user_tests {
+	
+  private String        usedBrowser = "";
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test5__add_user_tests(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  //Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass 
+  public static void setting_SystemProperties() {
+	  
+      System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void User_create() throws Exception {
+	 
+	String Id = testFuncs.getId();
+	String successPath   = System.getProperty("user.dir") + "\\" + "success.txt";
+	File file            = new File(successPath);
+	Log.startTestCase(this.getClass().getName());
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	
+    // Step 5.1 - Create user manually
+	testFuncs.myDebugPrinting("Step 5.1 - Create user manually");
+	testFuncs.addUser(driver, "user" + Id, "1q2w3e$r", "user" + Id, "TelAviv");
+    driver.switchTo().defaultContent();
+	testFuncs.myWait(2000);
+
+    // Step 5.2 - Create a registered user using POST method
+	testFuncs.myDebugPrinting("Step 5.2 - Create a registered user using POST method");
+	file.delete();
+	String path = System.getProperty("user.dir") + "\\" + testVars.getCrUserBatName();	
+    String[] cmd = {path, testVars.getIp(), testVars.getPort()  , "1",
+    		        "postUserPrefix1" + Id , testVars.getDomain(), "registered",
+    		        "430HD", "TelAviv", "myLocation" };
+    Process p = Runtime.getRuntime().exec(cmd);
+    p.waitFor();
+    testFuncs.waitForPostUsersCreate(successPath, 1 * 40);
+    testFuncs.verifyPostUserCreate(driver, "postUserPrefix1" + Id, "postUserPrefix1" + Id, true);
+    driver.switchTo().defaultContent();
+    driver.findElement(By.xpath("//*[@id='home']")).click();
+	testFuncs.myWait(2000);
+
+    // Step 5.3 - Create an unregistered user using POST method
+	testFuncs.myDebugPrinting("Step 5.3 - Create an unregistered user using POST method");
+	file.delete();
+    String[] cmd2 = {path, testVars.getIp(), testVars.getPort()  , "1",
+    		        "postUserPrefix2" + Id , testVars.getDomain(), "unregistered",
+    		        "430HD", "TelAviv", "myLocation" };
+    Process p2 = Runtime.getRuntime().exec(cmd2);
+    p2.waitFor();
+    testFuncs.waitForPostUsersCreate(successPath, 1 * 40);
+	testFuncs.enterMenu(driver, "Manage_users", "Manage Users");
+    testFuncs.verifyPostUserCreate(driver, "postUserPrefix2" + Id, "postUserPrefix2" + Id, false);
+  }
+
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+      testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

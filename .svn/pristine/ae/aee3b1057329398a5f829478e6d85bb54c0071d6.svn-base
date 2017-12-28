@@ -1,0 +1,193 @@
+package EMS_Tests;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests an edit of zero-touch user
+* ----------------
+* Tests:
+* 	 - Enter Manage multiple users changes menu.
+* 	 1. Create a user using POST query.
+* 	 2. Try to edit its username and display name
+*    3. Try to edit its device name
+* 	 4. Delete the user.
+* 
+* Results:
+* 	 1. User should be created successfully.
+* 	 2. The usernamd and display name should be edited successfully.
+* 	 3. The device-name should be edited successfully
+* 	 4. All users should be deleted successfully.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test79__edit_zero_tuch_user {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test79__edit_zero_tuch_user(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Edit_zero_touch_user() throws Exception {
+	 
+	String srcUserPrefix 	= "username";
+	String usersNumber   	= "1";
+	int usStartIdx 		 	= 1;
+	String successPath      = System.getProperty("user.dir") + "\\" + "success.txt";
+	File file               = new File(successPath);
+    Map<String, String> map = new HashMap<String, String>();
+    map.put("usersNumber",  usersNumber); 
+    map.put("startIdx"   ,  String.valueOf(usStartIdx));
+    map.put("srcUsername",  "Finished");
+	Log.startTestCase(this.getClass().getName());
+	
+    // Step 1 - Create a user using POST query
+	testFuncs.myDebugPrinting("Step 1 - Create a user using POST query");
+	file.delete();
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Manage_users", "Manage Users");
+	String testId = testFuncs.getId();
+	String srcUserName1 = srcUserPrefix + testId;
+	String path = System.getProperty("user.dir") + "\\" + testVars.getCrUserBatName();	
+    String[] cmd = {path, testVars.getIp(), testVars.getPort()  , usersNumber,
+    				srcUserName1 , testVars.getDomain(), "registered",
+    		        "430HD", "TelAviv", "myLocation" };
+    Process p = Runtime.getRuntime().exec(cmd);
+    p.waitFor();
+    testFuncs.waitForPostUsersCreate(successPath, Integer.parseInt(usersNumber) * 90);
+    testFuncs.verifyPostUserCreate(driver, srcUserName1, srcUserName1, true);
+    
+    // Step 2 - Try to edit its username and display name
+	testFuncs.myDebugPrinting("Step 2 - Try to edit its username and display name");
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Manage_users", "Manage Users");  
+    driver.switchTo().frame(1);						
+	driver.findElement(By.xpath("//*[@id='results']/tbody/tr[2]/td[8]/a[2]")).click();
+	testFuncs.myWait(5000);
+	
+	// Edit the username and display name
+	testFuncs.verifyStrByXpath(driver, "//*[@id='title']", "Edit User " + srcUserName1);
+	String username    = "editedUN" + testId;
+	String displayName = "editedDN" + testId;
+	driver.findElement(By.xpath("//*[@id='extension']")).clear();
+	driver.findElement(By.xpath("//*[@id='extension']")).sendKeys(username);
+	testFuncs.myWait(2000);
+	driver.findElement(By.xpath("//*[@id='displayName']")).clear();
+	driver.findElement(By.xpath("//*[@id='displayName']")).sendKeys(displayName);  
+	testFuncs.myWait(2000);
+	driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+	testFuncs.myWait(4000);
+	testFuncs.verifyStrByXpathContains(driver, "//*[@id='jqi_state_state0']/div[1]", "Do you want to generate the user devices (IP-Phone) configuration files?");
+	driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+	testFuncs.myWait(4000);
+	testFuncs.verifyStrByXpathContains(driver, "//*[@id='promt_div_id']/font[2]/b", "Do you want to update the devices files?");
+	driver.findElement(By.xpath("//*[@id='jqi_state0_buttonYes']")).click();
+	testFuncs.myWait(10000);
+	driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+	testFuncs.myWait(2000);
+	
+	// Verify the edit
+	driver.findElement(By.xpath("//*[@id='searchtext']")).clear();
+	driver.findElement(By.xpath("//*[@id='searchtext']")).sendKeys(username);
+	testFuncs.myWait(2000);
+	driver.findElement(By.xpath("//*[@id='searchusersform']/table/tbody/tr/td[7]/a")).click();
+	testFuncs.myWait(7000);
+	testFuncs.searchStr(driver, username);
+	testFuncs.searchStr(driver, displayName);
+	  
+    // Step 3 - Try to edit its device name
+ 	testFuncs.myDebugPrinting("Step 3 - Try to edit its device name");
+	driver.findElement(By.xpath("//*[@id='" + username + "tree']")).click();
+	testFuncs.myWait(2000);
+	driver.findElement(By.xpath("//*[@id='tr" + username + "device']/td[2]/table/tbody/tr/td/div/table/tbody/tr[5]/td/a[1]")).click();
+	testFuncs.myWait(5000);
+	String deviceName = "editedDevN" + testId;
+	testFuncs.verifyStrByXpath(driver, "//*[@id='title']/b", "Edit device of user " + username);
+	driver.findElement(By.xpath("//*[@id='display_name']")).clear();
+	driver.findElement(By.xpath("//*[@id='display_name']")).sendKeys(deviceName);
+	testFuncs.myWait(2000);
+	driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+	testFuncs.myWait(4000);
+	testFuncs.verifyStrByXpathContains(driver, "//*[@id='jqi_state_state0']/div[1]", "Do you want to generate");
+	driver.findElement(By.xpath("//*[@id='jqi_state0_buttonNo']")).click();
+	testFuncs.myWait(4000);
+	driver.findElement(By.xpath("//*[@id='" + username + "tree']")).click();
+	testFuncs.myWait(2000);
+	testFuncs.searchStr(driver, deviceName);
+
+    // Step 4 - Delete the created user
+  	testFuncs.myDebugPrinting("Step 4 - Delete the created user");
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Manage_Multiple_Users_open", "Manage Multiple Users");
+  	testFuncs.myWait(1000);
+    driver.switchTo().frame(1);	
+    testFuncs.selectMultipleUsers(driver, username, usersNumber);
+    map.put("action"	 ,  "Delete Users");
+    map.put("srcUsername",  "Finished");
+    map.put("usersPrefix",  username);
+    testFuncs.setMultipleUsersAction(driver, map);
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+	  
+    //driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+ 
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

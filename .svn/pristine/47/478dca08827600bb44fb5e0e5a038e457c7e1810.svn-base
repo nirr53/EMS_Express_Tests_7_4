@@ -1,0 +1,7 @@
+ems_server/keep_alive_period=1234
+ems_server/provisioning/url=http://<IP_ADDRESS>:8081/
+provisioning/method=STATIC
+provisioning/configuration/url=http://<IP_ADDRESS>/configfiles/
+provisioning/firmware/url=http://<IP_ADDRESS>/firmwarefiles/
+ems_server/user_name=system
+ems_server/user_password={"VvlZOp5/5pM="}

@@ -1,0 +1,177 @@
+package EMS_Tests;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test verify that we cannot upload files that has no cfg suffix in the Templates,
+* Template-placeholders and Phone configuration menus.
+* ----------------
+* Tests:
+* 	 - Enter the Phone configuration files menu
+* 	 1. Try to Upload non-cfg file to the Template
+* 	 2. Try to Upload non-cfg file to the Phone configuration
+* 
+* Results:
+*    1-2. In all cases upload should not be possible and appropriate error prompt should be displayed.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test35__upload_conf_files_with_invalid_suffix {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test35__upload_conf_files_with_invalid_suffix(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Test1() throws Exception {
+	  
+	String nonCfgFile = testVars.getImportFile("11.1");
+	Log.startTestCase(this.getClass().getName());
+	  
+    // Login the system
+	testFuncs.myDebugPrinting("Login the system");
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	
+	// Step 1 - Enter the Phone configuration files menu and try to Upload non-cfg file to the Template
+  	testFuncs.myDebugPrinting("Step 1 - Enter the Phone configuration files menu and try to Upload non-cfg file to the Template");
+	driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Templates", "IP Phones Configuration Templates");
+	driver.switchTo().frame(1);
+  	uploadNonCfgToTemplates(driver, nonCfgFile);
+  }
+  
+  @Test
+  public void Test2() throws Exception {
+	  
+	String nonCfgFile = testVars.getImportFile("11.1");
+	Log.startTestCase(this.getClass().getName());
+	
+	// Login the system
+	testFuncs.myDebugPrinting("Enter the Phone configuration files menu");
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	  
+	// Step 2 - Try to Upload non-cfg file to the Phone configuration
+  	testFuncs.myDebugPrinting("Step 2 - Try to Upload non-cfg file to the Phone configuration");
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Phone_configuration_files", "Manage Configuration Files");
+    driver.switchTo().frame(1);
+  	uploadNonCfgToPhoneConfiguration(driver, nonCfgFile);  
+  }
+  
+  /**
+  *  Upload non-cfg file to Phone configuration menu
+  *  @param driver         - A given driver
+  *  @param nonCfgFileName -  An invalid file path
+  */
+  private void uploadNonCfgToPhoneConfiguration(WebDriver driver, String nonCfgFileName) {
+	  
+	  driver.findElement(By.xpath("//*[@id='myfile']")).sendKeys(testVars.getSrcFilesPath() + "\\" + nonCfgFileName);
+	  driver.findElement(By.xpath("//*[@id='form_upload']/p/input[4]")).click();
+	  testFuncs.myWait(1000);
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='promt_div_id']", "Please choose a cfg file");
+  }
+  
+  /**
+  *  Upload non-cfg file to created Template
+  *  @param driver         - A given driver
+  *  @param nonCfgFileName -  An invalid file path
+  */
+  private void uploadNonCfgToTemplates(WebDriver driver, String nonCfgFileName) {
+	  
+	  String Id = testFuncs.getId();
+	  String tempTemplateName = "tempName" + Id;
+	  
+	  // Enter the Templates menu and create a Template
+	  driver.findElement(By.xpath("//*[@id='tbTemps']/tbody/tr[1]/td/a")).click();
+	  testFuncs.myWait(3000);
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='title']", "Add new Template");
+	  driver.findElement(By.xpath("//*[@id='modelname']")).sendKeys(tempTemplateName);
+	  driver.findElement(By.xpath("//*[@id='description']")).sendKeys("tempdesc");
+	  driver.findElement(By.xpath("//*[@id='region_id']")).sendKeys("AutoDetection");
+	  driver.findElement(By.xpath("//*[@id='model_type']")).sendKeys("420HD");
+	  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+	  testFuncs.myWait(3000);
+	  
+	  // Try to upload a non-cfg to the created Template
+	  testFuncs.myDebugPrinting("Try to upload a non-cfg to the created Template", testVars.logerVars.MINOR);
+	  driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[7]/td[2]/a")).click();
+	  testFuncs.myWait(3000);
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='title']", "Upload IP Phone Template");
+	  driver.findElement(By.xpath("//*[@id='IntroScreen']/form/table/tbody/tr[3]/td/input")).sendKeys(testVars.getSrcFilesPath() + "\\" + nonCfgFileName);
+	  driver.findElement(By.xpath("//*[@id='submit_img']")).click();
+	  testFuncs.myWait(3000);
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='jqi_state_state0']/div[1]/table/tbody/tr[1]/th", "IP Phone upload template");
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='promt_div_id']"								, "Please choose a cfg file.");
+	  driver.findElement(By.xpath("//*[@id='jqi_state0_buttonOk']")).click();
+	  testFuncs.myWait(3000);
+	  
+	  // Return to the Templates menu and delete the created Template
+	  testFuncs.myDebugPrinting("Return to the Templates menu and delete the created Template", testVars.logerVars.MINOR);
+	  driver.switchTo().defaultContent();
+	  driver.findElement(By.xpath("//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[4]/ul/li[1]/a")).click();
+	  driver.switchTo().frame(1);
+	  testFuncs.deleteTemplate(driver, tempTemplateName);
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

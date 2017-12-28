@@ -1,0 +1,139 @@
+package EMS_Tests;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the Template placeholders menu
+* ----------------
+* Tests:
+* 	 - Login via a Monitoring user.
+* 	 - Enter Template placeholders menu.
+* 	 1. Verify that Add a Template placeholder button is disabled.
+* 	 2. Verify that Edit an existing Template placeholder button is disabled.
+* 	 3. Verify that Delete a Template placeholder button is disabled.
+* 	 4. Verify that Show placeholders button is still active.
+* 
+* Results:
+*  	 1-3. Add, edit and delete buttons should stay disabled while we we login via a Monitoring user.
+*  	 4. The Show placeholders button should still be active
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test46__Monitoring_template_placeholders {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test46__Monitoring_template_placeholders(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Monitoring_Template_placeholders_menu() throws Exception {
+	  
+	String phPrefix = "daylight";
+	Log.startTestCase(this.getClass().getName());
+	 
+    // Enter the Add new template placeholder menu
+	testFuncs.myDebugPrinting("Enter the Add new template placeholder menu");
+	testFuncs.login(driver, testVars.getMonitUsername(), testVars.getMonitPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+    driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Monitoring_Templates_placeholders", "Template Placeholders");
+ 	testFuncs.myWait(1000);
+    driver.switchTo().frame(1);
+	
+	// Step 1 - Verify that the Add new placeholder button is disabled
+	testFuncs.myDebugPrinting("Step 1 - Verify that the Add new placeholder button is disabled");
+	String addButton = driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr[1]/td/table/tbody/tr[1]/td[2]/a")).getAttribute("class");
+    testFuncs.myAssertTrue("Add Template placeholder button is not deactivated !! (" + addButton + ")", addButton.contains("not-active"));
+
+	// Step 2 - Verify that Edit an existing Template placeholder button is disabled
+	testFuncs.myDebugPrinting("Step 2 - Verify that Edit an existing Template placeholder button is disabled");
+	driver.findElement(By.xpath("//*[@id='results-filtering']")).clear();
+	driver.findElement(By.xpath("//*[@id='results-filtering']")).sendKeys(phPrefix);
+  	testFuncs.myWait(3000);
+  	String bodyText = driver.findElement(By.tagName("body")).getText();
+  	String rowId = bodyText.substring(bodyText.indexOf("Placeholder Value Description") + "Placeholder Value Description".length(), bodyText.indexOf("%ITCS_") - 1);
+  	testFuncs.myDebugPrinting("rowId - " + rowId, testVars.logerVars.MINOR);
+	String editButton = driver.findElement(By.xpath("//*[@id='results']/tbody/tr[" + rowId + "]/td[6]/a[1]")).getAttribute("class");
+    testFuncs.myAssertTrue("Edit Template placeholder button is not deactivated !! (" + editButton + ")", editButton.contains("not-active"));
+
+	// Step 3 - Verify that Delete an existing Template placeholder button is disabled
+	testFuncs.myDebugPrinting("Step 3 - Verify that Delete an existing Template placeholder button is disabled");
+	String deleteButton = driver.findElement(By.xpath("//*[@id='deletePh']")).getAttribute("class");
+    testFuncs.myAssertTrue("Delete Template placeholder button is not deactivated !! (" + deleteButton + ")", deleteButton.contains("not-active"));
+  
+    // Step 4 - Verify that Show placeholders button is still active
+ 	testFuncs.myDebugPrinting("Step 4 - Verify that Show placeholders button is still active");
+	driver.findElement(By.xpath("//*[@id='plcsToDefId']/span")).click();
+  	testFuncs.myWait(3000);
+	ArrayList<?> tabs = new ArrayList<Object> (driver.getWindowHandles());
+	driver.switchTo().window((String) tabs.get(1));
+	testFuncs.verifyStrByXpath(driver, "//*[@id='title']"		   					  , "Templates Place Holders");
+	testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/div/h1"					  , "Templates Place Holders");
+	testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr[1]/td[1]/b", "Template Model");
+	testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr[1]/td[2]/b", "Placeholder");
+	testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr[1]/td[3]/b", "IPP Parameter");
+	testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr[1]/td[4]/b", "Description");
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

@@ -1,0 +1,164 @@
+package EMS_Tests;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests an export of users
+* ----------------
+* Tests:
+* 	 Login via an Operation user from the three following types:
+* 		- Operation user (one 'Operation' region and the rest are 'Monitoring').
+* 		- Operation user (one 'Operation' region and the rest are 'NA').
+* 		- Operation user (All regions are 'Operation').
+* 	 - Enter the Import users menu.
+* 	 1. Export a CSV template containing users only, without devices.
+* 	 2. Export a CSV template containing both users and devices.
+* 	 3. Export a CSV file containing users and devices information already defined in the server.
+* 
+* Results:
+* 	 1-3. In all cases the file should be downloaded successfully.
+* 
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test63__Operation_export_tests {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test63__Operation_export_tests(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Operation_export_users() throws Exception {
+	 
+	String csvTemplatePref  = "importUsers";
+	String csvCurrUsersPref = "exportUsers";
+	String usernames[]      = {testVars.getOpetUsername1(), testVars.getOpetUsername2(), testVars.getOpetUsername3()};
+	String passwords[]      = {testVars.getOperPassword1(), testVars.getOperPassword2(), testVars.getOperPassword3()};
+	String descriptions[]   = {"one region is Operation and the rest are Monitoring"  ,
+			 				   "one region is Operation and the rest are Not Availible",
+			 				   "all regions are Operation"};
+	Log.startTestCase(this.getClass().getName());
+	
+	if (!this.usedBrowser.equals(testVars.IE)) {
+		
+		for (int i = 0 ; i < 3; i ++) {
+			
+			testFuncs.myDebugPrinting("Tests on Operation user  - " + descriptions[i], testVars.logerVars.MAJOR);
+			testFuncs.login(driver, usernames[i], passwords[i], testVars.getSysMainStr(), "https://", this.usedBrowser);
+
+		    // Step 1 - Export a CSV template containing users only
+			testFuncs.myDebugPrinting("Step " + i + ".1 - Export a CSV template containing users only", testVars.logerVars.NORMAL);
+			testFuncs.deleteFilesByPrefix(testVars.getDownloadsPath(), csvTemplatePref);
+			testFuncs.enterMenu(driver, "Import_export", "Import Users and Devices information");
+		    driver.switchTo().frame(1);	
+			driver.findElement(By.xpath("//*[@id='uploadForm']/table/tbody/tr[8]/td/p/b[1]/a")).click();
+			testFuncs.myWait(5000);
+			if (testFuncs.findFilesByGivenPrefix(testVars.getDownloadsPath(), csvTemplatePref + ".csv")) {
+			} else {
+				
+				testFuncs.myFail("File was not downloaded successfully !!");
+			}
+		    driver.switchTo().defaultContent();
+			testFuncs.deleteFilesByPrefix(testVars.getDownloadsPath(), csvTemplatePref);
+			
+		    // Step 2 - Export a CSV template containing users and devices
+			testFuncs.myDebugPrinting("Step " + i + ".2 - Export a CSV template containing users and devices", testVars.logerVars.NORMAL);
+			testFuncs.deleteFilesByPrefix(testVars.getDownloadsPath(), csvTemplatePref);
+		    driver.switchTo().frame(1);	
+			driver.findElement(By.xpath("//*[@id='uploadForm']/table/tbody/tr[8]/td/p/b[2]/a")).click();
+			testFuncs.myWait(5000);
+			if (testFuncs.findFilesByGivenPrefix(testVars.getDownloadsPath(), csvTemplatePref + ".csv")) {
+			} else {
+				
+				testFuncs.myFail("File was not downloaded successfully !!");
+			}
+		    driver.switchTo().defaultContent();
+			testFuncs.deleteFilesByPrefix(testVars.getDownloadsPath(), csvTemplatePref);
+			
+		    // Step 3 - Export a CSV file containing users and devices information already defined in the server
+			testFuncs.myDebugPrinting("Step " + i + ".3 - Export a CSV file containing users and devices information already defined in the server", testVars.logerVars.NORMAL);
+			testFuncs.deleteFilesByPrefix(testVars.getDownloadsPath(), csvCurrUsersPref);
+		    driver.switchTo().frame(1);	
+			driver.findElement(By.xpath("//*[@id='uploadForm']/table/tbody/tr[10]/td/a")).click();
+			testFuncs.myWait(10000);
+			if (testFuncs.findFilesByGivenPrefix(testVars.getDownloadsPath(), csvCurrUsersPref + ".csv")) {
+			} else {
+				
+				testFuncs.myFail("File was not downloaded successfully !!");
+			}
+		    driver.switchTo().defaultContent();
+			testFuncs.deleteFilesByPrefix(testVars.getDownloadsPath(), csvCurrUsersPref);
+			pressLogOut(driver);
+		}
+	
+	}
+  } 
+  private void pressLogOut(WebDriver driver) {
+	  
+	  driver.switchTo().defaultContent();
+	  driver.findElement(By.xpath("//*[@id='header1']/tbody/tr/td[2]/a[3]")).click();
+	  testFuncs.myWait(2000);
+	  testFuncs.myAssertTrue("Log off testFuncs.myFailes !! (" + driver.getTitle() + ")", driver.getTitle().equals(testVars.getMainPageStr()));
+}
+
+@After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

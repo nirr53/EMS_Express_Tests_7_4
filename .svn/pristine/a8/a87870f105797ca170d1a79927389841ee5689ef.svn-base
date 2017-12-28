@@ -1,0 +1,132 @@
+package EMS_Tests;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test verify that we cannot add\edit\delete user while we in Monitoring user
+* ----------------
+* Tests:
+* 	 -Enter the Users menu
+*    1. Try to add a user
+*    2. Try to add a device to an existing user (System)
+*    3. Try to delete an existing user (System)
+*    4. Try to edit an existing user (System)
+* 
+* Results:
+*    1. Add user button should be deactivated.
+*    2. Add device button should be deactivated.
+*    3. Edit user should be active, but the Submit button should be deactivated.
+*    4. Edit user button should be deactivated.
+*    
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test40__Monitoring_user_tests {
+	
+  private WebDriver 	driver;
+  private StringBuffer  verificationErrors = new StringBuffer();
+  private String        usedBrowser = "";
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test40__Monitoring_user_tests(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  // Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass
+  public static void setting_SystemProperties() {
+	  
+	  System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs(); 
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Monitoring_user_and_device_actions() throws Exception {
+	
+	// This is the user default user
+	String sysUser = "system";
+	Log.startTestCase(this.getClass().getName());
+	
+	// Login the system
+	testFuncs.myDebugPrinting("Login the system");
+	testFuncs.login(driver, testVars.getMonitUsername(), testVars.getMonitPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	
+	// Step 1 - Try to add a user
+  	testFuncs.myDebugPrinting("Step 1 - Try to add a user");
+	driver.switchTo().defaultContent();
+	testFuncs.enterMenu(driver, "Manage_users", "Manage Users");
+    driver.switchTo().frame(1);
+    String addClass = driver.findElement(By.xpath("//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[1]/td[4]/a")).getAttribute("class");
+    testFuncs.myAssertTrue("Add button is still active ! \n" + addClass, addClass.contains("not-active"));
+    
+	// Step 2 - Try to add a device to an existing user (I.e System)
+  	testFuncs.myDebugPrinting("Step 2 - Try to add a device to an existing user (I.e System)");
+    driver.findElement(By.xpath("//*[@id='searchtext']")).clear();
+    driver.findElement(By.xpath("//*[@id='searchtext']")).sendKeys(sysUser);
+    driver.findElement(By.xpath("//*[@id='searchusersform']/table/tbody/tr/td[7]/a")).click();
+    testFuncs.myWait(5000); 
+    String addDevice = driver.findElement(By.xpath("//*[@id='results']/tbody/tr[2]/td[8]/a[1]")).getAttribute("class");
+    testFuncs.myAssertTrue("Add Device button is not deactivated !! (" + addDevice + ")", addDevice.contains("not-active"));
+
+	// Step 3 - Try to delete an existing user (I.e System)
+  	testFuncs.myDebugPrinting("Step 3 - Try to delete an existing user (I.e. System)");
+    String deleteUser = driver.findElement(By.xpath("//*[@id='results']/tbody/tr[2]/td[8]/a[3]")).getAttribute("class");
+    testFuncs.myAssertTrue("Delete User button is not deactivated !! (" + deleteUser + ")", deleteUser.contains("not-active"));
+
+	// Step 4 - Try to edit an existing user (I.e System)
+  	testFuncs.myDebugPrinting("Step 4 - Try to edit an existing user (I.e System)");
+    driver.findElement(By.xpath("//*[@id='results']/tbody/tr[2]/td[8]/a[2]")).click();
+    testFuncs.myWait(3000);
+    testFuncs.verifyStrByXpath(driver, "//*[@id='title']", "Edit User system");
+    String submit = driver.findElement(By.xpath("//*[@id='t1']/tbody/tr[3]/td/table/tbody/tr/td[3]/a")).getAttribute("class");
+    testFuncs.myAssertTrue("Submit button is not deactivated !! (" + submit + ")", submit.contains("not-active"));
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+    	testFuncs.myFail(verificationErrorString);
+    }
+  }
+}

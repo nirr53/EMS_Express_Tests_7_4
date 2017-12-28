@@ -1,0 +1,123 @@
+package EMS_Tests;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import org.openqa.selenium.*;
+
+/**
+* ----------------
+* This test tests the login mechanism
+* ----------------
+* Tests:
+* 	 1. Test the 'Home' button.
+* 	 2. Test the 'Log off' button.
+* 
+* Results:
+* 	 1. Press home should return you to the main page.
+*    2. Press 'Log off' should disconnect you from the system.
+*    
+* @author Nir Klieman
+* @version 1.00
+*/
+
+@RunWith(Parameterized.class)
+public class Test3__home_screen_buttons {
+	
+  private WebDriver 	driver;
+  private String        usedBrowser = "";
+  private StringBuffer  verificationErrors = new StringBuffer();
+  GlobalVars 			testVars;
+  GlobalFuncs			testFuncs;
+  
+  // Default constructor for print the name of the used browser 
+  public Test3__home_screen_buttons(String browser) {
+	  
+	  System.out.println("Browser - "  + browser);
+	  this.usedBrowser = browser;
+  }
+  
+  //Define each browser as a parameter
+  @SuppressWarnings("rawtypes")
+  @Parameters(name="{0}")
+  public static Collection data() {
+	  
+	GlobalVars testVars2  = new GlobalVars();
+    return Arrays.asList(testVars2.getBrowsers());
+  }
+  
+  @BeforeClass 
+  public static void setting_SystemProperties() {
+	  
+      System.out.println("System Properties seting Key value.");
+  }  
+  
+  @Before
+  public void setUp() throws Exception {
+	  	
+	testVars  = new GlobalVars();
+    testFuncs = new GlobalFuncs();
+    System.setProperty("webdriver.chrome.driver", testVars.getchromeDrvPath());
+	System.setProperty("webdriver.ie.driver"    , testVars.getIeDrvPath());
+	testFuncs.myDebugPrinting("Enter setUp(); usedbrowser - " + this.usedBrowser);
+	driver = testFuncs.defineUsedBrowser(this.usedBrowser);
+    // driver.manage().window().maximize();
+    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+  }
+
+  @Test
+  public void Home_screen_buttons() throws Exception {
+	
+	Log.startTestCase(this.getClass().getName());
+	  
+    // Step 3.1 - press the home button
+	testFuncs.myDebugPrinting("Step 3.1 - press the home button");
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+	driver.findElement(By.xpath("//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[6]/a")).click();
+	driver.findElement(By.xpath("//*[@id='tree_tab']/tbody/tr[3]/td/div/ul/li[6]/ul/li/a")).click();
+	testFuncs.myWait(2000);
+    driver.switchTo().frame(1);
+    testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/table/tbody/tr/td/table/tbody/tr[2]/td/table/tbody/tr[2]/td[2]", "Activity");     
+    driver.switchTo().defaultContent();
+    driver.findElement(By.xpath("//*[@id='home']")).click();
+	testFuncs.myWait(2000);
+    driver.switchTo().frame(1);
+    testFuncs.verifyStrByXpath(driver, "/html/body/div[3]/div[3]/div/div[1]/h3", "Firmware"); 
+	
+    // Step 3.2 - press the Log off button
+    testFuncs.myDebugPrinting("Step 3.2 - press the Log off button");
+    driver.switchTo().defaultContent();
+    driver.findElement(By.xpath("//*[@id='header1']/tbody/tr/td[2]/a[3]")).click();
+	testFuncs.myWait(2000);
+	if (!driver.getTitle().equals(testVars.getMainPageStr())) {
+		
+		testFuncs.myFail("Log off testFuncs.myFailes !! (" + driver.getTitle() + ")");
+	}
+    
+    // Step 3.3 - Check version number
+	testFuncs.myDebugPrinting("Step 3.3 - Check version number");
+    driver.switchTo().defaultContent();
+	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);
+    String scVersion = driver.findElement(By.xpath("//*[@id='header1']/tbody/tr/td[2]/font[2]")).getText();
+    testFuncs.myDebugPrinting("scVersion - " + scVersion, testVars.logerVars.MINOR);
+    testFuncs.myAssertTrue("Version Number was not detected !! (scVersion - " + scVersion + ")", scVersion.contains(testVars.getVersion()));  
+  }
+
+  @After
+  public void tearDown() throws Exception {
+	  
+    driver.quit();
+    System.clearProperty("webdriver.chrome.driver");
+	System.clearProperty("webdriver.ie.driver");
+    String verificationErrorString = verificationErrors.toString();
+    if (!"".equals(verificationErrorString)) {
+    	
+      testFuncs.myFail(verificationErrorString);
+    }
+  }
+}
