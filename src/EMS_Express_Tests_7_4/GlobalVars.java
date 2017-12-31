@@ -68,6 +68,7 @@ public class GlobalVars {
     private  String url  		     = ip + "/ipp/admin/AudioCodes_files/login.php";
     private  String crUserBatName    = "createUsersViaPost.exe"; 
     private  String crAlrmsBatName   = "alertEngine.exe";
+    private  String crKpAlvBatName   = "changeStatus.exe";
     private  String mainPageStr		 = "IP Phone Manager Express";
     private  String sysUsername      = "Admin";
 	private  String sysPassword      = "Admin";
@@ -101,6 +102,7 @@ public class GlobalVars {
 	private  String srcLangsFile     = "nirDdifferentLanguages.zip";
 	private  String srcDhcpCnfFile   = "dhcp_option_template.cfg";
 	private  String srcSbcConfFile   = "proxy_dhcp_option_template.cfg";
+	private  String specialCharsSite = "Nir_()'<>/\":*&^%#@!~";
 	public   String CHROME  	     = "Chrome";
 	public   String FF 			     = "Firefox";
 	public 	 String IE			     = "IE";
@@ -372,4 +374,16 @@ public class GlobalVars {
 		System.out.println("   usedSrcFile - " + usedSrcFile);	
 		return usedSrcFile;
 	}
+
+    /**
+    *  Default method for return the AutoIT exe  that sends a Keep-alive packet
+    *  @return crSndKpAlveBatName
+    */
+	public String getKpAlveBatName() { return this.crKpAlvBatName;  }
+
+    /**
+    *  Default method for return a Site with special characters in its name
+    *  @return spCharsSite
+    */
+	public String getSpecialCharsSite()  { return this.specialCharsSite; }
 }

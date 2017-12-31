@@ -2798,4 +2798,41 @@ public class GlobalFuncs {
 			  myAssertTrue("All tenant configuration values were not delete successfully !!\ntxt - " + txt, !txt.contains(prefix));
 		  }
 	  }
+
+	  /**
+	  *  Send a keep-alive packet for a pre-created device
+	  *  @param kpAlveBatName - given batch name that wraps and sends the packet
+	  *  @param ip 	   		  - ip of the OVOC
+	  *  @param port		  - port of the OVOC for send the keep alive packet
+	  *  @param macAddress	  - MAC address of pre-created device
+	  *  @param deviceName	  - Name of the device we want to update
+	  *  @param phoneModel	  - Name of the phone model we want to update
+	  *  @param domain		  - Domain of the OVOC
+	  *  @param devStatus	  - Status of device we want to update
+	  *  @param location	  - Name of the location we want to update
+	  *  @param phoneNumber	  - Name of the phone-number we want to update
+	  **/
+	  public void sendKeepAlivePacket(String kpAlveBatName, String ip		   , String port      ,
+									String macAddress	, String deviceName, String phoneModel,
+									String domain		, String devStatus , String location  ,
+									String phoneNumber) throws IOException {
+
+	 	myDebugPrinting("kpAlveBatName - " + System.getProperty("user.dir") + "\\" + testVars.getKpAlveBatName(), testVars.logerVars.MINOR);
+	 	Process process = new ProcessBuilder(System.getProperty("user.dir") + "\\" + testVars.getKpAlveBatName(), 
+				 ip  	   ,
+				 port	   ,
+				 macAddress,
+				 deviceName   ,
+				 phoneModel    ,   
+				 domain  ,
+				 devStatus ,
+				 location    ,
+				 phoneNumber).start();
+	    BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+	    String line;
+	    while ((line = br.readLine()) != null) {
+
+	    	myDebugPrinting(line, testVars.logerVars.MINOR);
+	    }
+	}
 }
