@@ -90,7 +90,7 @@ public class Test119__alarms_tests4 {
 	testFuncs.myDebugPrinting("Create a registered user using POST method");
 	testFuncs.createUserViaPost(testVars.getCrUserBatName(), testVars.getIp()       	,
 			 												 testVars.getPort()     	,
-			 												 " 1"				    	,
+			 												 "1"				    	,
 			 												 prefix 					,
 			 												 testVars.getDomain()       ,
 			 												 "registered"               ,
@@ -110,7 +110,7 @@ public class Test119__alarms_tests4 {
 			  testVars.getPort()							 ,
 			  mac1								 			 ,
 			  "IPPHONE CONFERENCE SPEAKER CONNECTION FAILURE",
-			  alartNames[0]			    		 	 			 ,
+			  alartNames[0]			    		 	 		 ,
 			  "2017-07-217T12:24:18"						 ,
 			  info1	 								 		 ,
 			  info2	 								 		 ,

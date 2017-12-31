@@ -99,7 +99,7 @@ public class Test5__add_user_tests {
 	testFuncs.enterMenu(driver, "Setup_Manage_users", "New User");
 	testFuncs.createUserViaPost(testVars.getCrUserBatName(), testVars.getIp()       	,
 			 												 testVars.getPort()     	,
-			 												 " 1"				    	,
+			 												 "1"				    	,
 			 												 prefix + "1_" + Id 		,
 			 												 testVars.getDomain()       ,
 			 												 "registered"               ,
@@ -113,7 +113,7 @@ public class Test5__add_user_tests {
 	testFuncs.myDebugPrinting("Step 3 - Create an unregistered user using POST method");  
 	testFuncs.createUserViaPost(testVars.getCrUserBatName(), testVars.getIp()           ,
 			 												 testVars.getPort()    	    ,
-			 												 " 1"				   	    ,
+			 												 "1"				   	    ,
 			 												 prefix + "2_" + Id     ,
 			 												 testVars.getDomain()       ,
 			 												 "unregistered"             ,
@@ -140,7 +140,7 @@ public class Test5__add_user_tests {
   @After
   public void tearDown() throws Exception {
 	  
-//    driver.quit();
+    driver.quit();
     System.clearProperty("webdriver.chrome.driver");
 	System.clearProperty("webdriver.ie.driver");
     String verificationErrorString = verificationErrors.toString();

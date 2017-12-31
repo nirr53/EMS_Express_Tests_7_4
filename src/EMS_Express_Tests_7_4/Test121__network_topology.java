@@ -91,8 +91,8 @@ public class Test121__network_topology {
 	testFuncs.enterMenu(driver, "Setup_Manage_users", "New User");
 	testFuncs.createUserViaPost(testVars.getCrUserBatName(), testVars.getIp()       	,
 			 												 testVars.getPort()     	,
-			 												usersNumber				    ,
-			 												regPrefix					,
+			 												 usersNumber				    ,
+			 												 regPrefix					,
 			 												 testVars.getDomain()       ,
 			 												 "registered"               ,
 			 												 testVars.getDefPhoneModel(),

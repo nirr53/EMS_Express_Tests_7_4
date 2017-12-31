@@ -87,10 +87,9 @@ public class Test103__speicel_characters_users {
 	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "http://", this.usedBrowser);  
 	String Id             = testFuncs.getId();
 	String prefixName     = "sChars_" + Id + "_";
-//	String suffixes[]     = {"!#$", "/=?", "^_`", "{|}", "~;", "*", "+", "'" }; //The ' character cause bugs - known bug
+	String suffixes[]     = {"!#$", "/=?", "^_`", "{|}", "~;", "*", "+", "'" }; //The ' character cause bugs - known bug
 //	String suffixes[]     = {"!#$", "/=?", "^_`", "{|}", "~;", "*", "+"};
-	
-	String suffixes[]     = {"'" }; //The ' character cause bugs - known bug
+	//String suffixes[]     = {"'" }; //The ' character cause bugs - known bug
 
 	
     // Step 1-8 - Create a user using POST query with !#$ charactarers

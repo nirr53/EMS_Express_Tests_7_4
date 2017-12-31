@@ -99,7 +99,7 @@ public class Test22__multiple_devices_update_generate_configuration {
 			 testVars.getDefPhoneModel(),
 			 testVars.getDefTenant()    ,
 			 "myLocation");
-	testFuncs.verifyPostUserCreate(driver,  dispPrefix,  dispPrefix, true);
+	testFuncs.verifyPostUsersCreate(driver,  dispPrefix,  dispPrefix, true, Integer.valueOf(usersNumber));	
     
     // Step 2 - update configuration
   	testFuncs.myDebugPrinting("Step 2 - update configuration");

@@ -102,7 +102,7 @@ public class Test101__device_status_export_tests {
 				 				testVars.getDefPhoneModel()              	 ,
 				 				testVars.getDefTenant()               		 ,
 				 				"myLocation");
-	testFuncs.verifyPostUserCreate(driver, userName, userName, true);   
+	testFuncs.verifyPostUsersCreate(driver,  userName,  userName, true, Integer.valueOf(usersNUmber));	
 	
 	// Step 1 - Check no-devices, don't check 'Export-all' checkbox, export the devices and verify that all displayed devices are exported
 	testFuncs.myDebugPrinting("Step 1 - Check no-devices, don't check 'Export-all' checkbox, export the devices and verify that all displayed devices are exported");

@@ -100,7 +100,7 @@ public class Test16__multiple_users_changes_change_tenant {
 			 testVars.getDefPhoneModel(),
 			 testVars.getDefTenant()    ,
 			 "myLocation");
-	testFuncs.verifyPostUserCreate(driver,  dispPrefix,  dispPrefix, true); 
+	testFuncs.verifyPostUsersCreate(driver,  dispPrefix,  dispPrefix, true, Integer.valueOf(usersNumber));	
     dispPrefix = dispPrefix.toLowerCase();
     
     // Step 2 - Change tenant

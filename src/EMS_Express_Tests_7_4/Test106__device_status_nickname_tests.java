@@ -102,7 +102,7 @@ public class Test106__device_status_nickname_tests {
 			 testVars.getDefPhoneModel(),
 			 testVars.getDefTenant()    ,
 			 "myLocation");
-	testFuncs.verifyPostUserCreate(driver,  dispPrefix,  dispPrefix, true);
+	testFuncs.verifyPostUsersCreate(driver,  dispPrefix,  dispPrefix, true, Integer.valueOf(usersNumberStr));	
 	   
 	// Step 1 - Add and edit a nickname for one of the devices
 	testFuncs.myDebugPrinting("Step 1 - Add and edit a nickname for one of the devices");

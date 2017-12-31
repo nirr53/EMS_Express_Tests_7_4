@@ -90,7 +90,7 @@ public class Test77__full_search {
 	  testFuncs.createUserViaPost(testVars.getCrUserBatName(), testVars.getIp()       ,
 					 										   testVars.getPort()     ,
 					 									       "1"				      ,
-					 									      srcUserName1            ,
+					 									       srcUserName1            ,
 					 										   testVars.getDomain()   ,
 					 										   "registered"           ,
 					 										   "430HD"                ,

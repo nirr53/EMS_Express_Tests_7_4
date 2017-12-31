@@ -94,7 +94,7 @@ public class Test110__alarms_tests3 {
 	testFuncs.myDebugPrinting("Create a registered users from two different tenants");
 	testFuncs.createUserViaPost(testVars.getCrUserBatName(), testVars.getIp()       	,
 			 												 testVars.getPort()     	,
-			 												 " 1"				    	,
+			 												 "1"				    	,
 			 												 user1 						,
 			 												 testVars.getDomain()       ,
 			 												 "registered"               ,

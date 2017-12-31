@@ -101,7 +101,7 @@ public class Test70__search_tests {
 				 											 "430HD"             ,
 				 											testVars.getDefTenant()             ,
 				 											 "myLocation");	
-	testFuncs.verifyPostUserCreate(driver,  dispPrefix,  dispPrefix, true); 
+	testFuncs.verifyPostUsersCreate(driver,  dispPrefix,  dispPrefix, true, Integer.valueOf(usersNumber));	
 	       
 	// Step 1 - Search for device according to part of its name
 	testFuncs.myDebugPrinting("Step 1 - Search for device according to part of its name");

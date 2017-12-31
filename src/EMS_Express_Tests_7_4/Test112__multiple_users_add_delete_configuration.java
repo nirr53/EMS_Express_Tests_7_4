@@ -102,7 +102,7 @@ public class Test112__multiple_users_add_delete_configuration {
 			 testVars.getDefPhoneModel(),
 			 testVars.getDefTenant()    ,
 			 "myLocation");
-	testFuncs.verifyPostUserCreate(driver,  dispPrefix,  dispPrefix, true); 
+	testFuncs.verifyPostUsersCreate(driver,  dispPrefix,  dispPrefix, true, Integer.valueOf(usersNumber));	
     
     // Step 2 - Add configuration-key
   	testFuncs.myDebugPrinting("Step 2 - Step 2 - Update configuration");

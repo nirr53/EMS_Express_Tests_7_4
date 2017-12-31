@@ -99,8 +99,8 @@ public class Test74__multiple_users_export_results {
 					 										   "registered"           ,
 					 										   "430HD"                ,
 					 										   testVars.getDefTenant(),
-					 										   "myLocation");	
-	  testFuncs.verifyPostUserCreate(driver,  dispPrefix,  dispPrefix, true); 
+					 										   "myLocation");
+	  testFuncs.verifyPostUsersCreate(driver,  dispPrefix,  dispPrefix, true, Integer.valueOf(usersNumber));	
 		       		
 	  // Delete the created users
 	  testFuncs.myDebugPrinting("Delete the created users");

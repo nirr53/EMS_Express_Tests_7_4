@@ -103,7 +103,7 @@ public class Test23__multiple_devices_change_firmware_vlan_mode {
 			 testVars.getDefPhoneModel(),
 			 testVars.getDefTenant()    ,
 			 "myLocation");
-	testFuncs.verifyPostUserCreate(driver,  dispPrefix,  dispPrefix, true);
+	testFuncs.verifyPostUsersCreate(driver,  dispPrefix,  dispPrefix, true, Integer.valueOf(usersNumber));	
 
     // Step 2 - change firmware
   	testFuncs.myDebugPrinting("Step 2 - change firmware");

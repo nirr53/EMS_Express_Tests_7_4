@@ -90,7 +90,7 @@ public class Test108__alarms_tests {
 	testFuncs.myDebugPrinting("Create a registered and unregisterd users using POST method");
 	testFuncs.createUserViaPost(testVars.getCrUserBatName(), testVars.getIp()       	,
 			 												 testVars.getPort()     	,
-			 												 " 1"				    	,
+			 												 "1"				    	,
 			 												 username 					,
 			 												 testVars.getDomain()       ,
 			 												 "registered"               ,

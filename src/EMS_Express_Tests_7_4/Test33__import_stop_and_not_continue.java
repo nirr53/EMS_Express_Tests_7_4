@@ -99,7 +99,7 @@ public class Test33__import_stop_and_not_continue {
 			 testVars.getDefPhoneModel(),
 			 testVars.getDefTenant()    ,
 			 "myLocation");
-	testFuncs.verifyPostUserCreate(driver,  dispPrefix,  dispPrefix, true); 
+	testFuncs.verifyPostUsersCreate(driver,  dispPrefix,  dispPrefix, true, Integer.valueOf(usersNumber));	
   	
     // Step 1 - Delete users, stop at middle, Return by Back and delete again
   	testFuncs.myDebugPrinting("Step 1 - Delete users, stop at middle, Return by Back and delete again");

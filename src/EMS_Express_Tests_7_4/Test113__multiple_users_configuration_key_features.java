@@ -108,7 +108,7 @@ public class Test113__multiple_users_configuration_key_features {
 			 testVars.getDefPhoneModel(),
 			 testVars.getDefTenant()    ,
 			 "myLocation");
-	testFuncs.verifyPostUserCreate(driver,  dispPrefix,  dispPrefix, true); 
+	testFuncs.verifyPostUsersCreate(driver,  dispPrefix,  dispPrefix, true, Integer.valueOf(usersNumber));	
     
     // Step 2 - Add Daylight-configuration-keys
   	testFuncs.myDebugPrinting("Add Daylight-configuration-keys");

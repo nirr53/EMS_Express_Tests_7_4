@@ -103,7 +103,7 @@ public class Test15__multiple_users_changes_reset_change_password {
 			 testVars.getDefPhoneModel(),
 			 testVars.getDefTenant()    ,
 			 "myLocation");
-	testFuncs.verifyPostUserCreate(driver,  dispPrefix,  dispPrefix, true);   
+	testFuncs.verifyPostUsersCreate(driver,  dispPrefix,  dispPrefix, true, Integer.valueOf(usersNumber));	
     
     // Step 2 - Reset the users password
   	testFuncs.myDebugPrinting("Step 2 - Reset the users password");
