@@ -6,7 +6,7 @@ public class MenuPaths {
 	private String SETUP_SECTION 						 = "//*[@id='navbar-collapse']/ul[1]/li[1]/a";
 	private String SETUP_USERS_DEVICES_MANAGE_MULTI_USRS = "//*[@id='left-nav']/ul/li[2]/ul/li[2]/a";
 	private String SETUP_USERS_DEVICES_MANAGE_MULTI_DVCS = "//*[@id='left-nav']/ul/li[2]/ul/li[3]/a";
-	private String SETUP_PHONE_CONF_SECTION 			 = "//*[@id='left-nav']/ul/li[2]/a";
+	private String SETUP_PHONE_CONF_SECTION 			 = "//*[@id='left-nav']/ul/li[3]/a";
 	private String SETUP_PHONE_CONF_TEMPLATES 			 = "//*[@id='left-nav']/ul/li[3]/ul/li[1]/a";
 	private String SETUP_PHONE_CONF_SYS_SETTINGS	 	 = "//*[@id='left-nav']/ul/li[3]/ul/li[2]/a";
 	private String SETUP_PHONE_CONF_DHCP_OPTIONS_CONFIG	 = "//*[@id='left-nav']/ul/li[3]/ul/li[3]/a";

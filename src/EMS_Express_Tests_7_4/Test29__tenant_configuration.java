@@ -25,9 +25,9 @@ import org.openqa.selenium.support.ui.Select;
 *    4. Delete  configuration values from the tenants
 * 
 * Results:
-* 	 1. CFG key should be added succesffully.
-* 	 2. CFG key should be deleted succesffully.
-*    3. CFG key should be copied succesffully.
+* 	 1. CFG key should be added successfully.
+* 	 2. CFG key should be deleted successfully.
+*    3. CFG key should be copied successfully.
 *    4. All values should be deleted successfully.
 * 
 * @author Nir Klieman
@@ -203,7 +203,7 @@ public class Test29__tenant_configuration {
 	  testFuncs.myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[3]/div[2]/div[1]/div[3]/a"), 7000);
 	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Save Configuration ( " + currTenant + " )");
 	  testFuncs.myWait(7000);
-	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "Successfull to save Tenant configuration.");
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "Tenant configuration was saved successfully.");
 	  testFuncs.myWait(7000);
 	  testFuncs.myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 7000);	
 	  testFuncs.myWait(7000);

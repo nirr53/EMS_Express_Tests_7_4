@@ -18,7 +18,7 @@ import org.openqa.selenium.*;
 * ----------------
 * Tests:
 * 	 - Login and enter the Phone Templates menu
-* 	 1. Create a 405 and 450HD templates.
+* 	 1. Create a 405, 445 and 450HD templates.
 * 	 2. Edit each of templates.
 * 	 3. Delete the templates.
 * 
@@ -32,7 +32,7 @@ import org.openqa.selenium.*;
 */
 
 @RunWith(Parameterized.class)
-public class Test25__templates_create_450_405_templates {
+public class Test25__templates_create_450_445_405_templates {
 	
   private WebDriver 	driver;
   private StringBuffer  verificationErrors = new StringBuffer();
@@ -41,7 +41,7 @@ public class Test25__templates_create_450_405_templates {
   GlobalFuncs			testFuncs;
   
   // Default constructor for print the name of the used browser 
-  public Test25__templates_create_450_405_templates(String browser) {
+  public Test25__templates_create_450_445_405_templates(String browser) {
 	  
 	  System.out.println("Browser - "  + browser);
 	  this.usedBrowser = browser;
@@ -75,14 +75,14 @@ public class Test25__templates_create_450_405_templates {
   }
 
   @Test
-  public void Templates_405_450_create_edit_delete() throws Exception {
+  public void Templates_405_445_450_create_edit_delete() throws Exception {
 	 
 	Log.startTestCase(this.getClass().getName());
 	
 	// Set vars
 	int i               = 1;
 	String Id 			= testFuncs.getId();
-	String phoneTypes[] = {"405", "450HD"};	
+	String phoneTypes[] = {"405", "445HD", "450HD"};	
     Map<String, String> map = new HashMap<String, String>();
     map.put("isRegionDefault"		   ,  "false");
     map.put("cloneFromtemplate"        ,  ""); 
@@ -99,7 +99,7 @@ public class Test25__templates_create_450_405_templates {
   		testFuncs.myDebugPrinting("Step 1." + i + " - Add a " + type + " template");
   		map.put("cloneFromtemplate", "Audiocodes_" + type + "_LYNC");
   		testFuncs.addTemplate(driver, "my" + type + "Template_" + Id, "my" + type + "desc", testVars.getNonDefTenant(0), type, map);
-  		testFuncs.myWait(3000);
+  		testFuncs.myWait(10000);
   		++i;
   	}
   	
@@ -111,7 +111,7 @@ public class Test25__templates_create_450_405_templates {
   		testFuncs.myDebugPrinting("Step 2." + i + " - Edit a " + type + " template");
   	  	map.put("model", type);
   		testFuncs.editTemplate(driver,  "my" + type + "Template_" + Id, map);
-  		testFuncs.myWait(3000);
+  		testFuncs.myWait(10000);
   		++i;
   	}
 
@@ -121,7 +121,7 @@ public class Test25__templates_create_450_405_templates {
   		
   		testFuncs.myDebugPrinting("Step 3." + i + " - Delete " + type + " template");
   		testFuncs.deleteTemplate(driver, "my" + type + "Template_" + Id);
-  		testFuncs.myWait(3000);
+  		testFuncs.myWait(10000);
   		++i;
   	}
   }

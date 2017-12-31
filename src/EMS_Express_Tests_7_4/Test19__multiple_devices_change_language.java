@@ -99,7 +99,7 @@ public class Test19__multiple_devices_change_language {
 			 testVars.getDefPhoneModel(),
 			 testVars.getDefTenant()    ,
 			 "myLocation");
-	testFuncs.verifyPostUserCreate(driver,  dispPrefix,  dispPrefix, true);
+	testFuncs.verifyPostUsersCreate(driver,  dispPrefix,  dispPrefix, true, Integer.valueOf(usersNumber));	
     
     // Step 2 - change language
   	testFuncs.myDebugPrinting("Step 2 - change language");

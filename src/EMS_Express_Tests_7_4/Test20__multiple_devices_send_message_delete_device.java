@@ -99,7 +99,7 @@ public class Test20__multiple_devices_send_message_delete_device {
 			 testVars.getDefPhoneModel(),
 			 testVars.getDefTenant()    ,
 			 "myLocation");
-	testFuncs.verifyPostUserCreate(driver,  dispPrefix,  dispPrefix, true);
+	testFuncs.verifyPostUsersCreate(driver,  dispPrefix,  dispPrefix, true, Integer.valueOf(usersNumber));	
     
     // Step 2 - send message
   	testFuncs.myDebugPrinting("Step 2 - send message");  	

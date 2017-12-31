@@ -369,7 +369,7 @@ public class GlobalFuncs {
 		myDebugPrinting("Set Tenant - " + tenant, testVars.logerVars.MINOR);
 		Select displayOptions = new Select(driver.findElement(By.xpath("//*[@id='tenant_id']")));
 		displayOptions.selectByVisibleText(tenant);	
-		myWait(2000);
+		myWait(5000);
 		
 		// Submit
 		myDebugPrinting("Submit", testVars.logerVars.MINOR);
@@ -594,6 +594,7 @@ public class GlobalFuncs {
 		myDebugPrinting("Set IP phone type " + phoneType, testVars.logerVars.MINOR);
 		Select displayOptions = new Select(driver.findElement(By.xpath("//*[@id='contentwrapper']/section/form/div/div[2]/div[2]/div/table/tbody/tr[3]/td[2]/select")));
 		displayOptions.selectByVisibleText(phoneType);
+		myWait(5000);
 		
 	    // Set MAC address
 		myDebugPrinting("Set MAC address " + macAddName, testVars.logerVars.MINOR);
@@ -604,6 +605,7 @@ public class GlobalFuncs {
 		myDebugPrinting("Set firmware " + firmWareType, testVars.logerVars.MINOR);
 		Select firmwareOptions = new Select(driver.findElement(By.xpath("//*[@id='contentwrapper']/section/form/div/div[2]/div[2]/div/table/tbody/tr[5]/td[2]/select")));
 		firmwareOptions.selectByVisibleText(firmWareType);
+		myWait(5000);
 	    		
 		// Submit & verify create
 		myDebugPrinting("Submit & verify create", testVars.logerVars.MINOR);	
@@ -792,8 +794,8 @@ public class GlobalFuncs {
 	  */
 	  public void selectMultipleUsers(WebDriver driver, String prefix, String expNumber) {
 		    
-		mySendKeys(driver, By.xpath("//*[@id='contentwrapper']/section/div/form/div/div[2]/div/table/tbody/tr[2]/td/div/div/input"), prefix, 5000);
-		myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/form/div/div[2]/div/table/tbody/tr[2]/td/div/div/a"), 7000);
+		mySendKeys(driver, By.xpath("//*[@id='contentwrapper']/section/div/form/div/div[2]/div/table/tbody/tr[2]/td/div/div/input"), prefix, 10000);
+		myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/form/div/div[2]/div/table/tbody/tr[2]/td/div/div/a")			   , 10000);
 		if (Integer.parseInt(expNumber) == 0) {
 	    	
 	      	myDebugPrinting("verify delete", testVars.logerVars.NORMAL);
@@ -988,7 +990,7 @@ public class GlobalFuncs {
 			// Set action
 			Select acionsList = new Select(driver.findElement(By.xpath("//*[@id='action']")));
 			acionsList.selectByVisibleText(action);
-			myWait(2000);
+			myWait(5000);
 			
 			// Perform action
 			switch (action) {
@@ -996,9 +998,9 @@ public class GlobalFuncs {
 				case "Delete Users":				
 					myDebugPrinting("Enter Delete Users block", testVars.logerVars.NORMAL);	 
 					new Select(driver.findElement(By.xpath("//*[@id='maintable']/tbody/tr[4]/td/div/select[1]"))).selectByValue("1");
-					myWait(2000);
+					myWait(5000);
 					new Select(driver.findElement(By.xpath("//*[@id='maintable']/tbody/tr[4]/td/div/select[2]"))).selectByValue("2");
-				    myWait(2000);
+				    myWait(5000);
 				    myClick(driver, By.xpath("//*[@id='deleteUsersTR']/td/div/a/span"), 3000);
 					verifyStrByXpath(driver, "//*[@id='modalContentId']", "Are you sure you want to delete the selected users?");					
 				    myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 4000);
@@ -1071,6 +1073,7 @@ public class GlobalFuncs {
 					myDebugPrinting("The wanted region is - " + region, testVars.logerVars.MINOR);		
 					Select regionsList = new Select(driver.findElement(By.xpath("//*[@id='branch']")));				
 					regionsList.selectByVisibleText(region);
+					myWait(5000);
 					myClick(driver, By.xpath("//*[@id='resetTenantTR']/td/div/a[2]/span"), 7000);
 					verifyStrByXpath(driver, "//*[@id='modalContentId']", "Are you sure you want to change the tenant to selected user(s) ?");
 					myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 7000);
@@ -1285,13 +1288,14 @@ public class GlobalFuncs {
 					String resetMode = map.get("resMode");
 					Select resetList = new Select(driver.findElement(By.xpath("//*[@id='resetIpPhonesTR']/td/div[1]/select")));
 					resetList.selectByVisibleText(resetMode);				
-				    myWait(2000);
+				    myWait(5000);
 					myDebugPrinting("Reset mode is - " + resetMode, testVars.logerVars.MINOR);
 					if (resetMode.equals("Scheduled")) {
 						
 						String scDelay = map.get("scMinutes");
 						Select resetList2 = new Select(driver.findElement(By.xpath("//*[@id='resetIpPhonesTR']/td/div[1]/span/select")));			
 						resetList2.selectByVisibleText(scDelay);
+						myWait(5000);
 					}
 					myClick(driver, By.xpath("//*[@id='resetIpPhonesTR']/td/div[1]/a"), 3000);
 					verifyStrByXpath(driver, "//*[@id='modalContentId']", "Note: restart command will work only on supported IP Phones.\nAre you sure you want to restart the selected IP Phones?");		
@@ -1317,6 +1321,7 @@ public class GlobalFuncs {
 		  String action     = map.get("action");
 		  Select devAction = new Select(driver.findElement(By.xpath("//*[@id='action']")));	    
 		  devAction.selectByVisibleText(action);
+		  myWait(5000);
 	
 		  // Perform action
 		  switch (action) {	
@@ -1326,6 +1331,7 @@ public class GlobalFuncs {
 					String language = map.get("language");
 				    Select langs = new Select(driver.findElement(By.xpath("//*[@id='deviceLanguage']")));	    
 				    langs.selectByVisibleText(language);
+					myWait(5000);
 					myClick(driver, By.xpath("//*[@id='changeLanguageTR']/td/div[1]/a[2]"), 3000);	
 					verifyStrByXpath(driver, "//*[@id='modalContentId']", "Are you sure you want to change the device's language?");
 					myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 10000);	
@@ -1347,6 +1353,7 @@ public class GlobalFuncs {
 					String phoneType = map.get("phoneType");
 				    Select templates = new Select(driver.findElement(By.xpath("//*[@id='ipptype']")));	    
 				    templates.selectByVisibleText(phoneType);
+					myWait(5000);
 					myClick(driver, By.xpath("//*[@id='changeTypeTR']/td/div[1]/a[2]"), 2000);	
 					verifyStrByXpath(driver, "//*[@id='modalContentId']", "Are you sure you want to change the Template of the selected devices?");
 					myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 10000);	
@@ -1359,12 +1366,14 @@ public class GlobalFuncs {
 					myDebugPrinting("resMode - " + resMode, testVars.logerVars.MINOR);
 					Select resSelectMode = new Select(driver.findElement(By.xpath("//*[@id='resetIpPhonesTR']/td/div[1]/select")));
 					resSelectMode.selectByVisibleText(resMode);
+					myWait(5000);
 					if (resMode.equals("Scheduled")) {
 						
 						String scTime = map.get("schTime");
 						myDebugPrinting("scTime - " + scTime, testVars.logerVars.MINOR);
 						Select scTimeSelect = new Select(driver.findElement(By.xpath("//*[@id='resetIpPhonesTR']/td/div[1]/span/select")));
 						scTimeSelect.selectByVisibleText(scTime);
+						myWait(5000);
 					}
 				    myClick(driver, By.xpath("//*[@id='resetIpPhonesTR']/td/div[1]/a"), 2000);
 					verifyStrByXpath(driver, "//*[@id='modalContentId']", "Note: restart command will work only on supported IP Phones.\nAre you sure you want to restart the selected IP Phones?");
@@ -1393,6 +1402,7 @@ public class GlobalFuncs {
 					String firmware = map.get("firmware");
 				    Select firmTypes = new Select(driver.findElement(By.xpath("//*[@id='firmware_id']")));
 				    firmTypes.selectByVisibleText(firmware);
+					myWait(5000);
 				    myClick(driver, By.xpath("//*[@id='updateFirmwareTR']/td/div[1]/a[2]"), 5000);
 				    verifyStrByXpath(driver, "//*[@id='modalContentId']", "Are you sure you want to change the device's firmware?");
 				    myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 10000);
@@ -1405,7 +1415,7 @@ public class GlobalFuncs {
 					myDebugPrinting("vlanMode - " + vlanMode, testVars.logerVars.MINOR);				
 				    Select vlanTypes = new Select(driver.findElement(By.xpath("//*[@id='changeVlanTR']/td/div[1]/select")));
 				    vlanTypes.selectByVisibleText(vlanMode);
-				    myWait(2000);
+				    myWait(5000);
 				    if (vlanMode.equals("Manual Configuration")) {
 				    	
 						String vlanId = map.get("vlanId");
@@ -1450,6 +1460,7 @@ public class GlobalFuncs {
 		myDebugPrinting("Create new template"    , testVars.logerVars.MINOR);
 		myDebugPrinting("tempName - "  + tempName, testVars.logerVars.MINOR);
 		myDebugPrinting("type - "      + type    , testVars.logerVars.MINOR);
+		myWait(3000);
 		
 		myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[2]/div/buttton"), 4000);
 		verifyStrByXpath(driver, "//*[@id='contentwrapper']/section/div/div[2]/div[1]/h3"		   , "Add new Template");
@@ -1457,9 +1468,11 @@ public class GlobalFuncs {
 		mySendKeys(driver, By.xpath("//*[@id='description']"), tempDesc, 2000);
 		Select tenantType = new Select (driver.findElement(By.xpath("//*[@id='tenant_id']")));
 		tenantType.selectByVisibleText(tenant);
+		myWait(5000);
 		Select tempType = new Select (driver.findElement(By.xpath("//*[@id='model_type']")));
 		tempType.selectByVisibleText(type);
-	  
+		myWait(5000);
+
 		// Check region default template check-box
 		if (map.get("isRegionDefault").equals("true")) {
 			
@@ -1472,6 +1485,7 @@ public class GlobalFuncs {
 			myDebugPrinting("cloneFromtemplate is not empty, clone starts !", testVars.logerVars.MINOR);		
 			Select cloneTempName = new Select (driver.findElement(By.xpath("//*[@id='clone_model_id']")));
 			cloneTempName.selectByVisibleText(map.get("cloneFromtemplate"));
+			myWait(5000);
 		}
 	  
 		// Is download shared templates
@@ -1557,7 +1571,7 @@ public class GlobalFuncs {
 		// Submit
 		myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[3]/button[2]"), 7000);	
 		verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Save New Template");
-		verifyStrByXpath(driver, "//*[@id='modalContentId']", "Successfull to add new template of tenant.");
+		verifyStrByXpath(driver, "//*[@id='modalContentId']", "Add new template of tenant successfully.");
 		myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 7000);	
 		verifyStrByXpath(driver, "//*[@id='contentwrapper']/section/div/div[2]/div[1]/h3", "IP Phones Configuration Templates");
 
@@ -1576,7 +1590,8 @@ public class GlobalFuncs {
 	  */
 	  public void deleteTemplate(WebDriver driver, String tempName) throws IOException {
 		  
-		  myDebugPrinting("tempName - " + tempName, testVars.logerVars.MINOR);	  
+		  myDebugPrinting("tempName - " + tempName, testVars.logerVars.MINOR);	
+		  myWait(3000);
 		  
 		  // Get idx
 		  BufferedReader r = new BufferedReader(new StringReader(driver.findElement(By.tagName("body")).getText()));
@@ -1600,7 +1615,7 @@ public class GlobalFuncs {
 		  verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Delete Template");
 		  verifyStrByXpath(driver, "//*[@id='modalContentId']", "Are you sure you want to delete the " + tempName + " IP Phone Model?");
 		  myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 10000);
-		  verifyStrByXpath(driver, "//*[@id='modalContentId']", "Successfull to delete the template");
+		  verifyStrByXpath(driver, "//*[@id='modalContentId']", "Delete template successfully.");
 		  myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 10000);
 
 		  // Verify delete
@@ -1619,6 +1634,7 @@ public class GlobalFuncs {
 	  public void editTemplate(WebDriver driver, String tempName, Map<String, String> map) throws UnsupportedFlavorException, IOException {
 		  
 		  myDebugPrinting("tempName - " + tempName, testVars.logerVars.MINOR);
+		  myWait(3000);
 		  
 		  // Get idx
 		  BufferedReader r = new BufferedReader(new StringReader(driver.findElement(By.tagName("body")).getText()));
@@ -1646,11 +1662,13 @@ public class GlobalFuncs {
 			  
 			  Select tenId  = new Select(driver.findElement(By.xpath("//*[@id='tenant_id']")));
 			  tenId.selectByVisibleText(map.get("tenant"));
+				myWait(5000);
 		  }
 		  if (map.containsKey("model")) {
 			  
 			  Select motype = new Select(driver.findElement(By.xpath("//*[@id='model_type']")));		
 			  motype.selectByVisibleText(map.get("model"));
+				myWait(5000);
 		  }
 		  myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[2]/div[1]/div[3]/div/div[3]/button"), 7000);	
 		  verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Update configuration template");
@@ -1790,7 +1808,7 @@ public class GlobalFuncs {
 		  // Move to new Tenant
 		 Select tenId = new Select(driver.findElement(By.xpath("//*[@id='tenant_id']")));
 		 tenId.selectByVisibleText(tenThatCopy);
-		 myWait(4000);
+		 myWait(5000);
 		 
 		 // Copy the PH from original tenant
 		 myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[4]/div[2]/div/span[1]/a"), 3000);
@@ -1798,17 +1816,17 @@ public class GlobalFuncs {
 		 verifyStrByXpath(driver, "//*[@id='modalContentId']", "Please select the Tenant Placeholders to copy.");  
 		 Select tenFromCopy = new Select(driver.findElement(By.xpath("/html/body/div[2]/div/select")));
 		 tenFromCopy.selectByVisibleText(tenTenant);
-		 myWait(2000);
+		 myWait(5000);
 		 myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 7000);
 		 verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Copy Tenant Placeholders From");  
 		 myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 7000);
 		  
 		 // verify copy
 		 myDebugPrinting("verify copy", testVars.logerVars.MINOR);
-		 mySendKeys(driver, By.xpath("//*[@id='tenants1-filtering']"), tenPhName , 6000);
-		 verifyStrByXpath(driver, "//*[@id='tenants1']/tbody[1]/tr/td[3]", tenPhName);
-		 verifyStrByXpath(driver, "//*[@id='tenants1']/tbody[1]/tr/td[4]", tenValue);
-		 verifyStrByXpath(driver, "//*[@id='tenants1']/tbody[1]/tr/td[5]", tenTenant);
+		 mySendKeys(driver, By.xpath("//*[@id='tenants1-filtering']"), tenPhName , 6000); 
+		 searchStr(driver, "%ITCS_" + tenPhName + "%");
+		 searchStr(driver, tenValue);
+		 searchStr(driver, tenTenant);
 	  }
 	  
 	  /**
@@ -1822,19 +1840,22 @@ public class GlobalFuncs {
 	  public void addTemplatePlaceholder(WebDriver driver, String tempName, String tempPhName, String tempPhValue, String tempPhDescription) {
 		    
 		  // Select a model
+		  myDebugPrinting("Select a model", testVars.logerVars.MINOR);
 		  Select models = new Select(driver.findElement(By.xpath("//*[@id='models']")));
 		  models.selectByVisibleText(tempName);
-		  myWait(4000);
+		  myWait(10000);
 		  
-		  // Fill daya
+		  // Fill data
+		  myDebugPrinting("Fill data", testVars.logerVars.MINOR);
 		  myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[8]/div[2]/table/tbody/tr[1]/td/table/tbody/tr[1]/td[2]/a"), 7000);
-		  verifyStrByXpath(driver, "//*[@id='contentwrapper']/section/div/div[2]/div[2]/div[1]/label", "IP Phone Model - " + tempName);
-		  mySendKeys(driver, By.xpath("//*[@id='ph_name']") , tempPhName       , 2000);
-		  mySendKeys(driver, By.xpath("//*[@id='ph_value']"), tempPhValue      , 2000);
-		  mySendKeys(driver, By.xpath("//*[@id='ph_desc']") , tempPhDescription, 2000);
-		  myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[4]/button[2]"), 7000);
-		  verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Add new placeholder");
-		  verifyStrByXpath(driver, "//*[@id='modalContentId']", "Successfull to save new placeholder.");
+//		  verifyStrByXpath(driver, "//*[@id='contentwrapper']/section/div/div[2]/div[2]/div[1]/label", "IP Phone Model - " + tempName);
+		  mySendKeys(driver, By.xpath("//*[@id='ph_name']") , tempPhName       , 7000);
+		  mySendKeys(driver, By.xpath("//*[@id='ph_value']"), tempPhValue      , 7000);
+		  mySendKeys(driver, By.xpath("//*[@id='ph_desc']") , tempPhDescription, 7000);
+		  myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[4]/button[2]"), 10000);
+		  verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Save new template " + tempPhName + " placeholder.");
+		  myWait(1000);
+		  verifyStrByXpath(driver, "//*[@id='modalContentId']", "The new placeholder was saved successfully.");
 		  myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 10000);  
 		  
 		  // Verify create
@@ -1883,8 +1904,8 @@ public class GlobalFuncs {
 		  mySendKeys(driver, By.xpath("//*[@id='ph_value']"), tempPhValue      , 2000);
 		  mySendKeys(driver, By.xpath("//*[@id='ph_desc']") , tempPhDescription, 2000);  				  
 		  myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[4]/button[2]"), 3000);
-		  verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Update Placeholder.");
-		  verifyStrByXpath(driver, "//*[@id='modalContentId']", "Successfull to update new placeholder.");
+		  verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Update template " + tempPhName + " placeholder.");
+		  verifyStrByXpath(driver, "//*[@id='modalContentId']", "Update new placeholder successfully.");
 		  myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 10000);
 
 		  // Verify edit
@@ -1906,7 +1927,7 @@ public class GlobalFuncs {
 		  myDebugPrinting("Select a model", testVars.logerVars.MINOR);
 		  Select models = new Select(driver.findElement(By.xpath("//*[@id='models']")));
 		  models.selectByVisibleText(tempName);
-		  myWait(4000);
+		  myWait(5000);
 		  
 		  // Get idx
 		  BufferedReader r = new BufferedReader(new StringReader(driver.findElement(By.tagName("body")).getText()));
@@ -1946,12 +1967,13 @@ public class GlobalFuncs {
 		  	
 			Select models = new Select(driver.findElement(By.xpath("//*[@id='models']")));
 			models.selectByVisibleText(tempWeCopyTo);
-			myWait(4000);
+			myWait(5000);
 			myClick(driver, By.xpath("//*[@id='import']"), 3000);
 			verifyStrByXpath(driver, "//*[@id='modalTitleId']"	, "Import Place Holders");
-			verifyStrByXpath(driver, "//*[@id='modalContentId']", "Please selcet a model:");
+			verifyStrByXpath(driver, "//*[@id='modalContentId']", "Please select a model");
 			Select modelsToCopy = new Select(driver.findElement(By.xpath("/html/body/div[2]/div/select")));
 			modelsToCopy.selectByVisibleText(tempWecopyFrom);
+			myWait(5000);
 			myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 3000);
 
 			// Copy a template place holder to Default Template should not be possible
@@ -1962,16 +1984,16 @@ public class GlobalFuncs {
 				verifyStrByXpath(driver, "/html/body/div/div/div[2]/div/div", "You do not have permission to modify this item"); 
 				return;
 			}
-			verifyStrByXpath(driver, "//*[@id='contentwrapper']/section/div/div[1]/div[4]/h4", "Import place holders succesfully");
+			verifyStrByXpath(driver, "//*[@id='modalContentId']", "Import place holders succesfully");
 			myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 5000);	
 			
 			// Verify import
 			models = new Select(driver.findElement(By.xpath("//*[@id='models']")));
 			models.selectByVisibleText(tempWecopyFrom);
-			myWait(3000);
+			myWait(5000);
 			models = new Select(driver.findElement(By.xpath("//*[@id='models']")));
 			models.selectByVisibleText(tempWeCopyTo);
-			myWait(3000);
+			myWait(5000);
 			searchStr(driver, "%ITCS_" + tempPhName + "%");
 	  }
 	  
@@ -2000,6 +2022,7 @@ public class GlobalFuncs {
 
 			  Select myFirmTenant = new Select(driver.findElement(By.xpath("//*[@id='tenant_id']")));
 			  myFirmTenant.selectByVisibleText(firmTenant);
+			  myWait(5000);
 		  }
 		  myClick(driver, By.xpath("//*[@id='trunkTBL']/div[2]/div[3]/button[1]"), 7000);
 		  
@@ -2010,10 +2033,12 @@ public class GlobalFuncs {
 		  WebElement fileInput = driver.findElement(By.name("uploadedfile"));
 		  fileInput.sendKeys(testVars.getSrcFilesPath() + "\\" + firmFileName);
 		  myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[3]/button[2]"), 15000);
-		  verifyStrByXpath(driver, "//*[@id='contentwrapper']/section/div/div[1]/div[4]/h4", "The IP Phone firmware has been uploaded successfully.");
+		  verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Upload Successful");
+		  verifyStrByXpath(driver, "//*[@id='modalContentId']", "The IP Phone firmware has been uploaded successfully.");	
 		  myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 15000);
 
-		  // Verify cerate
+		  // Verify create
+		  myDebugPrinting("Verify create", testVars.logerVars.MINOR);		  
 		  enterMenu(driver, "Setup_Phone_conf_phone_firmware_files", "Phone firmware files");
 		  searchStr(driver, firmName);
 		  searchStr(driver, firmDesc);
@@ -2063,6 +2088,7 @@ public class GlobalFuncs {
 			  
 			  Select myFirmTenant = new Select(driver.findElement(By.xpath("//*[@id='tenant_id']")));
 			  myFirmTenant.selectByVisibleText(newFirmTenant);
+			  myWait(5000);
 		  }  
 		  
 		  if (!newFirmTenant.isEmpty()) {
@@ -2118,7 +2144,7 @@ public class GlobalFuncs {
 	  public void mySendKeys(WebDriver driver, By byType, String currUsr, int timeOut) {
 		  
 		  driver.findElement(byType).clear();
-		  myWait(1000);
+		  myWait(2000);
 		  driver.findElement(byType).sendKeys(currUsr);
 		  myWait(timeOut);
 	  }
@@ -2143,6 +2169,7 @@ public class GlobalFuncs {
 		  action.doubleClick(element).perform();
 		  Select devKey = new Select(driver.findElement(By.xpath("//*[@id='key']")));
 		  devKey.selectByVisibleText(phName);
+		  myWait(5000);
 		  mySendKeys(driver, By.xpath("//*[@id='over_value']"), phValue, 2000);
 		  myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/form/div/div[3]/button[2]") , 7000);
   
@@ -2190,6 +2217,7 @@ public class GlobalFuncs {
 	  */
 	  public void myClick(WebDriver driver, By byType, int timeout) {
 		  
+		  myWait(1000);
 	      driver.findElement(byType).click();
 		  myWait(timeout);
 	  }
@@ -2276,26 +2304,27 @@ public class GlobalFuncs {
 		  
 		// Fill data
 	    myDebugPrinting("Fill data", testVars.logerVars.NORMAL);  
-		myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[4]/div[2]/div/span[2]/a"), 9000);
+		myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[4]/div[2]/div/span[2]/a"), 10000);
 		verifyStrByXpath(driver, "//*[@id='contentwrapper']/section/div/div[2]/div[1]/h3", "Add new placeholder");
+		myWait(1000);
 		Select tenId = new Select(driver.findElement(By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[2]/div[4]/select")));
 		tenId.selectByVisibleText(tenTenant);
-		myWait(3000);
+		myWait(7000);
 		myDebugPrinting("tenPhName - "  + tenPhName ,testVars.logerVars.MINOR);  
 	    myDebugPrinting("tenPhValue - " + tenPhValue,testVars.logerVars.MINOR);
-		mySendKeys(driver, By.xpath("//*[@id='ph_name']") , tenPhName , 2000);
-		mySendKeys(driver, By.xpath("//*[@id='ph_value']"), tenPhValue, 2000);
-		myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[3]/button[2]"), 5000);
-		verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Save New Placeholder.");
-		verifyStrByXpath(driver, "//*[@id='modalContentId']", "Successfull to save new placeholder." + tenPhName);
-		myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 5000);
+		mySendKeys(driver, By.xpath("//*[@id='ph_name']") , tenPhName , 10000);
+		mySendKeys(driver, By.xpath("//*[@id='ph_value']"), tenPhValue, 10000);
+		myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[3]/button[2]"), 10000);
+		verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Save new tenant " + tenPhName + " placeholder.");
+		myWait(1000);
+		verifyStrByXpath(driver, "//*[@id='modalContentId']", "The new placeholder was saved successfully." + tenPhName);
+		myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 10000);
 		
 		// Verify the create
 	    myDebugPrinting("Verify the create", testVars.logerVars.NORMAL);  
-		mySendKeys(driver, By.xpath("//*[@id='tenants1-filtering']"), tenPhName , 6000);
-		verifyStrByXpath(driver, "//*[@id='tenants1']/tbody[1]/tr/td[3]", tenPhName);
-		verifyStrByXpath(driver, "//*[@id='tenants1']/tbody[1]/tr/td[4]", tenPhValue);
-		verifyStrByXpath(driver, "//*[@id='tenants1']/tbody[1]/tr/td[5]", tenTenant);
+		mySendKeys(driver, By.xpath("//*[@id='tenants1-filtering']"), tenPhName , 10000);
+		searchStr(driver, "%ITCS_" + tenPhName  + "%");
+		searchStr(driver, tenPhValue);
 	  }
 	  
 	  /**
@@ -2381,6 +2410,7 @@ public class GlobalFuncs {
 				++i;
 			}
 		}
+		myWait(7000);
 	
 		// Check if the current user is "Monitoring" if so - edit should fail
 	    myDebugPrinting("Check if the current user is \"Monitoring\" if so - edit should fail", testVars.logerVars.NORMAL);  
@@ -2391,21 +2421,21 @@ public class GlobalFuncs {
 			return;
 		}
 	    myDebugPrinting("xpath - " + "//*[@id='tenants1']/tbody[1]/tr[" + i + "]/td[6]/button[1]", testVars.logerVars.DEBUG);  
-		myClick(driver, By.xpath("//*[@id='tenants1']/tbody[1]/tr[" + i + "]/td[6]/button[1]"), 5000);
+		myClick(driver, By.xpath("//*[@id='tenants1']/tbody[1]/tr[" + i + "]/td[6]/button[1]"), 10000);
 		
 		// Fill data
 		verifyStrByXpath(driver, "//*[@id='contentwrapper']/section/div/div[2]/div[1]/h3", "Edit placeholder");
-		mySendKeys(driver, By.xpath("//*[@id='ph_value']"), tenNewPhValue, 2000);
+		mySendKeys(driver, By.xpath("//*[@id='ph_value']"), tenNewPhValue, 7000);
 		myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[3]/button[2]"), 5000);
-		verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Update Placeholder.");
-		verifyStrByXpath(driver, "//*[@id='modalContentId']", "Successfull to update new placeholder." + tenPhName);
+		verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Update tenant " + tenPhName + " placeholder.");
+		verifyStrByXpath(driver, "//*[@id='modalContentId']", "Update new placeholder successfully." + tenPhName);
 		myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 5000);
 		
 		// Verify the create
 	    myDebugPrinting("Verify the create", testVars.logerVars.NORMAL);  
 		mySendKeys(driver, By.xpath("//*[@id='tenants1-filtering']"), tenPhName , 6000);
-		verifyStrByXpath(driver, "//*[@id='tenants1']/tbody[1]/tr/td[3]", tenPhName);
-		verifyStrByXpath(driver, "//*[@id='tenants1']/tbody[1]/tr/td[4]", tenNewPhValue);
+		searchStr(driver, "%ITCS_" + tenPhName + "%");
+		searchStr(driver, tenNewPhValue);
 	  }
 	  
 	  /**
@@ -2424,7 +2454,7 @@ public class GlobalFuncs {
 		verifyStrByXpath(driver, "//*[@id='contentwrapper']/section/div/div[2]/div[1]/h3", "Add new placeholder");		
 		Select siteId = new Select(driver.findElement(By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[2]/div[4]/select")));
 		siteId.selectByVisibleText(sitePHSite);	
-		myWait(3000);	
+		myWait(5000);	
 		mySendKeys(driver, By.xpath("//*[@id='ph_name']") , sitePhName , 2000);
 		mySendKeys(driver, By.xpath("//*[@id='ph_value']"), sitePhValue, 2000);	
 		myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[3]/button[2]"), 5000);
@@ -2689,11 +2719,13 @@ public class GlobalFuncs {
 			  case "Severity":	
 				  myDebugPrinting("Search according to Severity", testVars.logerVars.MINOR);	  
 				  new Select(driver.findElement(By.xpath("//*[@id='inputStatus']"))).selectByVisibleText(alertData);
+				  myWait(5000);
 				  break;
 				  
 			  case "Tenant":	
 				  myDebugPrinting("Search according to Tenant", testVars.logerVars.MINOR);	  
-				  new Select(driver.findElement(By.xpath("//*[@id='inputTenant']"))).selectByVisibleText(alertData);
+				  new Select(driver.findElement(By.xpath("//*[@id='inputTenant']"))).selectByVisibleText(alertData);		
+				  myWait(5000);
 				  break;  
 				  
 		  }
@@ -2720,8 +2752,8 @@ public class GlobalFuncs {
 	  **/
 	  public void deleteAlarm(WebDriver driver, String alertDesc) {
 		  		  
-		  // Search for the alert accorfing to description
-		  myDebugPrinting("Search for the alert accorfing to description", testVars.logerVars.MINOR);
+		  // Search for the alert according to description
+		  myDebugPrinting("Search for the alert according to description", testVars.logerVars.MINOR);
 		  String[] alertsForSearch = {alertDesc};
 		  searchAlarm(driver, "Description", alertDesc, alertsForSearch); 
 		   

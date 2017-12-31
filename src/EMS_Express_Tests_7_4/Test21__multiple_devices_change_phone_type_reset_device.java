@@ -101,7 +101,7 @@ public class Test21__multiple_devices_change_phone_type_reset_device {
 			 testVars.getDefPhoneModel(),
 			 testVars.getDefTenant()    ,
 			 "myLocation");
-	testFuncs.verifyPostUserCreate(driver,  dispPrefix,  dispPrefix, true);
+	testFuncs.verifyPostUsersCreate(driver,  dispPrefix,  dispPrefix, true, Integer.valueOf(usersNumber));	
     
     // Step 2 - change Template
   	testFuncs.myDebugPrinting("Step 2 - change Template");
