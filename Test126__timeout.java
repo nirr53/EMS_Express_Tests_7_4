@@ -135,7 +135,7 @@ public class Test126__timeout {
 	testFuncs.myDebugPrinting("Wait for <"  + ((timeoutInt - 1) * 61 * 1000) + "> milli-seconds" , testVars.logerVars.MINOR);
 	testFuncs.myWait((timeoutInt - 1) * 61 * 1000);
 	testFuncs.myClick(driver, By.xpath("//*[@id='trunkTBL']/div/div[1]/h3/div/a[3]"), 5000);
-	String classTxt = driver.findElement(By.xpath("//*[@id='table']/tbody[1]/tr/td[7]/i")).getAttribute("class");
+	String classTxt = driver.findElement(By.xpath("//*[@id='table']/tbody[1]/tr/td[8]/i")).getAttribute("class");
 	testFuncs.myAssertTrue("Registered status was not detected !! <" + classTxt + ">", classTxt.contains("fa-check-square"));
 	
 	// Step 2 - Verify that the user is disconnect after 180 (3 minutes) seconds from the the last keep-alive
@@ -143,7 +143,7 @@ public class Test126__timeout {
 	testFuncs.myDebugPrinting("Wait for <"  + (1 * 61 * 1000) + "> milli-seconds" , testVars.logerVars.MINOR);
 	testFuncs.myWait(1 * 61 * 1000);
 	testFuncs.myClick(driver, By.xpath("//*[@id='trunkTBL']/div/div[1]/h3/div/a[3]"), 5000);
-	classTxt = driver.findElement(By.xpath("//*[@id='table']/tbody[1]/tr/td[7]/i")).getAttribute("class");
+	classTxt = driver.findElement(By.xpath("//*[@id='table']/tbody[1]/tr/td[8]/i")).getAttribute("class");
 	testFuncs.myAssertTrue("Disconected status was not detected !! <" + classTxt + ">", classTxt.contains("fa-chain-broken"));	
   }
   

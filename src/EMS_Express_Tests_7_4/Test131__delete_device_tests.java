@@ -134,13 +134,13 @@ public class Test131__delete_device_tests {
 	  testFuncs.selectMultipleUsers(driver, userName1, "0");
 
 	  // Step 2 - Delete a device via Manage multiple devices
-	  testFuncs.myDebugPrinting("Step 1 - Delete a device via Manage user page");
+	  testFuncs.myDebugPrinting("Step 2 - Delete a device via Manage multiple devices");
 	  testFuncs.enterMenu(driver, "Setup_Manage_multiple_devices", "Manage Multiple Devices");
 	  testFuncs.selectMultipleUsers(driver, userName2, "1");
 	  map.put("action"     ,  "Delete Devices");  
 	  testFuncs.setMultipleDevicesAction(driver, map);    
-	  testFuncs.searchStr(driver, userName2 + "@" + testVars.getDomain() + " " + testFuncs.readFile("mac_1.txt"));
-
+	  testFuncs.searchStr(driver, userName2 + " " + testFuncs.readFile("mac_1.txt") + " Finished");
+	  
 	  // Verify delete
 	  testFuncs.enterMenu(driver, "Setup_Manage_users", "New User");	
 	  testFuncs.searchUser(driver, userName2); 

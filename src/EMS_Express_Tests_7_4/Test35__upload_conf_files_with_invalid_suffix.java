@@ -116,8 +116,8 @@ public class Test35__upload_conf_files_with_invalid_suffix {
 	  
 	  // Try to upload non-cfg file to Configuration-files menu
 	  testFuncs.myDebugPrinting("Try to upload non-cfg file to Configuration-files menu", testVars.logerVars.MINOR);
-	  testFuncs.mySendKeys(driver, By.xpath("//*[@id='myfile']"), testVars.getSrcFilesPath() + "\\" + nonCfgFileName, 2000);
-	  testFuncs.myClick(driver, By.xpath("//*[@id='form_upload']/div/input[4]"), 5000);
+	  testFuncs.mySendKeys(driver, By.xpath("//*[@id='myfile']"), nonCfgFileName, 2000);
+	  testFuncs.myClick(driver, By.xpath("//*[@id='form_upload']/div/input[4]") , 5000);
 	    
 	  // Verify that an error is recived
 	  testFuncs.myDebugPrinting("Verify that an error is recived", testVars.logerVars.MINOR);

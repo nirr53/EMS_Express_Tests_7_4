@@ -325,8 +325,9 @@ public class Test98__device_actions_row {
 	
 	  // Verify the correct IP is opend
 	  testFuncs.myDebugPrinting("Verify the correct IP is opend", testVars.logerVars.MINOR); 
-	  testFuncs.myAssertTrue("The opened web-page is does not match the IP of the device !!", driver.findElement(By.tagName("body")).getText().contains(ip));
-	  driver.close();
+	  String txt = driver.getCurrentUrl();
+	  testFuncs.myAssertTrue("The opened web-page is does not match the IP of the device !! \ntxt - " + txt, txt.contains(ip));
+	  driver.close();	  
 	  driver.switchTo().window(parentHandle);
   }
 
@@ -388,7 +389,7 @@ public class Test98__device_actions_row {
 	  testFuncs.mySendKeys(driver, By.xpath("//*[@id='trunkTBL']/div/div[2]/div[1]/div[2]/form/div/input"), "user:" + userName.trim(), 5000);
 	  driver.findElement(By.xpath("//*[@id='trunkTBL']/div/div[2]/div[1]/div[2]/form/div/input")).sendKeys(Keys.ENTER);	        
 	  testFuncs.myWait(7000);
-	  testFuncs.verifyStrByXpath(driver, "//*[@id='table']/tbody[1]/tr/td[7]", userName.trim());
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='table']/tbody[1]/tr/td[8]", userName.trim());
 	  
 	  // Select the searched device via check Select-All check-box
 	  testFuncs.myDebugPrinting("Select the searched device via check Select-All check-box", testVars.logerVars.MINOR);

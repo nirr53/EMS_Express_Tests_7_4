@@ -111,8 +111,8 @@ public class Test106__device_status_nickname_tests {
 	searchAndSelectDevice(driver, editedUser);
 	setDeviceNickname(editedUser, "new Nickname" + Id);
 	
-	// Step 2 - Verify that you cannot edit a nickname while sevarl devices are selected
-	testFuncs.myDebugPrinting("Step 2 - Verify that you cannot edit a nickname while sevarl devices are selected");
+	// Step 2 - Verify that you cannot edit a nickname while several devices are selected
+	testFuncs.myDebugPrinting("Step 2 - Verify that you cannot edit a nickname while several devices are selected");
 	searchAndSelectDevice(driver, dispPrefix);
 	testFuncs.myClick(driver, By.xpath("//*[@id='selectall']"), 2000);
 	testFuncs.myClick(driver, By.xpath("//*[@id='dl-menu']/a"), 2000);  
@@ -163,7 +163,7 @@ public class Test106__device_status_nickname_tests {
 	  testFuncs.mySendKeys(driver, By.xpath("//*[@id='trunkTBL']/div/div[2]/div[1]/div[2]/form/div/input"), "user:" + userName.trim(), 5000);
 	  driver.findElement(By.xpath("//*[@id='trunkTBL']/div/div[2]/div[1]/div[2]/form/div/input")).sendKeys(Keys.ENTER);	        
 	  testFuncs.myWait(7000);
-	  testFuncs.verifyStrByXpath(driver, "//*[@id='table']/tbody[1]/tr/td[7]", userName.trim());
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='table']/tbody[1]/tr/td[8]", userName.trim());
 	  
 	  // Select the searched device via check Select-All check-box
 	  testFuncs.myDebugPrinting("Select the searched device via check Select-All check-box", testVars.logerVars.MINOR);

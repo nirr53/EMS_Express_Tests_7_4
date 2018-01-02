@@ -121,8 +121,13 @@ public class Test10__system_logs_tests {
 		
 		displayLogOptions.selectByIndex(i);
 	  	testFuncs.myWait(3000);
-	  	testFuncs.myClick(driver, By.xpath("//*[@id='append_']"), 1000);
+		testFuncs.myDebugPrinting(displayLogOptions.getFirstSelectedOption().getText(), testVars.logerVars.MINOR);
+	  	testFuncs.myClick(driver, By.xpath("//*[@id='append_']"), 500);
+	  	
+	  	
+	  	
 	  	testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/div[1]/div[4]/h4", "Web Admin log level was saved successfully.");
+	  	testFuncs.myWait(3000);
 	}
 
     // Step 2.3 - Download Archive files
@@ -130,7 +135,7 @@ public class Test10__system_logs_tests {
 		
 		testFuncs.myDebugPrinting("Step 2.3 - Download Archive files");
 	  	testFuncs.myClick(driver, By.xpath("//*[@id='trunkTBL']/div[2]/div[2]/form/table/tbody/tr[1]/td/table/tbody/tr/td[1]/table/tbody/tr[1]/td[2]/a"), 3000);
-		testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/div[2]/div[2]/form/table/thead/tr/th", "Web Admin Archive Files");	
+	  	testFuncs.verifyStrByXpath(driver, "//*[@id='trunkTBL']/div[2]/div[2]/form/table/thead/tr/th", "Web Admin Archive Files");	
 		String txt = driver.findElement(By.tagName("body")).getText();
 		testFuncs.myDebugPrinting("txt - " + txt, testVars.logerVars.MINOR);
 		int numOfFiles = txt.length() - txt.replace(".txt", "aaa").length();

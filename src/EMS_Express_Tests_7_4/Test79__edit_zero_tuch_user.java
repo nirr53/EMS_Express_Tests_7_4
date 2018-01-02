@@ -114,8 +114,8 @@ public class Test79__edit_zero_tuch_user {
 	testFuncs.mySendKeys(driver, By.xpath("//*[@id='displayname']"), edDispName ,2000);				
 	testFuncs.myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[3]/button[1]"), 10000);
   	testFuncs.verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Update User");
-   	testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "User " + userName + " successfully updated.");
-	testFuncs.myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 10000);
+   	testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "User " + userFullName + " successfully updated.");
+   	testFuncs.myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 10000);
   	testFuncs.verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Generate Configuration Files");
 	testFuncs.myClick(driver, By.xpath("/html/body/div[2]/div/button[2]")							   , 5000);
 	testFuncs.myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[3]/button[2]"), 5000);

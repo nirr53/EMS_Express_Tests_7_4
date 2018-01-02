@@ -76,9 +76,9 @@ public class Test64__long_name_users {
 	Log.startTestCase(this.getClass().getName());
 	
 	// Set vars
-	String longPrefix   = "longName____";
-	String manLongName  = "longName____tests__1";
-	String postLongName = "longName____tests__2";
+	String longPrefix   = "longName____" + testFuncs.getId();
+	String manLongName  = longPrefix + "_tests1";
+	String postLongName = longPrefix + "_tests2";
 	Map<String, String> map = new HashMap<String, String>();
     map.put("startIdx"   ,  String.valueOf(1));
     map.put("usersNumber",  "2");

@@ -112,7 +112,7 @@ public class Test123__change_status {
 	testFuncs.enterMenu(driver, "Monitor_device_status", "Devices Status");
 	testFuncs.mySendKeys(driver, By.xpath("//*[@id='trunkTBL']/div/div[2]/div[1]/div[2]/form/div/input"), "user:" + chngSttsUsername.trim(), 5000);
     driver.findElement(By.xpath("//*[@id='trunkTBL']/div/div[2]/div[1]/div[2]/form/div/input")).sendKeys(Keys.ENTER);	    
-    String attClass = driver.findElement(By.xpath("//*[@id='table']/tbody[1]/tr/td[7]/i")).getAttribute("class");
+    String attClass = driver.findElement(By.xpath("//*[@id='table']/tbody[1]/tr/td[8]/i")).getAttribute("class");
     testFuncs.myAssertTrue("Offline Icon was not detected !! <" + attClass + ">", attClass.contains("fa-times-circle"));  
 
     // Step 2 -  Change the user's device status to 'Registered'
@@ -130,7 +130,7 @@ public class Test123__change_status {
 	testFuncs.enterMenu(driver, "Monitor_device_status", "Devices Status");
 	testFuncs.mySendKeys(driver, By.xpath("//*[@id='trunkTBL']/div/div[2]/div[1]/div[2]/form/div/input"), "user:" + chngSttsUsername.trim(), 5000);
     driver.findElement(By.xpath("//*[@id='trunkTBL']/div/div[2]/div[1]/div[2]/form/div/input")).sendKeys(Keys.ENTER);	    
-    String attClass2 = driver.findElement(By.xpath("//*[@id='table']/tbody[1]/tr/td[7]/i")).getAttribute("class");
+    String attClass2 = driver.findElement(By.xpath("//*[@id='table']/tbody[1]/tr/td[8]/i")).getAttribute("class");
     testFuncs.myAssertTrue("Registered Icon was not detected !! <" + attClass2 + ">", attClass2.contains("fa-check-square"));  
      
     // Step 3 - Delete the created users

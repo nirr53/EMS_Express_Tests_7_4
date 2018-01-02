@@ -247,7 +247,7 @@ public class Test96__template_features {
 	  testFuncs.verifyStrByXpathContains(driver, "//*[@id='modalContentId']", "Are you sure you want to delete all configuration settings and save empty content?");
 	  testFuncs.myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 4000);	  
 //	   Nir - bug 7.4.245 7.4.17 (VI 145708)
-	   testFuncs.verifyStrByXpathContains(driver, "//*[@id='modalTitleId']"  , "Save Configuration ( " + testVars.getDefSite() + " [" + testVars.getDefSite() + "] / " + testVars.getDefTenant() + " )");
+	   testFuncs.verifyStrByXpathContains(driver, "//*[@id='modalTitleId']"  , "Save Configuration");
 	   testFuncs.verifyStrByXpathContains(driver, "//*[@id='modalContentId']", "Site configuration was saved successfully.");
 	   testFuncs.myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 4000);	
 

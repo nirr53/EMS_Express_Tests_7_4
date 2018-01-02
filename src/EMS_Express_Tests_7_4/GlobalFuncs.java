@@ -556,7 +556,7 @@ public class GlobalFuncs {
 	    			
 	    			myFail("No users were found for <" + dispName + "> !!");
 	    		}
-			    verifyStrByXpath(driver, "//*[@id='table']/tbody[1]/tr/td[7]", dispName.trim()); 
+			    verifyStrByXpath(driver, "//*[@id='table']/tbody[1]/tr/td[8]", dispName.trim()); 
 			    String txt = driver.findElement(By.tagName("body")).getText();
 			    myAssertTrue("Approve button is displayed !! \ntxt - " + txt, !txt.contains("Approve"));	
 	    	} else {
@@ -753,7 +753,7 @@ public class GlobalFuncs {
 	      		  
 		myDebugPrinting("path -   " + path, testVars.logerVars.MINOR);
 		mySendKeys(driver, By.xpath(uploadFieldXpath), path  , 2000);
-		myClick(driver   , By.xpath(uploadButtonXpath), 30000);
+		myClick(driver   , By.xpath(uploadButtonXpath), 250000);
 		if (driver.findElement(By.tagName("body")).getText().contains("Failed to import from selected file.")) {
 			
 			myFail("Upload configuration-file was failed !!");
@@ -780,7 +780,7 @@ public class GlobalFuncs {
 		
 		if (!confirmMessageStrs[0].isEmpty()) {
 		
-	    	verifyStrByXpath(driver, "//*[@id='modalContentId']", confirmMessageStrs[0]);	
+	    	verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , confirmMessageStrs[0]);	
 	    	verifyStrByXpath(driver, "//*[@id='modalContentId']", confirmMessageStrs[1]);	
 			myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 20000);	
 		}
@@ -2253,6 +2253,10 @@ public class GlobalFuncs {
 	    while ((line = br.readLine()) != null) {
 
 	    	myDebugPrinting(line, testVars.logerVars.MINOR);
+	    	if (line.contains("device_create_error")) {
+		
+	    		myFail("Device <" + line.substring(line.indexOf("___") + 3) + "> was not created !!");    		
+	    	}
 	    }
 	  }  
 	  

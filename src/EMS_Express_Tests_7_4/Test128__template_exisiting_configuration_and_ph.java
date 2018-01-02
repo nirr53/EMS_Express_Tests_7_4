@@ -149,7 +149,7 @@ public class Test128__template_exisiting_configuration_and_ph {
 	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "This setting name is already in use.\nAre you sure you want to replace " + confValue + " to " + newConfValue); 	   
 	  testFuncs.myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 3000);		
 	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Save Configuration");
-	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "Successfully to save the template new configuration settings");  
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "Template configuration saved successfully");  
 	  testFuncs.myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 3000);					  
 
 	  // Verify edit
@@ -166,7 +166,7 @@ public class Test128__template_exisiting_configuration_and_ph {
 	  testFuncs.mySendKeys(driver, By.xpath("//*[@id='ini_value']"), confValue, 2500);
 	  testFuncs.myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[2]/div[1]/div[4]/div/div[2]/div[1]/div[3]/a"), 3000);  
 	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Save Configuration");
-	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "Successfully to save the template new configuration settings");  
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "Template configuration saved successfully");  
 	  testFuncs.myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 3000);				
 
 	  // Verify create

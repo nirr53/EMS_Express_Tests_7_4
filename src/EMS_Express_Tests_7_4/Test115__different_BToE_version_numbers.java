@@ -127,7 +127,7 @@ public class Test115__different_BToE_version_numbers {
     map.put("usersNumber"	  , usersNumber); 
     map.put("startIdx"   	  , String.valueOf(1));  
 	testFuncs.enterMenu(driver, "Setup_Manage_multiple_users", " Manage Multiple Users");
-    testFuncs.selectMultipleUsers(driver, prefixName, usersNumber);   
+    testFuncs.selectMultipleUsers(driver, Id, usersNumber);   
     testFuncs.setMultipleUsersAction(driver, map);
     btoeDisabled   = btoeDisabled.toLowerCase();
     btoeAutoPaired = btoeAutoPaired.toLowerCase();
@@ -168,7 +168,7 @@ public class Test115__different_BToE_version_numbers {
 	  
 	  // Check version
 	  testFuncs.myDebugPrinting("Check version", testVars.logerVars.NORMAL);  
-	  testFuncs.verifyStrByXpath(driver, "//*[@id='table']/tbody[1]/tr/td[21]", version);
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='table']/tbody[1]/tr/td[14]", version);
   }
 
   @After

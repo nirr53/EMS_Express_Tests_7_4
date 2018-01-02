@@ -85,7 +85,7 @@ public class Test118__user_configuration_features {
 	String usersNumber   	= "1";
 	int usStartIdx 		 	= 1;
 	String Id 				= testFuncs.getId();
-	String dispPrefix   	= "userFeatures" + Id;
+	String dispPrefix   	= "userfeatures" + Id;
     Map<String, String> map = new HashMap<String, String>();
     map.put("usersNumber",  usersNumber); 
     map.put("startIdx"   ,  String.valueOf(usStartIdx));

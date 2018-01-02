@@ -121,7 +121,7 @@ public class Test67__DHCP_Option_configuration {
 	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "Are you sure you want to generate the DHCP option template?");
 	  testFuncs.myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 5000);
 	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "DHCP Option template");
-	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "Successfull to generate the DHCP option template");
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "DHCP option template was generated successfully");
 	  testFuncs.myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 5000);
   }
 
@@ -133,7 +133,7 @@ public class Test67__DHCP_Option_configuration {
 	  testFuncs.myDebugPrinting("upload file", testVars.logerVars.MINOR);
 	  testFuncs.myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[2]/div/div[1]/a[3]"), 3000);
 	  testFuncs.verifyStrByXpath(driver, "//*[@id='contentwrapper']/section/div/div[2]/div[1]/h3", "Upload IP Phone Template");
-	  testFuncs.verifyStrByXpath(driver, "//*[@id='myform']/label"								 , "Press the Browse button to locate the file and then press the Submit button. When file upload is complete The file has been uploaded successfully message will be shown.");
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='myform']/label"								 , "Press the Browse... button to locate the file and then press the Upload button. When file upload is complete The file has been uploaded successfully message will be shown.");
 	  driver.findElement(By.name("uploadedfile")).sendKeys(filePath);
 	  testFuncs.myWait(2000);
 	  testFuncs.myClick(driver, By.xpath("//*[@id='contentwrapper']/section/div/div[2]/div[3]/button[2]"), 7000);
@@ -165,7 +165,7 @@ public class Test67__DHCP_Option_configuration {
 	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "Are you sure you want to reset the DHCP option template?");
 	  testFuncs.myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 5000);
 	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Reset the DHCP Options Configuration");
-	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "Successfull to reset the DHCP option template");
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "DHCP option template was reset successfully");
 	  testFuncs.myClick(driver, By.xpath("/html/body/div[2]/div/button[1]"), 5000);
 	  
 	  // Verify reset

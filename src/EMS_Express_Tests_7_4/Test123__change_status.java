@@ -113,8 +113,8 @@ public class Test123__change_status {
 	testFuncs.mySendKeys(driver, By.xpath("//*[@id='trunkTBL']/div/div[2]/div[1]/div[2]/form/div/input"), "user:" + chngSttsUsername.trim(), 5000);
     driver.findElement(By.xpath("//*[@id='trunkTBL']/div/div[2]/div[1]/div[2]/form/div/input")).sendKeys(Keys.ENTER);	    
     String attClass = driver.findElement(By.xpath("//*[@id='table']/tbody[1]/tr/td[7]/i")).getAttribute("class");
-    testFuncs.myAssertTrue("Offline Icon was not detected !! <" + attClass + ">", attClass.contains("fa-times-circle"));  
-
+    testFuncs.myAssertTrue("Offline Icon was not detected !! <" + attClass + ">", attClass.contains("fa-chain-broken"));    
+    
     // Step 2 -  Change the user's device status to 'Registered'
  	testFuncs.myDebugPrinting("Step 2 -  Change the user's device status to 'Registered'");
 	testFuncs.sendKeepAlivePacket(testVars.getKpAlveBatName()	 ,

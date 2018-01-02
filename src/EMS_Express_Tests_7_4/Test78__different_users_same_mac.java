@@ -148,7 +148,7 @@ public class Test78__different_users_same_mac {
   @After
   public void tearDown() throws Exception {
 	  
-    driver.quit();
+	driver.quit();
     System.clearProperty("webdriver.chrome.driver");
 	System.clearProperty("webdriver.ie.driver");
     String verificationErrorString = verificationErrors.toString();

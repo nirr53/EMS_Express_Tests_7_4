@@ -280,7 +280,7 @@ public class Test97__device_actions {
 	  testFuncs.myDebugPrinting("Change device firmware", testVars.logerVars.NORMAL); 
 	  testFuncs.myClick(driver, By.xpath("//*[@id='dl-menu1']/a"), 2000);
 	  testFuncs.myClick(driver, By.xpath("//*[@id='updateFirmware']"), 2000);
-	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Change Tenant");
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalTitleId']"  , "Update Firmware");
 	  testFuncs.verifyStrByXpath(driver, "//*[@id='modalContentId']", "Please select a firmware:");  
 	  new Select(driver.findElement(By.xpath("//*[@id='firmware']"))).selectByVisibleText(firmware);
 	  testFuncs.myWait(2000);
@@ -317,7 +317,7 @@ public class Test97__device_actions {
 	  testFuncs.enterMenu(driver , "Monitor_device_status", "Devices Status");   
 	  testFuncs.mySendKeys(driver, By.xpath("//*[@id='trunkTBL']/div/div[2]/div[1]/div[2]/form/div/input"), "user:" + userName.trim(), 5000);
 	  driver.findElement(By.xpath("//*[@id='trunkTBL']/div/div[2]/div[1]/div[2]/form/div/input")).sendKeys(Keys.ENTER);	        
-	  testFuncs.verifyStrByXpath(driver, "//*[@id='table']/tbody[1]/tr/td[7]", userName.trim()); 	    
+	  testFuncs.verifyStrByXpath(driver, "//*[@id='table']/tbody[1]/tr/td[8]", userName.trim()); 	    
 	  testFuncs.myWait(5000);
 	  
 	  // Select the searched device via check Select-All check-box
