@@ -297,9 +297,17 @@ Func createUserViaPost($userPassword, $macAdress, $ipAddress  , $phoneType  , $p
    myToolTip("$PostData is:" & @CRLF & $PostData, 150, 150, $innerFunctionLevel)
    $Socket = _HTTPConnect($IP)
    HTTPJasonPost($IP, $target2, $Socket, $PostData)
+   myCountDown(5000)
    $recv = _HTTPRead($Socket,0)
-   _HTTPClose($Socket)
    myToolTip("$recv - " & $recv, 150, 150, $innerFunctionLevel)
+   if $recv == 0 Then
+	  myToolTip("$recv = 0 !!", 150, 150, $innerFunctionLevel)
+	  _HTTPClose($Socket)
+	  myToolTip("device_create_error___" & $userName, 150, 150, $innerFunctionLevel)
+	  Exit 1
+
+   EndIf
+   _HTTPClose($Socket)
    myCountDown(5000)
    myToolTip("exit createUserViaPost()", 150, 150, $functionLevel)
 
