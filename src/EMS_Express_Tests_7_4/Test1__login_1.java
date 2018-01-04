@@ -71,7 +71,7 @@ public class Test1__login_1 {
 	  
 	Log.startTestCase(this.getClass().getName());
 	  
-    // Step 1 - login via HTTPS
+    // Step 1 - login via HTTPS to the web
     testFuncs.myDebugPrinting("Step 1 - login via HTTPS");
 	testFuncs.login(driver, testVars.getSysUsername(), testVars.getSysPassword(), testVars.getSysMainStr(), "https://", this.usedBrowser);  
   }
